@@ -5,193 +5,255 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Angebotskalkulator</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
       background: #f0f2f5;
       color: #1a1a2e;
       min-height: 100vh;
-      padding: 2rem;
+      padding: 1.5rem;
     }
 
-    .container {
-      max-width: 1080px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1400px; margin: 0 auto; }
 
     header {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: white;
-      padding: 2rem 2.5rem;
+      padding: 1.75rem 2.25rem;
       border-radius: 12px 12px 0 0;
     }
 
-    header h1 {
-      font-size: 1.6rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    header p {
-      margin-top: 0.4rem;
-      font-size: 0.9rem;
-      opacity: 0.7;
-    }
+    header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.02em; }
+    header p  { margin-top: 0.35rem; font-size: 0.88rem; opacity: 0.7; }
 
     .card {
       background: white;
       border-radius: 0 0 12px 12px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      padding: 2rem 2.5rem;
+      padding: 1.75rem 2.25rem;
     }
 
-    /* Meta section (Kunde, Angebotsnr., Datum) */
+    /* Meta */
     .meta {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
       gap: 1rem;
-      margin-bottom: 1.75rem;
-      padding-bottom: 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
       border-bottom: 1px solid #e5e7eb;
     }
 
-    .meta-field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
+    .field { display: flex; flex-direction: column; gap: 0.3rem; }
 
-    .meta-field label {
-      font-size: 0.75rem;
+    .field label {
+      font-size: 0.73rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: #6b7280;
     }
 
-    .meta-field input {
-      padding: 0.55rem 0.75rem;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 7px;
-      font-size: 0.9rem;
-      background: #f9fafb;
-      color: #1a1a2e;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .meta-field input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-      background: white;
-    }
-
-    /* Table */
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead th {
-      text-align: left;
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #6b7280;
-      padding: 0 0.75rem 0.75rem;
-      border-bottom: 2px solid #e5e7eb;
-    }
-
-    thead th.num    { text-align: right; }
-    thead th.center { text-align: center; }
-
-    tbody tr {
-      border-bottom: 1px solid #f3f4f6;
-      transition: background 0.15s;
-    }
-
-    tbody tr:hover {
-      background: #fafafa;
-    }
-
-    tbody td {
-      padding: 0.55rem 0.75rem;
-      vertical-align: middle;
-    }
-
-    /* Inputs inside table */
-    input[type="text"],
-    input[type="number"],
-    select {
-      width: 100%;
+    .field input, .field select {
       padding: 0.5rem 0.65rem;
       border: 1.5px solid #e5e7eb;
       border-radius: 7px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       background: #f9fafb;
       color: #1a1a2e;
       transition: border-color 0.2s, box-shadow 0.2s;
       font-family: inherit;
     }
 
-    select {
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.6rem center;
-      padding-right: 1.8rem;
-      cursor: pointer;
-    }
-
-    input[type="number"] {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-
-    input:focus, select:focus {
+    .field input:focus, .field select:focus {
       outline: none;
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
       background: white;
     }
 
-    .col-pos     { width: 50px;  text-align: center; color: #9ca3af; font-variant-numeric: tabular-nums; }
-    .col-desc    { min-width: 260px; }
-    .col-qty     { width: 90px; }
-    .col-unit    { width: 90px; }
-    .col-ep      { width: 130px; }
-    .col-rabatt  { width: 100px; }
-    .col-gesamt  { width: 140px; text-align: right; }
-    .col-del     { width: 48px;  text-align: center; }
+    /* Konfigurations-Panel */
+    details.config {
+      margin-bottom: 1.5rem;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0;
+    }
 
-    .price-display {
+    details.config summary {
+      padding: 0.85rem 1.2rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: #374151;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    details.config summary::before {
+      content: '\25B8';
+      transition: transform 0.2s;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    details.config[open] summary::before { transform: rotate(90deg); }
+
+    .config-body {
+      padding: 0 1.2rem 1.2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .config-group h3 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b7280;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .config-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.88rem;
+    }
+
+    .config-row label { color: #4b5563; }
+
+    .config-row input {
+      width: 110px;
+      padding: 0.4rem 0.55rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      text-align: right;
+      background: white;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .config-row input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+
+    .input-suffix {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .input-suffix span { color: #6b7280; font-size: 0.85rem; min-width: 20px; }
+
+    /* Tabelle */
+    .table-wrapper { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 8px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+
+    thead th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      padding: 0.6rem 0.55rem;
+      border-bottom: 2px solid #e5e7eb;
+      background: #f9fafb;
+      white-space: nowrap;
+    }
+
+    thead th.num    { text-align: right; }
+    thead th.center { text-align: center; }
+
+    tbody tr { border-bottom: 1px solid #f3f4f6; }
+    tbody tr:hover { background: #fafafa; }
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody td {
+      padding: 0.35rem 0.45rem;
+      vertical-align: middle;
+    }
+
+    tbody input[type="text"],
+    tbody input[type="number"],
+    tbody select {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      border: 1.5px solid transparent;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: transparent;
+      color: #1a1a2e;
+      transition: border-color 0.15s, background 0.15s;
+      font-family: inherit;
+    }
+
+    tbody input[type="number"] {
       text-align: right;
       font-variant-numeric: tabular-nums;
-      font-size: 0.9rem;
+    }
+
+    tbody select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.4rem center;
+      padding-right: 1.3rem;
+      cursor: pointer;
+    }
+
+    tbody input:hover, tbody select:hover { background: #f9fafb; }
+
+    tbody input:focus, tbody select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: white;
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+    }
+
+    .col-pos     { width: 46px;  text-align: center; color: #9ca3af;
+                   font-variant-numeric: tabular-nums; font-weight: 500; }
+    .col-desc    { min-width: 220px; }
+    .col-kstr    { min-width: 150px; }
+    .col-num     { width: 95px; }
+    .col-std     { width: 80px; }
+    .col-stk     { width: 70px; }
+    .col-deckung { width: 85px; }
+    .col-calc    { width: 105px; }
+    .col-del     { width: 42px; text-align: center; }
+
+    .calc-display {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.85rem;
       color: #374151;
-      padding: 0.5rem 0.65rem;
+      padding: 0.4rem 0.5rem;
       font-weight: 500;
     }
 
-    /* Delete button */
+    .calc-display.vp { color: #1d4ed8; font-weight: 600; }
+
+    /* Delete-Button */
     .btn-del {
       background: none;
       border: none;
       cursor: pointer;
       color: #d1d5db;
-      padding: 0.3rem;
-      border-radius: 6px;
+      padding: 0.25rem;
+      border-radius: 5px;
       transition: color 0.15s, background 0.15s;
       display: flex;
       align-items: center;
@@ -199,26 +261,24 @@
       margin: 0 auto;
     }
 
-    .btn-del:hover {
-      color: #ef4444;
-      background: #fef2f2;
-    }
+    .btn-del:hover { color: #ef4444; background: #fef2f2; }
 
-    /* Add row button */
+    /* Zeile hinzufügen */
     .btn-add {
-      margin-top: 1.25rem;
+      margin-top: 1rem;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.6rem 1.2rem;
+      padding: 0.55rem 1.1rem;
       border: 2px dashed #d1d5db;
       background: transparent;
       border-radius: 8px;
       color: #6b7280;
-      font-size: 0.875rem;
+      font-size: 0.88rem;
       font-weight: 500;
       cursor: pointer;
-      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      transition: all 0.2s;
+      font-family: inherit;
     }
 
     .btn-add:hover {
@@ -227,104 +287,109 @@
       background: #eff6ff;
     }
 
-    /* Summary section */
-    .summary {
+    /* Summary */
+    .summary-grid {
       margin-top: 2rem;
-      border-top: 2px solid #e5e7eb;
-      padding-top: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.45rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
     }
 
-    .summary-row {
-      display: flex;
-      gap: 2rem;
-      align-items: center;
-      font-size: 0.9rem;
-      color: #6b7280;
-      min-width: 320px;
-      justify-content: space-between;
-    }
-
-    .summary-row span:last-child {
-      min-width: 140px;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-      color: #374151;
-    }
-
-    .summary-total {
-      display: flex;
-      gap: 2rem;
-      align-items: center;
-      margin-top: 0.5rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid #e5e7eb;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #1a1a2e;
-      min-width: 320px;
-      justify-content: space-between;
-    }
-
-    .summary-total span:last-child {
-      min-width: 140px;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-      color: #1d4ed8;
-    }
-
-    .mwst-control {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .mwst-control input {
-      width: 60px;
-      padding: 0.25rem 0.4rem;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      text-align: right;
+    .summary-box {
       background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.1rem 1.3rem;
     }
 
-    /* Action buttons */
+    .summary-box h3 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b7280;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.3rem 0;
+      font-size: 0.88rem;
+      color: #4b5563;
+    }
+
+    .summary-line .val {
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+      color: #1a1a2e;
+    }
+
+    /* Gesamt-Summen Box */
+    .totals {
+      margin-top: 1.5rem;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      border-radius: 10px;
+      padding: 1.25rem 1.75rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .totals .t-item { }
+    .totals .t-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      opacity: 0.7;
+      margin-bottom: 0.25rem;
+    }
+    .totals .t-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .totals .t-value.highlight { color: #60a5fa; font-size: 1.45rem; }
+
+    /* Aktionen */
     .actions {
-      margin-top: 2rem;
+      margin-top: 1.75rem;
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
     }
 
     .btn-primary {
-      padding: 0.65rem 1.5rem;
+      padding: 0.6rem 1.4rem;
       background: #1d4ed8;
       color: white;
       border: none;
       border-radius: 8px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
+      font-family: inherit;
     }
 
     .btn-primary:hover  { background: #1e40af; }
     .btn-primary:active { transform: scale(0.98); }
 
     .btn-secondary {
-      padding: 0.65rem 1.5rem;
+      padding: 0.6rem 1.4rem;
       background: white;
       color: #374151;
       border: 1.5px solid #d1d5db;
       border-radius: 8px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 500;
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
+      font-family: inherit;
     }
 
     .btn-secondary:hover { border-color: #9ca3af; background: #f9fafb; }
@@ -345,29 +410,32 @@
       pointer-events: none;
     }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .toast.show { opacity: 1; transform: translateY(0); }
 
+    @media (max-width: 900px) {
+      .config-body    { grid-template-columns: 1fr; }
+      .summary-grid   { grid-template-columns: 1fr; }
+    }
     @media (max-width: 600px) {
       body { padding: 0.75rem; }
       .card { padding: 1.25rem; }
       header { padding: 1.25rem; }
-      header h1 { font-size: 1.2rem; }
+      header h1 { font-size: 1.15rem; }
     }
 
-    /* Print */
     @media print {
       body { background: white; padding: 0; }
       .container { max-width: 100%; }
       header { border-radius: 0; }
-      .btn-add, .actions, .btn-del, .toast { display: none !important; }
+      .btn-add, .actions, .btn-del, .toast, details.config { display: none !important; }
       .card { box-shadow: none; border-radius: 0; }
-      input, select { border: none !important; background: transparent !important;
-                      box-shadow: none !important; padding: 0 !important; }
-      select { background-image: none !important; padding-right: 0 !important; }
+      tbody input, tbody select {
+        border: none !important; background: transparent !important;
+        box-shadow: none !important;
+      }
+      tbody select { background-image: none !important; padding-right: 0.3rem !important; }
       tbody tr { page-break-inside: avoid; }
+      .totals { background: #1a1a2e !important; -webkit-print-color-adjust: exact; }
     }
   </style>
 </head>
@@ -375,30 +443,70 @@
 <div class="container">
   <header>
     <h1>Angebotskalkulator</h1>
-    <p>Angebote schnell kalkulieren &mdash; Zeilen beliebig hinzufügen</p>
+    <p>Herstellkosten- und Verkaufspreis-Kalkulation mit Deckung</p>
   </header>
 
   <div class="card">
 
     <!-- Angebots-Metadaten -->
     <div class="meta">
-      <div class="meta-field">
+      <div class="field">
+        <label for="angebotTitel">Angebotstitel</label>
+        <input type="text" id="angebotTitel" placeholder="z. B. Bahnsteiganzeiger" />
+      </div>
+      <div class="field">
         <label for="kundeName">Kunde</label>
         <input type="text" id="kundeName" placeholder="Firmenname / Name" />
       </div>
-      <div class="meta-field">
+      <div class="field">
         <label for="angebotNr">Angebotsnr.</label>
         <input type="text" id="angebotNr" />
       </div>
-      <div class="meta-field">
+      <div class="field">
         <label for="angebotDatum">Datum</label>
         <input type="date" id="angebotDatum" />
       </div>
-      <div class="meta-field">
+      <div class="field">
         <label for="gueltigBis">Gültig bis</label>
         <input type="date" id="gueltigBis" />
       </div>
     </div>
+
+    <!-- Konfigurations-Panel -->
+    <details class="config" open>
+      <summary>Konfiguration (Stundensätze, MGK, Deckung)</summary>
+      <div class="config-body">
+        <div class="config-group">
+          <h3>Globale Faktoren</h3>
+          <div class="config-row">
+            <label>Materialgemeinkosten-Faktor (MGK)</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgMGK" step="0.01" min="1" value="1.06" />
+              <span>×</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>Standard-Deckung</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgDeckung" step="0.5" min="0" max="99" value="35" />
+              <span>%</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>Preisnachlass (auf Gesamt-VP)</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgPreisnachlass" step="0.5" min="0" max="100" value="0" />
+              <span>%</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="config-group">
+          <h3>Stundensätze pro Kostenstruktur</h3>
+          <div id="rateConfig"></div>
+        </div>
+      </div>
+    </details>
 
     <!-- Positionstabelle -->
     <div class="table-wrapper">
@@ -407,17 +515,22 @@
           <tr>
             <th class="col-pos center">Pos.</th>
             <th class="col-desc">Bezeichnung</th>
-            <th class="col-qty num">Menge</th>
-            <th class="col-unit">Einheit</th>
-            <th class="col-ep num">Einzelpreis</th>
-            <th class="col-rabatt num">Rabatt&nbsp;%</th>
-            <th class="col-gesamt num">Gesamt</th>
+            <th class="col-kstr">Kostenstruktur</th>
+            <th class="col-num num">Hausteil&nbsp;€</th>
+            <th class="col-num num">Kaufteil&nbsp;€</th>
+            <th class="col-num num">Fremd&nbsp;UA&nbsp;€</th>
+            <th class="col-num num">Sonder&nbsp;€</th>
+            <th class="col-std num">Std.</th>
+            <th class="col-stk num">Stück</th>
+            <th class="col-calc num">HK Einzel</th>
+            <th class="col-deckung num">Deckung&nbsp;%</th>
+            <th class="col-calc num">VP Einzel</th>
+            <th class="col-calc num">HK Gesamt</th>
+            <th class="col-calc num">VP Gesamt</th>
             <th class="col-del"></th>
           </tr>
         </thead>
-        <tbody id="quoteBody">
-          <!-- rows inserted by JS -->
-        </tbody>
+        <tbody id="quoteBody"></tbody>
       </table>
     </div>
 
@@ -428,39 +541,42 @@
       Zeile hinzufügen
     </button>
 
-    <!-- Summary -->
-    <div class="summary">
-      <div class="summary-row">
-        <span>Zwischensumme (netto)</span>
-        <span id="sumNetto">0,00 €</span>
+    <!-- Summary: Kostenarten + Kostenstrukturen -->
+    <div class="summary-grid">
+      <div class="summary-box">
+        <h3>Gesamteinzelsummen nach Kostenart</h3>
+        <div id="sumKostenarten"></div>
       </div>
-      <div class="summary-row">
-        <span>Rabatt gesamt</span>
-        <span id="sumRabatt">- 0,00 €</span>
-      </div>
-      <div class="summary-row">
-        <span>Netto nach Rabatt</span>
-        <span id="sumNettoNachRabatt">0,00 €</span>
-      </div>
-      <div class="summary-row">
-        <span>
-          MwSt.
-          <span class="mwst-control">
-            <input type="number" id="mwstRate" min="0" max="100" step="0.1" value="19" oninput="recalcTotal()" />
-            %
-          </span>
-        </span>
-        <span id="sumMwst">0,00 €</span>
-      </div>
-      <div class="summary-total">
-        <span>Gesamtbetrag (brutto)</span>
-        <span id="sumBrutto">0,00 €</span>
+      <div class="summary-box">
+        <h3>Gesamteinzelsummen nach Kostenstruktur</h3>
+        <div id="sumKostenstrukturen"></div>
       </div>
     </div>
 
-    <!-- Actions -->
+    <!-- Gesamt-Totals -->
+    <div class="totals">
+      <div class="t-item">
+        <div class="t-label">Gesamt Herstellkosten</div>
+        <div class="t-value" id="totalHK">0,00 €</div>
+      </div>
+      <div class="t-item">
+        <div class="t-label">Gesamtdeckung</div>
+        <div class="t-value" id="totalDeckung">0,00 %</div>
+      </div>
+      <div class="t-item">
+        <div class="t-label">Gesamt Verkaufspreis</div>
+        <div class="t-value" id="totalVP">0,00 €</div>
+      </div>
+      <div class="t-item">
+        <div class="t-label">Endpreis (nach Nachlass)</div>
+        <div class="t-value highlight" id="totalEndpreis">0,00 €</div>
+      </div>
+    </div>
+
+    <!-- Aktionen -->
     <div class="actions">
       <button class="btn-primary" onclick="printQuote()">Drucken / als PDF</button>
+      <button class="btn-secondary" onclick="exportJSON()">Als JSON exportieren</button>
       <button class="btn-secondary" onclick="resetTable()">Zurücksetzen</button>
     </div>
   </div>
@@ -470,31 +586,92 @@
 
 <script>
   // -----------------------------------------------------------------------
-  // Einheiten-Vorschläge
+  // Kostenstrukturen & Default-Stundensätze (aus Vorlage)
   // -----------------------------------------------------------------------
-  const UNITS = ['Stk', 'Std', 'Tag', 'Pauschal', 'm', 'm²', 'm³', 'kg', 'l', 'km'];
+  const KOSTENSTRUKTUREN = [
+    { key: 'pm',       name: 'Projektmanagement', defaultRate: 100 },
+    { key: 'sw',       name: 'SW Entwicklung',    defaultRate: 100 },
+    { key: 'hw',       name: 'HW Entwicklung',    defaultRate: 100 },
+    { key: 'konfig',   name: 'Konfiguration',     defaultRate:  80 },
+    { key: 'service',  name: 'Service',           defaultRate:  80 },
+    { key: 'beschall', name: 'Beschallung',       defaultRate: 100 },
+    { key: 'material', name: 'Material',          defaultRate:   0 },
+    { key: 'fremd',    name: 'Fremdleistung',     defaultRate:   0 },
+    { key: 'sonder',   name: 'Sonderkosten',      defaultRate:   0 },
+  ];
 
   let rowCounter = 0;
 
+  // -----------------------------------------------------------------------
+  // Formatter
+  // -----------------------------------------------------------------------
   function formatEUR(value) {
-    return value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    return (value || 0).toLocaleString('de-DE',
+      { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  }
+  function formatPct(value) {
+    return (value || 0).toLocaleString('de-DE',
+      { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' %';
   }
 
-  function buildUnitOptions(selected = 'Stk') {
-    return UNITS.map(u =>
-      `<option value="${u}" ${u === selected ? 'selected' : ''}>${u}</option>`
+  // -----------------------------------------------------------------------
+  // Konfigurations-Panel aufbauen (Stundensätze)
+  // -----------------------------------------------------------------------
+  function buildRateConfig() {
+    const host = document.getElementById('rateConfig');
+    host.innerHTML = KOSTENSTRUKTUREN.map(k => `
+      <div class="config-row">
+        <label>${k.name}</label>
+        <span class="input-suffix">
+          <input type="number" step="0.5" min="0"
+                 id="rate-${k.key}" value="${k.defaultRate}"
+                 oninput="recalcAll()" />
+          <span>€/h</span>
+        </span>
+      </div>
+    `).join('');
+  }
+
+  function getRate(key) {
+    const el = document.getElementById(`rate-${key}`);
+    return el ? (parseFloat(el.value) || 0) : 0;
+  }
+  function getMGK()            { return parseFloat(document.getElementById('cfgMGK').value)          || 1; }
+  function getDefaultDeckung() { return parseFloat(document.getElementById('cfgDeckung').value)      || 0; }
+  function getPreisnachlass()  { return parseFloat(document.getElementById('cfgPreisnachlass').value) || 0; }
+
+  // -----------------------------------------------------------------------
+  // Zeile hinzufügen
+  // -----------------------------------------------------------------------
+  function buildKstrOptions(selectedKey) {
+    return KOSTENSTRUKTUREN.map(k =>
+      `<option value="${k.key}" ${k.key === selectedKey ? 'selected' : ''}>${k.name}</option>`
     ).join('');
   }
 
-  function renumberPositions() {
-    document.querySelectorAll('#quoteBody tr').forEach((tr, i) => {
-      const posCell = tr.querySelector('.col-pos');
-      if (posCell) posCell.textContent = i + 1;
-    });
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
-  function addRow(desc = '', qty = 1, unit = 'Stk', price = 0, discount = 0) {
+  function addRow(data = {}) {
     const id = ++rowCounter;
+    const {
+      desc = '',
+      kstr = 'material',
+      hausteil = 0,
+      kaufteil = 0,
+      fremd = 0,
+      sonder = 0,
+      std = 0,
+      stueck = 1,
+      deckung = null
+    } = data;
+
+    const deckungVal = deckung !== null ? deckung : getDefaultDeckung();
 
     const tr = document.createElement('tr');
     tr.id = `row-${id}`;
@@ -503,29 +680,47 @@
     tr.innerHTML = `
       <td class="col-pos"></td>
       <td class="col-desc">
-        <input type="text" placeholder="Leistung / Produkt" value="${escapeHtml(desc)}" />
+        <input type="text" placeholder="Leistung / Produkt"
+               value="${escapeHtml(desc)}" data-f="desc" />
       </td>
-      <td class="col-qty">
-        <input type="number" min="0" step="0.01" value="${qty}"
-               oninput="recalcRow(${id})" />
+      <td class="col-kstr">
+        <select data-f="kstr" onchange="recalcRow(${id})">${buildKstrOptions(kstr)}</select>
       </td>
-      <td class="col-unit">
-        <select>${buildUnitOptions(unit)}</select>
+      <td class="col-num">
+        <input type="number" step="0.01" min="0" value="${hausteil}"
+               data-f="hausteil" oninput="recalcRow(${id})" />
       </td>
-      <td class="col-ep">
-        <input type="number" min="0" step="0.01" value="${price.toFixed(2)}"
-               oninput="recalcRow(${id})" />
+      <td class="col-num">
+        <input type="number" step="0.01" min="0" value="${kaufteil}"
+               data-f="kaufteil" oninput="recalcRow(${id})" />
       </td>
-      <td class="col-rabatt">
-        <input type="number" min="0" max="100" step="0.5" value="${discount}"
-               oninput="recalcRow(${id})" />
+      <td class="col-num">
+        <input type="number" step="0.01" min="0" value="${fremd}"
+               data-f="fremd" oninput="recalcRow(${id})" />
       </td>
-      <td class="col-gesamt">
-        <div class="price-display" id="gesamt-${id}">0,00 €</div>
+      <td class="col-num">
+        <input type="number" step="0.01" min="0" value="${sonder}"
+               data-f="sonder" oninput="recalcRow(${id})" />
       </td>
+      <td class="col-std">
+        <input type="number" step="0.01" min="0" value="${std}"
+               data-f="std" oninput="recalcRow(${id})" />
+      </td>
+      <td class="col-stk">
+        <input type="number" step="1" min="0" value="${stueck}"
+               data-f="stueck" oninput="recalcRow(${id})" />
+      </td>
+      <td class="col-calc"><div class="calc-display" id="hk-${id}">0,00 €</div></td>
+      <td class="col-deckung">
+        <input type="number" step="0.5" min="0" max="99" value="${deckungVal}"
+               data-f="deckung" oninput="recalcRow(${id})" />
+      </td>
+      <td class="col-calc"><div class="calc-display vp" id="vp-${id}">0,00 €</div></td>
+      <td class="col-calc"><div class="calc-display"    id="hkg-${id}">0,00 €</div></td>
+      <td class="col-calc"><div class="calc-display vp" id="vpg-${id}">0,00 €</div></td>
       <td class="col-del">
         <button class="btn-del" title="Zeile entfernen" onclick="removeRow(${id})">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
             <path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8"
                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -538,55 +733,11 @@
     recalcRow(id);
   }
 
-  function escapeHtml(s) {
-    return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/"/g, '&quot;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-  }
-
-  function getRowValues(id) {
-    const tr = document.getElementById(`row-${id}`);
-    if (!tr) return { qty: 0, ep: 0, discount: 0 };
-    const numberInputs = tr.querySelectorAll('input[type="number"]');
-    const qty      = Math.max(0, parseFloat(numberInputs[0].value) || 0);
-    const ep       = Math.max(0, parseFloat(numberInputs[1].value) || 0);
-    const discount = Math.min(100, Math.max(0, parseFloat(numberInputs[2].value) || 0));
-    return { qty, ep, discount };
-  }
-
-  function recalcRow(id) {
-    const { qty, ep, discount } = getRowValues(id);
-    const brutto = qty * ep;
-    const gesamt = brutto * (1 - discount / 100);
-    const cell = document.getElementById(`gesamt-${id}`);
-    if (cell) cell.textContent = formatEUR(gesamt);
-    recalcTotal();
-  }
-
-  function recalcTotal() {
-    let netto = 0, totalRabatt = 0;
-
-    document.querySelectorAll('#quoteBody tr').forEach(tr => {
-      const id = parseInt(tr.dataset.id, 10);
-      const { qty, ep, discount } = getRowValues(id);
-      const brutto = qty * ep;
-      const rabatt = brutto * (discount / 100);
-      netto       += brutto;
-      totalRabatt += rabatt;
+  function renumberPositions() {
+    document.querySelectorAll('#quoteBody tr').forEach((tr, i) => {
+      const posCell = tr.querySelector('.col-pos');
+      if (posCell) posCell.textContent = i + 1;
     });
-
-    const nettoNachRabatt = netto - totalRabatt;
-    const mwstRate = Math.max(0, parseFloat(document.getElementById('mwstRate').value) || 0);
-    const mwst   = nettoNachRabatt * (mwstRate / 100);
-    const brutto = nettoNachRabatt + mwst;
-
-    document.getElementById('sumNetto').textContent           = formatEUR(netto);
-    document.getElementById('sumRabatt').textContent          = '- ' + formatEUR(totalRabatt);
-    document.getElementById('sumNettoNachRabatt').textContent = formatEUR(nettoNachRabatt);
-    document.getElementById('sumMwst').textContent            = formatEUR(mwst);
-    document.getElementById('sumBrutto').textContent          = formatEUR(brutto);
   }
 
   function removeRow(id) {
@@ -596,6 +747,131 @@
     recalcTotal();
   }
 
+  // -----------------------------------------------------------------------
+  // Werte aus Zeile lesen
+  // -----------------------------------------------------------------------
+  function readRow(id) {
+    const tr = document.getElementById(`row-${id}`);
+    if (!tr) return null;
+    const g = f => tr.querySelector(`[data-f="${f}"]`);
+    const num = f => Math.max(0, parseFloat(g(f).value) || 0);
+    return {
+      id,
+      desc:     g('desc').value,
+      kstr:     g('kstr').value,
+      hausteil: num('hausteil'),
+      kaufteil: num('kaufteil'),
+      fremd:    num('fremd'),
+      sonder:   num('sonder'),
+      std:      num('std'),
+      stueck:   num('stueck'),
+      deckung:  Math.min(99, num('deckung'))
+    };
+  }
+
+  // -----------------------------------------------------------------------
+  // Kern-Berechnung (abgeleitet aus Vorlage)
+  //   HK = Hausteil + Kaufteil × MGK + Fremd × MGK + Sonder + Std × Rate
+  //   VP = HK / (1 − Deckung%)
+  // -----------------------------------------------------------------------
+  function computeRow(r) {
+    const mgk  = getMGK();
+    const rate = getRate(r.kstr);
+    const hk   = r.hausteil
+               + r.kaufteil * mgk
+               + r.fremd    * mgk
+               + r.sonder
+               + r.std      * rate;
+    const deckung = r.deckung / 100;
+    const vp = deckung < 1 ? hk / (1 - deckung) : hk;
+    return {
+      hkEinzel: hk,
+      vpEinzel: vp,
+      hkGesamt: hk * r.stueck,
+      vpGesamt: vp * r.stueck
+    };
+  }
+
+  function recalcRow(id) {
+    const r = readRow(id);
+    if (!r) return;
+    const c = computeRow(r);
+    document.getElementById(`hk-${id}`).textContent  = formatEUR(c.hkEinzel);
+    document.getElementById(`vp-${id}`).textContent  = formatEUR(c.vpEinzel);
+    document.getElementById(`hkg-${id}`).textContent = formatEUR(c.hkGesamt);
+    document.getElementById(`vpg-${id}`).textContent = formatEUR(c.vpGesamt);
+    recalcTotal();
+  }
+
+  function recalcAll() {
+    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+      recalcRow(parseInt(tr.dataset.id, 10));
+    });
+  }
+
+  // -----------------------------------------------------------------------
+  // Gesamtsummen + Aufschlüsselung
+  // -----------------------------------------------------------------------
+  function recalcTotal() {
+    const mgk = getMGK();
+
+    // Summen Kostenart (Einzelbeträge × Stück)
+    const kostenart = { hausteil: 0, kaufteil: 0, fremd: 0, sonder: 0, std: 0 };
+    // Summen Kostenstruktur (VP gesamt pro Kategorie)
+    const kstrSums  = Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, { hk: 0, vp: 0 }]));
+
+    let totalHK = 0, totalVP = 0;
+
+    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+      const r = readRow(parseInt(tr.dataset.id, 10));
+      if (!r) return;
+      const c = computeRow(r);
+
+      totalHK += c.hkGesamt;
+      totalVP += c.vpGesamt;
+
+      kostenart.hausteil += r.hausteil * r.stueck;
+      kostenart.kaufteil += r.kaufteil * r.stueck;
+      kostenart.fremd    += r.fremd    * r.stueck;
+      kostenart.sonder   += r.sonder   * r.stueck;
+      kostenart.std      += r.std      * r.stueck;
+
+      kstrSums[r.kstr].hk += c.hkGesamt;
+      kstrSums[r.kstr].vp += c.vpGesamt;
+    });
+
+    // Kostenart-Box
+    const kaHost = document.getElementById('sumKostenarten');
+    kaHost.innerHTML = `
+      <div class="summary-line"><span>Hausteil</span><span class="val">${formatEUR(kostenart.hausteil)}</span></div>
+      <div class="summary-line"><span>Kaufteil / Vorratsmaterial</span><span class="val">${formatEUR(kostenart.kaufteil)}</span></div>
+      <div class="summary-line"><span>Fremdleistung UA</span><span class="val">${formatEUR(kostenart.fremd)}</span></div>
+      <div class="summary-line"><span>Sonderkosten</span><span class="val">${formatEUR(kostenart.sonder)}</span></div>
+      <div class="summary-line"><span>Personalstunden</span><span class="val">${(kostenart.std).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Std.</span></div>
+    `;
+
+    // Kostenstruktur-Box (VP)
+    const ksHost = document.getElementById('sumKostenstrukturen');
+    ksHost.innerHTML = KOSTENSTRUKTUREN.map(k => `
+      <div class="summary-line">
+        <span>${k.name}</span>
+        <span class="val">${formatEUR(kstrSums[k.key].vp)}</span>
+      </div>
+    `).join('');
+
+    // Gesamtdeckung: (VP − HK) / VP
+    const deckung = totalVP > 0 ? ((totalVP - totalHK) / totalVP) * 100 : 0;
+    const endpreis = totalVP * (1 - getPreisnachlass() / 100);
+
+    document.getElementById('totalHK').textContent       = formatEUR(totalHK);
+    document.getElementById('totalDeckung').textContent  = formatPct(deckung);
+    document.getElementById('totalVP').textContent       = formatEUR(totalVP);
+    document.getElementById('totalEndpreis').textContent = formatEUR(endpreis);
+  }
+
+  // -----------------------------------------------------------------------
+  // Reset / Export / Druck
+  // -----------------------------------------------------------------------
   function resetTable() {
     if (!confirm('Alle Zeilen löschen und neu starten?')) return;
     document.getElementById('quoteBody').innerHTML = '';
@@ -605,9 +881,34 @@
     showToast('Tabelle zurückgesetzt');
   }
 
-  function printQuote() {
-    window.print();
+  function exportJSON() {
+    const rows = [...document.querySelectorAll('#quoteBody tr')]
+      .map(tr => readRow(parseInt(tr.dataset.id, 10)));
+    const data = {
+      titel:      document.getElementById('angebotTitel').value,
+      kunde:      document.getElementById('kundeName').value,
+      angebotNr:  document.getElementById('angebotNr').value,
+      datum:      document.getElementById('angebotDatum').value,
+      gueltigBis: document.getElementById('gueltigBis').value,
+      config: {
+        mgk:             getMGK(),
+        defaultDeckung:  getDefaultDeckung(),
+        preisnachlass:   getPreisnachlass(),
+        stundensaetze:   Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, getRate(k.key)]))
+      },
+      positionen: rows
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = (data.angebotNr || 'angebot') + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('JSON exportiert');
   }
+
+  function printQuote() { window.print(); }
 
   function showToast(msg) {
     const t = document.getElementById('toast');
@@ -619,18 +920,21 @@
   // -----------------------------------------------------------------------
   // Init
   // -----------------------------------------------------------------------
-  // Heutiges Datum vorbelegen
+  buildRateConfig();
+
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById('angebotDatum').value = today;
-  // Standard-Gültigkeit: +30 Tage
-  const gueltig = new Date();
-  gueltig.setDate(gueltig.getDate() + 30);
-  document.getElementById('gueltigBis').value = gueltig.toISOString().slice(0, 10);
-  // Einfache automatische Angebotsnummer
+  const g = new Date(); g.setDate(g.getDate() + 30);
+  document.getElementById('gueltigBis').value = g.toISOString().slice(0, 10);
   document.getElementById('angebotNr').value =
     'ANG-' + today.replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
 
-  // Eine leere Startzeile
+  // Konfig-Änderungen (MGK, Default-Deckung, Preisnachlass) neu rechnen
+  ['cfgMGK', 'cfgDeckung', 'cfgPreisnachlass'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recalcAll);
+  });
+
+  // Eine Startzeile
   addRow();
 </script>
 </body>
