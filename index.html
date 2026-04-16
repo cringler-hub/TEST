@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Software-Lizenz Angebotskalkulator</title>
+  <title>Angebotskalkulator</title>
   <style>
     * {
       box-sizing: border-box;
@@ -20,7 +20,7 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1080px;
       margin: 0 auto;
     }
 
@@ -50,6 +50,47 @@
       padding: 2rem 2.5rem;
     }
 
+    /* Meta section (Kunde, Angebotsnr., Datum) */
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .meta-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .meta-field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b7280;
+    }
+
+    .meta-field input {
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 7px;
+      font-size: 0.9rem;
+      background: #f9fafb;
+      color: #1a1a2e;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .meta-field input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+      background: white;
+    }
+
     /* Table */
     .table-wrapper {
       overflow-x: auto;
@@ -71,10 +112,8 @@
       border-bottom: 2px solid #e5e7eb;
     }
 
-    thead th:last-child {
-      text-align: center;
-      width: 60px;
-    }
+    thead th.num    { text-align: right; }
+    thead th.center { text-align: center; }
 
     tbody tr {
       border-bottom: 1px solid #f3f4f6;
@@ -86,12 +125,14 @@
     }
 
     tbody td {
-      padding: 0.65rem 0.75rem;
+      padding: 0.55rem 0.75rem;
       vertical-align: middle;
     }
 
     /* Inputs inside table */
-    select, input[type="number"] {
+    input[type="text"],
+    input[type="number"],
+    select {
       width: 100%;
       padding: 0.5rem 0.65rem;
       border: 1.5px solid #e5e7eb;
@@ -100,31 +141,39 @@
       background: #f9fafb;
       color: #1a1a2e;
       transition: border-color 0.2s, box-shadow 0.2s;
-      appearance: none;
-      -webkit-appearance: none;
+      font-family: inherit;
     }
 
     select {
+      appearance: none;
+      -webkit-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      padding-right: 2rem;
+      background-position: right 0.6rem center;
+      padding-right: 1.8rem;
       cursor: pointer;
     }
 
-    select:focus, input[type="number"]:focus {
+    input[type="number"] {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input:focus, select:focus {
       outline: none;
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
       background: white;
     }
 
-    .col-lizenz  { min-width: 220px; }
+    .col-pos     { width: 50px;  text-align: center; color: #9ca3af; font-variant-numeric: tabular-nums; }
+    .col-desc    { min-width: 260px; }
     .col-qty     { width: 90px; }
-    .col-ep      { width: 140px; }
+    .col-unit    { width: 90px; }
+    .col-ep      { width: 130px; }
     .col-rabatt  { width: 100px; }
-    .col-gesamt  { width: 140px; }
-    .col-del     { width: 60px; text-align: center; }
+    .col-gesamt  { width: 140px; text-align: right; }
+    .col-del     { width: 48px;  text-align: center; }
 
     .price-display {
       text-align: right;
@@ -132,11 +181,7 @@
       font-size: 0.9rem;
       color: #374151;
       padding: 0.5rem 0.65rem;
-    }
-
-    .price-ep {
-      color: #6b7280;
-      font-size: 0.85rem;
+      font-weight: 500;
     }
 
     /* Delete button */
@@ -199,6 +244,8 @@
       align-items: center;
       font-size: 0.9rem;
       color: #6b7280;
+      min-width: 320px;
+      justify-content: space-between;
     }
 
     .summary-row span:last-child {
@@ -218,6 +265,8 @@
       font-size: 1.15rem;
       font-weight: 700;
       color: #1a1a2e;
+      min-width: 320px;
+      justify-content: space-between;
     }
 
     .summary-total span:last-child {
@@ -225,6 +274,22 @@
       text-align: right;
       font-variant-numeric: tabular-nums;
       color: #1d4ed8;
+    }
+
+    .mwst-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .mwst-control input {
+      width: 60px;
+      padding: 0.25rem 0.4rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      text-align: right;
+      background: #f9fafb;
     }
 
     /* Action buttons */
@@ -291,25 +356,62 @@
       header { padding: 1.25rem; }
       header h1 { font-size: 1.2rem; }
     }
+
+    /* Print */
+    @media print {
+      body { background: white; padding: 0; }
+      .container { max-width: 100%; }
+      header { border-radius: 0; }
+      .btn-add, .actions, .btn-del, .toast { display: none !important; }
+      .card { box-shadow: none; border-radius: 0; }
+      input, select { border: none !important; background: transparent !important;
+                      box-shadow: none !important; padding: 0 !important; }
+      select { background-image: none !important; padding-right: 0 !important; }
+      tbody tr { page-break-inside: avoid; }
+    }
   </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>Software-Lizenz Angebotskalkulator</h1>
-    <p>Erstellen Sie schnell und einfach ein Lizenzangebot</p>
+    <h1>Angebotskalkulator</h1>
+    <p>Angebote schnell kalkulieren &mdash; Zeilen beliebig hinzufügen</p>
   </header>
 
   <div class="card">
+
+    <!-- Angebots-Metadaten -->
+    <div class="meta">
+      <div class="meta-field">
+        <label for="kundeName">Kunde</label>
+        <input type="text" id="kundeName" placeholder="Firmenname / Name" />
+      </div>
+      <div class="meta-field">
+        <label for="angebotNr">Angebotsnr.</label>
+        <input type="text" id="angebotNr" />
+      </div>
+      <div class="meta-field">
+        <label for="angebotDatum">Datum</label>
+        <input type="date" id="angebotDatum" />
+      </div>
+      <div class="meta-field">
+        <label for="gueltigBis">Gültig bis</label>
+        <input type="date" id="gueltigBis" />
+      </div>
+    </div>
+
+    <!-- Positionstabelle -->
     <div class="table-wrapper">
       <table id="quoteTable">
         <thead>
           <tr>
-            <th class="col-lizenz">Lizenz / Produkt</th>
-            <th class="col-qty">Menge</th>
-            <th class="col-ep">Einzelpreis</th>
-            <th class="col-rabatt">Rabatt %</th>
-            <th class="col-gesamt">Gesamtpreis</th>
+            <th class="col-pos center">Pos.</th>
+            <th class="col-desc">Bezeichnung</th>
+            <th class="col-qty num">Menge</th>
+            <th class="col-unit">Einheit</th>
+            <th class="col-ep num">Einzelpreis</th>
+            <th class="col-rabatt num">Rabatt&nbsp;%</th>
+            <th class="col-gesamt num">Gesamt</th>
             <th class="col-del"></th>
           </tr>
         </thead>
@@ -341,7 +443,13 @@
         <span id="sumNettoNachRabatt">0,00 €</span>
       </div>
       <div class="summary-row">
-        <span>MwSt. 19 %</span>
+        <span>
+          MwSt.
+          <span class="mwst-control">
+            <input type="number" id="mwstRate" min="0" max="100" step="0.1" value="19" oninput="recalcTotal()" />
+            %
+          </span>
+        </span>
         <span id="sumMwst">0,00 €</span>
       </div>
       <div class="summary-total">
@@ -352,12 +460,8 @@
 
     <!-- Actions -->
     <div class="actions">
-      <button class="btn-primary" onclick="printQuote()">
-        Angebot drucken / als PDF
-      </button>
-      <button class="btn-secondary" onclick="resetTable()">
-        Zurücksetzen
-      </button>
+      <button class="btn-primary" onclick="printQuote()">Drucken / als PDF</button>
+      <button class="btn-secondary" onclick="resetTable()">Zurücksetzen</button>
     </div>
   </div>
 </div>
@@ -366,31 +470,9 @@
 
 <script>
   // -----------------------------------------------------------------------
-  // Lizenz-Katalog  (Name → Basispreis in €)
-  // Beliebig erweiterbar
+  // Einheiten-Vorschläge
   // -----------------------------------------------------------------------
-  const LICENSES = [
-    { name: "Microsoft 365 Business Basic",     price: 6.00  },
-    { name: "Microsoft 365 Business Standard",  price: 12.50 },
-    { name: "Microsoft 365 Business Premium",   price: 22.00 },
-    { name: "Microsoft 365 Apps for Business",  price: 9.90  },
-    { name: "Windows 11 Pro",                   price: 259.00 },
-    { name: "Windows 11 Enterprise (pro User)", price: 14.00 },
-    { name: "Adobe Acrobat Pro (Abo/Monat)",    price: 19.99 },
-    { name: "Adobe Creative Cloud All Apps",    price: 59.99 },
-    { name: "Autodesk AutoCAD (Jahresabo)",     price: 229.00 },
-    { name: "Autodesk AutoCAD LT (Jahresabo)",  price: 79.00 },
-    { name: "ESET Endpoint Security (1 Jahr)",  price: 38.00 },
-    { name: "Kaspersky Endpoint Security",      price: 42.00 },
-    { name: "Slack Pro (pro User/Monat)",       price: 7.25  },
-    { name: "Zoom Workplace Pro (pro User)",    price: 13.99 },
-    { name: "Atlassian Jira (Cloud, pro User)", price: 8.15  },
-    { name: "Atlassian Confluence (Cloud)",     price: 5.75  },
-    { name: "GitHub Enterprise Cloud",          price: 21.00 },
-    { name: "GitLab Ultimate (Cloud)",          price: 99.00 },
-    { name: "VMware Workstation Pro",           price: 199.00 },
-    { name: "Custom / Sonstiges",               price: 0.00  },
-  ];
+  const UNITS = ['Stk', 'Std', 'Tag', 'Pauschal', 'm', 'm²', 'm³', 'kg', 'l', 'km'];
 
   let rowCounter = 0;
 
@@ -398,38 +480,45 @@
     return value.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
   }
 
-  function buildOptions(selectedIndex) {
-    return LICENSES.map((l, i) =>
-      `<option value="${i}" ${i === selectedIndex ? 'selected' : ''}>${l.name}</option>`
+  function buildUnitOptions(selected = 'Stk') {
+    return UNITS.map(u =>
+      `<option value="${u}" ${u === selected ? 'selected' : ''}>${u}</option>`
     ).join('');
   }
 
-  function addRow(licenseIndex = 0, qty = 1, customPrice = null, discount = 0) {
+  function renumberPositions() {
+    document.querySelectorAll('#quoteBody tr').forEach((tr, i) => {
+      const posCell = tr.querySelector('.col-pos');
+      if (posCell) posCell.textContent = i + 1;
+    });
+  }
+
+  function addRow(desc = '', qty = 1, unit = 'Stk', price = 0, discount = 0) {
     const id = ++rowCounter;
-    const price = customPrice !== null ? customPrice : LICENSES[licenseIndex].price;
 
     const tr = document.createElement('tr');
     tr.id = `row-${id}`;
     tr.dataset.id = id;
 
     tr.innerHTML = `
-      <td class="col-lizenz">
-        <select onchange="onLicenseChange(${id}, this)">
-          ${buildOptions(licenseIndex)}
-        </select>
+      <td class="col-pos"></td>
+      <td class="col-desc">
+        <input type="text" placeholder="Leistung / Produkt" value="${escapeHtml(desc)}" />
       </td>
       <td class="col-qty">
-        <input type="number" min="1" value="${qty}"
-               onchange="recalcRow(${id})" oninput="recalcRow(${id})" />
+        <input type="number" min="0" step="0.01" value="${qty}"
+               oninput="recalcRow(${id})" />
+      </td>
+      <td class="col-unit">
+        <select>${buildUnitOptions(unit)}</select>
       </td>
       <td class="col-ep">
         <input type="number" min="0" step="0.01" value="${price.toFixed(2)}"
-               id="ep-${id}"
-               onchange="recalcRow(${id})" oninput="recalcRow(${id})" />
+               oninput="recalcRow(${id})" />
       </td>
       <td class="col-rabatt">
-        <input type="number" min="0" max="100" step="0.5" value="${discount.toFixed(1)}"
-               onchange="recalcRow(${id})" oninput="recalcRow(${id})" />
+        <input type="number" min="0" max="100" step="0.5" value="${discount}"
+               oninput="recalcRow(${id})" />
       </td>
       <td class="col-gesamt">
         <div class="price-display" id="gesamt-${id}">0,00 €</div>
@@ -445,34 +534,34 @@
     `;
 
     document.getElementById('quoteBody').appendChild(tr);
+    renumberPositions();
     recalcRow(id);
   }
 
-  function onLicenseChange(id, select) {
-    const idx = parseInt(select.value, 10);
-    const epInput = document.getElementById(`ep-${id}`);
-    // Only update price for non-custom licenses
-    if (idx < LICENSES.length - 1) {
-      epInput.value = LICENSES[idx].price.toFixed(2);
-    }
-    recalcRow(id);
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
-  function getRowInputs(id) {
+  function getRowValues(id) {
     const tr = document.getElementById(`row-${id}`);
-    const inputs = tr.querySelectorAll('input[type="number"]');
-    const qty      = Math.max(1, parseFloat(inputs[0].value) || 1);
-    const ep       = Math.max(0, parseFloat(inputs[1].value) || 0);
-    const discount = Math.min(100, Math.max(0, parseFloat(inputs[2].value) || 0));
+    if (!tr) return { qty: 0, ep: 0, discount: 0 };
+    const numberInputs = tr.querySelectorAll('input[type="number"]');
+    const qty      = Math.max(0, parseFloat(numberInputs[0].value) || 0);
+    const ep       = Math.max(0, parseFloat(numberInputs[1].value) || 0);
+    const discount = Math.min(100, Math.max(0, parseFloat(numberInputs[2].value) || 0));
     return { qty, ep, discount };
   }
 
   function recalcRow(id) {
-    const { qty, ep, discount } = getRowInputs(id);
-    const brutto   = qty * ep;
-    const rabatt   = brutto * (discount / 100);
-    const gesamt   = brutto - rabatt;
-    document.getElementById(`gesamt-${id}`).textContent = formatEUR(gesamt);
+    const { qty, ep, discount } = getRowValues(id);
+    const brutto = qty * ep;
+    const gesamt = brutto * (1 - discount / 100);
+    const cell = document.getElementById(`gesamt-${id}`);
+    if (cell) cell.textContent = formatEUR(gesamt);
     recalcTotal();
   }
 
@@ -481,7 +570,7 @@
 
     document.querySelectorAll('#quoteBody tr').forEach(tr => {
       const id = parseInt(tr.dataset.id, 10);
-      const { qty, ep, discount } = getRowInputs(id);
+      const { qty, ep, discount } = getRowValues(id);
       const brutto = qty * ep;
       const rabatt = brutto * (discount / 100);
       netto       += brutto;
@@ -489,19 +578,21 @@
     });
 
     const nettoNachRabatt = netto - totalRabatt;
-    const mwst   = nettoNachRabatt * 0.19;
+    const mwstRate = Math.max(0, parseFloat(document.getElementById('mwstRate').value) || 0);
+    const mwst   = nettoNachRabatt * (mwstRate / 100);
     const brutto = nettoNachRabatt + mwst;
 
-    document.getElementById('sumNetto').textContent          = formatEUR(netto);
-    document.getElementById('sumRabatt').textContent         = '- ' + formatEUR(totalRabatt);
+    document.getElementById('sumNetto').textContent           = formatEUR(netto);
+    document.getElementById('sumRabatt').textContent          = '- ' + formatEUR(totalRabatt);
     document.getElementById('sumNettoNachRabatt').textContent = formatEUR(nettoNachRabatt);
-    document.getElementById('sumMwst').textContent           = formatEUR(mwst);
-    document.getElementById('sumBrutto').textContent         = formatEUR(brutto);
+    document.getElementById('sumMwst').textContent            = formatEUR(mwst);
+    document.getElementById('sumBrutto').textContent          = formatEUR(brutto);
   }
 
   function removeRow(id) {
     const tr = document.getElementById(`row-${id}`);
     if (tr) tr.remove();
+    renumberPositions();
     recalcTotal();
   }
 
@@ -509,8 +600,8 @@
     if (!confirm('Alle Zeilen löschen und neu starten?')) return;
     document.getElementById('quoteBody').innerHTML = '';
     rowCounter = 0;
-    recalcTotal();
     addRow();
+    recalcTotal();
     showToast('Tabelle zurückgesetzt');
   }
 
@@ -526,29 +617,21 @@
   }
 
   // -----------------------------------------------------------------------
-  // Print styles (injected so they don't clutter the main CSS)
+  // Init
   // -----------------------------------------------------------------------
-  const printCSS = `
-    @media print {
-      body { background: white; padding: 0; }
-      .container { max-width: 100%; }
-      header { border-radius: 0; }
-      .btn-add, .actions, .btn-del, .toast { display: none !important; }
-      .card { box-shadow: none; border-radius: 0; }
-      select, input { border: none !important; background: transparent !important;
-                      box-shadow: none !important; padding: 0 !important; }
-    }
-  `;
-  const styleEl = document.createElement('style');
-  styleEl.textContent = printCSS;
-  document.head.appendChild(styleEl);
+  // Heutiges Datum vorbelegen
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('angebotDatum').value = today;
+  // Standard-Gültigkeit: +30 Tage
+  const gueltig = new Date();
+  gueltig.setDate(gueltig.getDate() + 30);
+  document.getElementById('gueltigBis').value = gueltig.toISOString().slice(0, 10);
+  // Einfache automatische Angebotsnummer
+  document.getElementById('angebotNr').value =
+    'ANG-' + today.replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
 
-  // -----------------------------------------------------------------------
-  // Init: start with 3 example rows
-  // -----------------------------------------------------------------------
-  addRow(0, 10, null, 5);   // Microsoft 365 Business Basic, 10 Stk, 5% Rabatt
-  addRow(4, 1,  null, 0);   // Windows 11 Pro, 1 Stk
-  addRow(6, 1,  null, 10);  // Adobe Acrobat, 1 Stk, 10%
+  // Eine leere Startzeile
+  addRow();
 </script>
 </body>
 </html>
