@@ -159,7 +159,7 @@
     /* Tabelle */
     .table-wrapper { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 8px; }
 
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 1300px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 1200px; }
 
     thead th {
       text-align: left;
@@ -595,7 +595,6 @@
             <th class="col-num num">Fremd&nbsp;UA&nbsp;€</th>
             <th class="col-num num">Sonder&nbsp;€</th>
             <th class="col-std num">Std.</th>
-            <th class="col-calc num">Pers.kosten&nbsp;€</th>
             <th class="col-stk num">Stück</th>
             <th class="col-calc num">HK Einzel</th>
             <th class="col-deckung num">Deckung&nbsp;%</th>
@@ -722,7 +721,7 @@
     htr.dataset.gid = gid;
     htr.innerHTML = `
       <td class="h-num"></td>
-      <td class="h-title-cell" colspan="12">
+      <td class="h-title-cell" colspan="11">
         <input type="text" placeholder="Überschrift eingeben…" value="${escapeHtml(title)}" />
       </td>
       <td class="h-subtotal" id="grp-hk-${gid}">0,00 €</td>
@@ -745,7 +744,7 @@
     atr.dataset.gid = gid;
     atr.innerHTML = `
       <td></td>
-      <td colspan="15">
+      <td colspan="14">
         <button class="btn-add-sub" onclick="addItem('${gid}')">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -806,7 +805,6 @@
       <td class="col-std">
         <input type="number" step="0.5" min="0" value="" placeholder="Std." data-f="std" oninput="recalcRow(${id})" />
       </td>
-      <td class="col-calc"><div class="calc-display" id="pk-${id}">0,00 €</div></td>
       <td class="col-stk">
         <input type="number" step="1" min="0" value="${stueck}" data-f="stueck" oninput="recalcRow(${id})" />
       </td>
@@ -882,18 +880,16 @@
   function computeRow(r) {
     const mgk = getMGK();
     const rate = getRate(r.kstr);
-    const persKosten = r.std * rate;
-    const hk = r.hausteil + r.kaufteil * mgk + r.fremd * mgk + r.sonder + persKosten;
+    const hk = r.hausteil + r.kaufteil * mgk + r.fremd * mgk + r.sonder + r.std * rate;
     const deckung = r.deckung / 100;
     const vp = deckung < 1 ? hk / (1 - deckung) : hk;
-    return { persKosten, hkEinzel: hk, vpEinzel: vp, hkGesamt: hk * r.stueck, vpGesamt: vp * r.stueck };
+    return { hkEinzel: hk, vpEinzel: vp, hkGesamt: hk * r.stueck, vpGesamt: vp * r.stueck };
   }
 
   function recalcRow(id) {
     const r = readRow(id);
     if (!r) return;
     const c = computeRow(r);
-    document.getElementById(`pk-${id}`).textContent  = formatEUR(c.persKosten);
     document.getElementById(`hk-${id}`).textContent  = formatEUR(c.hkEinzel);
     document.getElementById(`vp-${id}`).textContent  = formatEUR(c.vpEinzel);
     document.getElementById(`hkg-${id}`).textContent = formatEUR(c.hkGesamt);
