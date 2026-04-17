@@ -31,7 +31,7 @@
       background: white;
       border-radius: 0 0 12px 12px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      padding: 1.75rem 2.25rem;
+      padding: 1rem 1rem;
     }
 
     /* Meta */
@@ -159,19 +159,21 @@
     /* Tabelle */
     .table-wrapper { border: 1px solid #e5e7eb; border-radius: 8px; }
 
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; table-layout: fixed; }
 
     thead th {
       text-align: left;
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       color: #6b7280;
-      padding: 0.6rem 0.55rem;
+      padding: 0.45rem 0.3rem;
       border-bottom: 2px solid #e5e7eb;
       background: #f9fafb;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     thead th.num    { text-align: right; }
@@ -182,18 +184,19 @@
     tbody tr:last-child { border-bottom: none; }
 
     tbody td {
-      padding: 0.35rem 0.45rem;
+      padding: 0.25rem 0.2rem;
       vertical-align: middle;
+      overflow: hidden;
     }
 
     tbody input[type="text"],
     tbody input[type="number"],
     tbody select {
       width: 100%;
-      padding: 0.4rem 0.5rem;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      padding: 0.25rem 0.3rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      font-size: 0.78rem;
       background: #f9fafb;
       color: #1a1a2e;
       transition: border-color 0.15s, background 0.15s;
@@ -203,6 +206,13 @@
     tbody input[type="number"] {
       text-align: right;
       font-variant-numeric: tabular-nums;
+      -moz-appearance: textfield;
+    }
+
+    tbody input[type="number"]::-webkit-outer-spin-button,
+    tbody input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     tbody select {
@@ -238,10 +248,11 @@
     .calc-display {
       text-align: right;
       font-variant-numeric: tabular-nums;
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       color: #374151;
-      padding: 0.4rem 0.5rem;
+      padding: 0.25rem 0.3rem;
       font-weight: 500;
+      white-space: nowrap;
     }
 
     .calc-display.vp { color: #1d4ed8; font-weight: 600; }
