@@ -246,6 +246,80 @@
 
     .calc-display.vp { color: #1d4ed8; font-weight: 600; }
 
+    /* Heading-Rows */
+    tr.heading-row {
+      background: #eef2ff !important;
+      border-bottom: 2px solid #c7d2fe !important;
+    }
+
+    tr.heading-row td {
+      padding: 0.6rem 0.55rem;
+    }
+
+    tr.heading-row .h-num {
+      font-weight: 700;
+      color: #4338ca;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    tr.heading-row .h-title-cell input {
+      width: 100%;
+      padding: 0.45rem 0.6rem;
+      border: 1.5px solid transparent;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: transparent;
+      color: #1e1b4b;
+      font-family: inherit;
+    }
+
+    tr.heading-row .h-title-cell input:focus {
+      outline: none;
+      border-color: #6366f1;
+      background: white;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+    }
+
+    tr.heading-row .h-subtotal {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #4338ca;
+    }
+
+    /* Sub-item add button inside table */
+    tr.add-sub-row {
+      border-bottom: 2px solid #e5e7eb !important;
+    }
+
+    tr.add-sub-row:hover { background: transparent !important; }
+
+    tr.add-sub-row td { padding: 0.3rem 0.55rem; }
+
+    .btn-add-sub {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.8rem;
+      border: 1.5px dashed #c7d2fe;
+      background: transparent;
+      border-radius: 6px;
+      color: #6366f1;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .btn-add-sub:hover {
+      border-color: #6366f1;
+      background: #eef2ff;
+    }
+
     /* Delete-Button */
     .btn-del {
       background: none;
@@ -427,7 +501,7 @@
       body { background: white; padding: 0; }
       .container { max-width: 100%; }
       header { border-radius: 0; }
-      .btn-add, .actions, .btn-del, .toast, details.config { display: none !important; }
+      .btn-add, .btn-add-sub, .add-sub-row, .actions, .btn-del, .toast, details.config { display: none !important; }
       .card { box-shadow: none; border-radius: 0; }
       tbody input, tbody select {
         border: none !important; background: transparent !important;
@@ -534,12 +608,14 @@
       </table>
     </div>
 
-    <button class="btn-add" onclick="addRow()">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      Zeile hinzufügen
-    </button>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;">
+      <button class="btn-add" onclick="addHeading()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Überschrift hinzufügen
+      </button>
+    </div>
 
     <!-- Summary: Kostenarten + Kostenstrukturen -->
     <div class="summary-grid">
@@ -585,9 +661,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // -----------------------------------------------------------------------
-  // Kostenstrukturen & Default-Stundensätze (aus Vorlage)
-  // -----------------------------------------------------------------------
   const KOSTENSTRUKTUREN = [
     { key: 'pm',       name: 'Projektmanagement', defaultRate: 100 },
     { key: 'sw',       name: 'SW Entwicklung',    defaultRate: 100 },
@@ -601,125 +674,149 @@
   ];
 
   let rowCounter = 0;
+  let groupCounter = 0;
 
-  // -----------------------------------------------------------------------
-  // Formatter
-  // -----------------------------------------------------------------------
-  function formatEUR(value) {
-    return (value || 0).toLocaleString('de-DE',
-      { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  function formatEUR(v) {
+    return (v || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
   }
-  function formatPct(value) {
-    return (value || 0).toLocaleString('de-DE',
-      { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' %';
+  function formatPct(v) {
+    return (v || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' %';
   }
 
-  // -----------------------------------------------------------------------
-  // Konfigurations-Panel aufbauen (Stundensätze)
-  // -----------------------------------------------------------------------
+  function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // --- Config ---
   function buildRateConfig() {
-    const host = document.getElementById('rateConfig');
-    host.innerHTML = KOSTENSTRUKTUREN.map(k => `
+    document.getElementById('rateConfig').innerHTML = KOSTENSTRUKTUREN.map(k => `
       <div class="config-row">
         <label>${k.name}</label>
         <span class="input-suffix">
-          <input type="number" step="0.5" min="0"
-                 id="rate-${k.key}" value="${k.defaultRate}"
-                 oninput="recalcAll()" />
+          <input type="number" step="0.5" min="0" id="rate-${k.key}" value="${k.defaultRate}" oninput="recalcAll()" />
           <span>€/h</span>
         </span>
       </div>
     `).join('');
   }
 
-  function getRate(key) {
-    const el = document.getElementById(`rate-${key}`);
-    return el ? (parseFloat(el.value) || 0) : 0;
-  }
-  function getMGK()            { return parseFloat(document.getElementById('cfgMGK').value)          || 1; }
-  function getDefaultDeckung() { return parseFloat(document.getElementById('cfgDeckung').value)      || 0; }
+  function getRate(key)        { const el = document.getElementById(`rate-${key}`); return el ? (parseFloat(el.value)||0) : 0; }
+  function getMGK()            { return parseFloat(document.getElementById('cfgMGK').value) || 1; }
+  function getDefaultDeckung() { return parseFloat(document.getElementById('cfgDeckung').value) || 0; }
   function getPreisnachlass()  { return parseFloat(document.getElementById('cfgPreisnachlass').value) || 0; }
 
-  // -----------------------------------------------------------------------
-  // Zeile hinzufügen
-  // -----------------------------------------------------------------------
-  function buildKstrOptions(selectedKey) {
-    return KOSTENSTRUKTUREN.map(k =>
-      `<option value="${k.key}" ${k.key === selectedKey ? 'selected' : ''}>${k.name}</option>`
-    ).join('');
+  function buildKstrOptions(sel) {
+    return KOSTENSTRUKTUREN.map(k => `<option value="${k.key}" ${k.key===sel?'selected':''}>${k.name}</option>`).join('');
   }
 
-  function escapeHtml(s) {
-    return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/"/g, '&quot;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+  // --- Heading (Überschrift) ---
+  function addHeading(title = '') {
+    const gid = 'g' + (++groupCounter);
+    const tbody = document.getElementById('quoteBody');
+
+    // Heading row
+    const htr = document.createElement('tr');
+    htr.className = 'heading-row';
+    htr.dataset.type = 'heading';
+    htr.dataset.gid = gid;
+    htr.innerHTML = `
+      <td class="h-num"></td>
+      <td class="h-title-cell" colspan="11">
+        <input type="text" placeholder="Überschrift eingeben…" value="${escapeHtml(title)}" />
+      </td>
+      <td class="h-subtotal" id="grp-hk-${gid}">0,00 €</td>
+      <td class="h-subtotal" id="grp-vp-${gid}">0,00 €</td>
+      <td class="col-del">
+        <button class="btn-del" title="Überschrift + Zeilen entfernen" onclick="removeHeading('${gid}')">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(htr);
+
+    // Add-sub-item button row
+    const atr = document.createElement('tr');
+    atr.className = 'add-sub-row';
+    atr.dataset.type = 'addsub';
+    atr.dataset.gid = gid;
+    atr.innerHTML = `
+      <td></td>
+      <td colspan="14">
+        <button class="btn-add-sub" onclick="addItem('${gid}')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Unterposition hinzufügen
+        </button>
+      </td>
+    `;
+    tbody.appendChild(atr);
+
+    // Add one empty item by default
+    addItem(gid);
+    renumberAll();
   }
 
-  function addRow(data = {}) {
+  function removeHeading(gid) {
+    const rows = document.querySelectorAll(`#quoteBody tr[data-gid="${gid}"]`);
+    const itemCount = [...rows].filter(r => r.dataset.type === 'item').length;
+    if (itemCount > 0 && !confirm(`Überschrift mit ${itemCount} Unterposition(en) löschen?`)) return;
+    rows.forEach(r => r.remove());
+    renumberAll();
+    recalcTotal();
+  }
+
+  // --- Item (Unterposition) ---
+  function addItem(gid, data = {}) {
     const id = ++rowCounter;
-    const {
-      desc = '',
-      kstr = 'material',
-      hausteil = 0,
-      kaufteil = 0,
-      fremd = 0,
-      sonder = 0,
-      std = 0,
-      stueck = 1,
-      deckung = null
-    } = data;
-
+    const { desc='', kstr='material', hausteil=0, kaufteil=0, fremd=0, sonder=0, std=0, stueck=1, deckung=null } = data;
     const deckungVal = deckung !== null ? deckung : getDefaultDeckung();
 
     const tr = document.createElement('tr');
+    tr.className = 'item-row';
     tr.id = `row-${id}`;
     tr.dataset.id = id;
+    tr.dataset.type = 'item';
+    tr.dataset.gid = gid;
 
     tr.innerHTML = `
       <td class="col-pos"></td>
       <td class="col-desc">
-        <input type="text" placeholder="Leistung / Produkt"
-               value="${escapeHtml(desc)}" data-f="desc" />
+        <input type="text" placeholder="Leistung / Produkt" value="${escapeHtml(desc)}" data-f="desc" />
       </td>
       <td class="col-kstr">
         <select data-f="kstr" onchange="recalcRow(${id})">${buildKstrOptions(kstr)}</select>
       </td>
       <td class="col-num">
-        <input type="number" step="0.01" min="0" value="${hausteil}"
-               data-f="hausteil" oninput="recalcRow(${id})" />
+        <input type="number" step="0.01" min="0" value="${hausteil}" data-f="hausteil" oninput="recalcRow(${id})" />
       </td>
       <td class="col-num">
-        <input type="number" step="0.01" min="0" value="${kaufteil}"
-               data-f="kaufteil" oninput="recalcRow(${id})" />
+        <input type="number" step="0.01" min="0" value="${kaufteil}" data-f="kaufteil" oninput="recalcRow(${id})" />
       </td>
       <td class="col-num">
-        <input type="number" step="0.01" min="0" value="${fremd}"
-               data-f="fremd" oninput="recalcRow(${id})" />
+        <input type="number" step="0.01" min="0" value="${fremd}" data-f="fremd" oninput="recalcRow(${id})" />
       </td>
       <td class="col-num">
-        <input type="number" step="0.01" min="0" value="${sonder}"
-               data-f="sonder" oninput="recalcRow(${id})" />
+        <input type="number" step="0.01" min="0" value="${sonder}" data-f="sonder" oninput="recalcRow(${id})" />
       </td>
       <td class="col-std">
-        <input type="number" step="0.01" min="0" value="${std}"
-               data-f="std" oninput="recalcRow(${id})" />
+        <input type="number" step="0.01" min="0" value="${std}" data-f="std" oninput="recalcRow(${id})" />
       </td>
       <td class="col-stk">
-        <input type="number" step="1" min="0" value="${stueck}"
-               data-f="stueck" oninput="recalcRow(${id})" />
+        <input type="number" step="1" min="0" value="${stueck}" data-f="stueck" oninput="recalcRow(${id})" />
       </td>
       <td class="col-calc"><div class="calc-display" id="hk-${id}">0,00 €</div></td>
       <td class="col-deckung">
-        <input type="number" step="0.5" min="0" max="99" value="${deckungVal}"
-               data-f="deckung" oninput="recalcRow(${id})" />
+        <input type="number" step="0.5" min="0" max="99" value="${deckungVal}" data-f="deckung" oninput="recalcRow(${id})" />
       </td>
       <td class="col-calc"><div class="calc-display vp" id="vp-${id}">0,00 €</div></td>
       <td class="col-calc"><div class="calc-display"    id="hkg-${id}">0,00 €</div></td>
       <td class="col-calc"><div class="calc-display vp" id="vpg-${id}">0,00 €</div></td>
       <td class="col-del">
-        <button class="btn-del" title="Zeile entfernen" onclick="removeRow(${id})">
+        <button class="btn-del" title="Zeile entfernen" onclick="removeItem(${id})">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
             <path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8"
                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -728,28 +825,38 @@
       </td>
     `;
 
-    document.getElementById('quoteBody').appendChild(tr);
-    renumberPositions();
+    // Insert before the add-sub-row of this group
+    const addSubRow = document.querySelector(`#quoteBody tr.add-sub-row[data-gid="${gid}"]`);
+    document.getElementById('quoteBody').insertBefore(tr, addSubRow);
+    renumberAll();
     recalcRow(id);
   }
 
-  function renumberPositions() {
-    document.querySelectorAll('#quoteBody tr').forEach((tr, i) => {
-      const posCell = tr.querySelector('.col-pos');
-      if (posCell) posCell.textContent = i + 1;
-    });
-  }
-
-  function removeRow(id) {
+  function removeItem(id) {
     const tr = document.getElementById(`row-${id}`);
     if (tr) tr.remove();
-    renumberPositions();
+    renumberAll();
     recalcTotal();
   }
 
-  // -----------------------------------------------------------------------
-  // Werte aus Zeile lesen
-  // -----------------------------------------------------------------------
+  // --- Numbering: 1, 1.1, 1.2, 2, 2.1 etc. ---
+  function renumberAll() {
+    let hNum = 0, iNum = 0;
+    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+      if (tr.dataset.type === 'heading') {
+        hNum++;
+        iNum = 0;
+        const numCell = tr.querySelector('.h-num');
+        if (numCell) numCell.textContent = hNum;
+      } else if (tr.dataset.type === 'item') {
+        iNum++;
+        const posCell = tr.querySelector('.col-pos');
+        if (posCell) posCell.textContent = hNum + '.' + iNum;
+      }
+    });
+  }
+
+  // --- Row read + compute ---
   function readRow(id) {
     const tr = document.getElementById(`row-${id}`);
     if (!tr) return null;
@@ -757,6 +864,7 @@
     const num = f => Math.max(0, parseFloat(g(f).value) || 0);
     return {
       id,
+      gid:      tr.dataset.gid,
       desc:     g('desc').value,
       kstr:     g('kstr').value,
       hausteil: num('hausteil'),
@@ -769,27 +877,13 @@
     };
   }
 
-  // -----------------------------------------------------------------------
-  // Kern-Berechnung (abgeleitet aus Vorlage)
-  //   HK = Hausteil + Kaufteil × MGK + Fremd × MGK + Sonder + Std × Rate
-  //   VP = HK / (1 − Deckung%)
-  // -----------------------------------------------------------------------
   function computeRow(r) {
-    const mgk  = getMGK();
+    const mgk = getMGK();
     const rate = getRate(r.kstr);
-    const hk   = r.hausteil
-               + r.kaufteil * mgk
-               + r.fremd    * mgk
-               + r.sonder
-               + r.std      * rate;
+    const hk = r.hausteil + r.kaufteil * mgk + r.fremd * mgk + r.sonder + r.std * rate;
     const deckung = r.deckung / 100;
     const vp = deckung < 1 ? hk / (1 - deckung) : hk;
-    return {
-      hkEinzel: hk,
-      vpEinzel: vp,
-      hkGesamt: hk * r.stueck,
-      vpGesamt: vp * r.stueck
-    };
+    return { hkEinzel: hk, vpEinzel: vp, hkGesamt: hk * r.stueck, vpGesamt: vp * r.stueck };
   }
 
   function recalcRow(id) {
@@ -804,86 +898,92 @@
   }
 
   function recalcAll() {
-    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+    document.querySelectorAll('#quoteBody tr.item-row').forEach(tr => {
       recalcRow(parseInt(tr.dataset.id, 10));
     });
   }
 
-  // -----------------------------------------------------------------------
-  // Gesamtsummen + Aufschlüsselung
-  // -----------------------------------------------------------------------
+  // --- Totals + Group subtotals ---
   function recalcTotal() {
-    const mgk = getMGK();
-
-    // Summen Kostenart (Einzelbeträge × Stück)
     const kostenart = { hausteil: 0, kaufteil: 0, fremd: 0, sonder: 0, std: 0 };
-    // Summen Kostenstruktur (VP gesamt pro Kategorie)
-    const kstrSums  = Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, { hk: 0, vp: 0 }]));
-
+    const kstrSums = Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, { hk: 0, vp: 0 }]));
+    const grpSums = {};
     let totalHK = 0, totalVP = 0;
 
-    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+    document.querySelectorAll('#quoteBody tr.item-row').forEach(tr => {
       const r = readRow(parseInt(tr.dataset.id, 10));
       if (!r) return;
       const c = computeRow(r);
-
       totalHK += c.hkGesamt;
       totalVP += c.vpGesamt;
-
       kostenart.hausteil += r.hausteil * r.stueck;
       kostenart.kaufteil += r.kaufteil * r.stueck;
-      kostenart.fremd    += r.fremd    * r.stueck;
-      kostenart.sonder   += r.sonder   * r.stueck;
-      kostenart.std      += r.std      * r.stueck;
-
+      kostenart.fremd    += r.fremd * r.stueck;
+      kostenart.sonder   += r.sonder * r.stueck;
+      kostenart.std      += r.std * r.stueck;
       kstrSums[r.kstr].hk += c.hkGesamt;
       kstrSums[r.kstr].vp += c.vpGesamt;
+      if (!grpSums[r.gid]) grpSums[r.gid] = { hk: 0, vp: 0 };
+      grpSums[r.gid].hk += c.hkGesamt;
+      grpSums[r.gid].vp += c.vpGesamt;
+    });
+
+    // Update group subtotals in heading rows
+    document.querySelectorAll('#quoteBody tr.heading-row').forEach(tr => {
+      const gid = tr.dataset.gid;
+      const s = grpSums[gid] || { hk: 0, vp: 0 };
+      const hkEl = document.getElementById(`grp-hk-${gid}`);
+      const vpEl = document.getElementById(`grp-vp-${gid}`);
+      if (hkEl) hkEl.textContent = formatEUR(s.hk);
+      if (vpEl) vpEl.textContent = formatEUR(s.vp);
     });
 
     // Kostenart-Box
-    const kaHost = document.getElementById('sumKostenarten');
-    kaHost.innerHTML = `
+    document.getElementById('sumKostenarten').innerHTML = `
       <div class="summary-line"><span>Hausteil</span><span class="val">${formatEUR(kostenart.hausteil)}</span></div>
       <div class="summary-line"><span>Kaufteil / Vorratsmaterial</span><span class="val">${formatEUR(kostenart.kaufteil)}</span></div>
       <div class="summary-line"><span>Fremdleistung UA</span><span class="val">${formatEUR(kostenart.fremd)}</span></div>
       <div class="summary-line"><span>Sonderkosten</span><span class="val">${formatEUR(kostenart.sonder)}</span></div>
-      <div class="summary-line"><span>Personalstunden</span><span class="val">${(kostenart.std).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Std.</span></div>
+      <div class="summary-line"><span>Personalstunden</span><span class="val">${kostenart.std.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Std.</span></div>
     `;
 
-    // Kostenstruktur-Box (VP)
-    const ksHost = document.getElementById('sumKostenstrukturen');
-    ksHost.innerHTML = KOSTENSTRUKTUREN.map(k => `
-      <div class="summary-line">
-        <span>${k.name}</span>
-        <span class="val">${formatEUR(kstrSums[k.key].vp)}</span>
-      </div>
-    `).join('');
+    document.getElementById('sumKostenstrukturen').innerHTML = KOSTENSTRUKTUREN.map(k =>
+      `<div class="summary-line"><span>${k.name}</span><span class="val">${formatEUR(kstrSums[k.key].vp)}</span></div>`
+    ).join('');
 
-    // Gesamtdeckung: (VP − HK) / VP
     const deckung = totalVP > 0 ? ((totalVP - totalHK) / totalVP) * 100 : 0;
     const endpreis = totalVP * (1 - getPreisnachlass() / 100);
-
     document.getElementById('totalHK').textContent       = formatEUR(totalHK);
     document.getElementById('totalDeckung').textContent  = formatPct(deckung);
     document.getElementById('totalVP').textContent       = formatEUR(totalVP);
     document.getElementById('totalEndpreis').textContent = formatEUR(endpreis);
   }
 
-  // -----------------------------------------------------------------------
-  // Reset / Export / Druck
-  // -----------------------------------------------------------------------
+  // --- Reset / Export / Print ---
   function resetTable() {
-    if (!confirm('Alle Zeilen löschen und neu starten?')) return;
+    if (!confirm('Alle Positionen löschen und neu starten?')) return;
     document.getElementById('quoteBody').innerHTML = '';
     rowCounter = 0;
-    addRow();
-    recalcTotal();
+    groupCounter = 0;
+    addHeading('Position 1');
     showToast('Tabelle zurückgesetzt');
   }
 
   function exportJSON() {
-    const rows = [...document.querySelectorAll('#quoteBody tr')]
-      .map(tr => readRow(parseInt(tr.dataset.id, 10)));
+    const gruppen = [];
+    let current = null;
+    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+      if (tr.dataset.type === 'heading') {
+        current = {
+          titel: tr.querySelector('.h-title-cell input').value,
+          positionen: []
+        };
+        gruppen.push(current);
+      } else if (tr.dataset.type === 'item' && current) {
+        const r = readRow(parseInt(tr.dataset.id, 10));
+        if (r) current.positionen.push(r);
+      }
+    });
     const data = {
       titel:      document.getElementById('angebotTitel').value,
       kunde:      document.getElementById('kundeName').value,
@@ -891,17 +991,15 @@
       datum:      document.getElementById('angebotDatum').value,
       gueltigBis: document.getElementById('gueltigBis').value,
       config: {
-        mgk:             getMGK(),
-        defaultDeckung:  getDefaultDeckung(),
-        preisnachlass:   getPreisnachlass(),
-        stundensaetze:   Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, getRate(k.key)]))
+        mgk: getMGK(), defaultDeckung: getDefaultDeckung(), preisnachlass: getPreisnachlass(),
+        stundensaetze: Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, getRate(k.key)]))
       },
-      positionen: rows
+      gruppen
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
     a.download = (data.angebotNr || 'angebot') + '.json';
     a.click();
     URL.revokeObjectURL(url);
@@ -917,25 +1015,19 @@
     setTimeout(() => t.classList.remove('show'), 2500);
   }
 
-  // -----------------------------------------------------------------------
-  // Init
-  // -----------------------------------------------------------------------
+  // --- Init ---
   buildRateConfig();
-
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById('angebotDatum').value = today;
-  const g = new Date(); g.setDate(g.getDate() + 30);
-  document.getElementById('gueltigBis').value = g.toISOString().slice(0, 10);
-  document.getElementById('angebotNr').value =
-    'ANG-' + today.replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
+  const gd = new Date(); gd.setDate(gd.getDate() + 30);
+  document.getElementById('gueltigBis').value = gd.toISOString().slice(0, 10);
+  document.getElementById('angebotNr').value = 'ANG-' + today.replace(/-/g,'') + '-' + Math.floor(100 + Math.random()*900);
 
-  // Konfig-Änderungen (MGK, Default-Deckung, Preisnachlass) neu rechnen
-  ['cfgMGK', 'cfgDeckung', 'cfgPreisnachlass'].forEach(id => {
+  ['cfgMGK','cfgDeckung','cfgPreisnachlass'].forEach(id => {
     document.getElementById(id).addEventListener('input', recalcAll);
   });
 
-  // Eine Startzeile
-  addRow();
+  addHeading('Position 1');
 </script>
 </body>
 </html>
