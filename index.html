@@ -376,7 +376,7 @@
     .summary-grid {
       margin-top: 2rem;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 1.5rem;
     }
 
@@ -637,6 +637,10 @@
       <div class="summary-box">
         <h3>Gesamteinzelsummen nach Kostenstruktur</h3>
         <div id="sumKostenstrukturen"></div>
+      </div>
+      <div class="summary-box">
+        <h3>Stunden je Abteilung</h3>
+        <div id="sumStunden"></div>
       </div>
     </div>
 
@@ -917,9 +921,9 @@
   // --- Totals + Group subtotals ---
   function recalcTotal() {
     const kostenart = { hausteil: 0, kaufteil: 0, fremd: 0, sonder: 0, std: 0 };
-    const kstrSums = Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, { hk: 0, vp: 0 }]));
+    const kstrSums = Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, { hk: 0, vp: 0, std: 0 }]));
     const grpSums = {};
-    let totalHK = 0, totalVP = 0;
+    let totalHK = 0, totalVP = 0, totalStd = 0;
 
     document.querySelectorAll('#quoteBody tr.item-row').forEach(tr => {
       const r = readRow(parseInt(tr.dataset.id, 10));
@@ -934,6 +938,8 @@
       kostenart.std      += r.std * r.stueck;
       kstrSums[r.kstr].hk += c.hkGesamt;
       kstrSums[r.kstr].vp += c.vpGesamt;
+      kstrSums[r.kstr].std += r.std * r.stueck;
+      totalStd += r.std * r.stueck;
       if (!grpSums[r.gid]) grpSums[r.gid] = { hk: 0, vp: 0 };
       grpSums[r.gid].hk += c.hkGesamt;
       grpSums[r.gid].vp += c.vpGesamt;
@@ -961,6 +967,15 @@
     document.getElementById('sumKostenstrukturen').innerHTML = KOSTENSTRUKTUREN.map(k =>
       `<div class="summary-line"><span>${k.name}</span><span class="val">${formatEUR(kstrSums[k.key].vp)}</span></div>`
     ).join('');
+
+    const fmtStd = v => v.toLocaleString('de-DE', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' Std.';
+    document.getElementById('sumStunden').innerHTML =
+      KOSTENSTRUKTUREN.filter(k => kstrSums[k.key].std > 0 || getRate(k.key) > 0).map(k =>
+        `<div class="summary-line"><span>${k.name}</span><span class="val">${fmtStd(kstrSums[k.key].std)}</span></div>`
+      ).join('') +
+      `<div class="summary-line" style="border-top:1px solid #e5e7eb;margin-top:0.3rem;padding-top:0.4rem;font-weight:600;">
+        <span>Gesamt</span><span class="val">${fmtStd(totalStd)}</span>
+      </div>`;
 
     const deckung = totalVP > 0 ? ((totalVP - totalHK) / totalVP) * 100 : 0;
     const endpreis = totalVP * (1 - getPreisnachlass() / 100);
