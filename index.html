@@ -1016,9 +1016,17 @@
     const mgk = getMGK();
     const fgk = getFGK();
     const rate = getRate(r.kstr);
+    let hk;
+    if (r.kstr === 'km') {
+      // Kilometer: Stück = Anzahl km, HK = Stück × Km-Satz
+      hk = r.stueck * rate + r.hausteil + r.kaufteil * mgk + r.fremd * mgk + r.sonder;
+      const deckung = r.deckung / 100;
+      const vp = deckung < 1 ? hk / (1 - deckung) : hk;
+      return { hkEinzel: hk, vpEinzel: vp, hkGesamt: hk, vpGesamt: vp };
+    }
     let stdKosten = r.std * rate;
     if (r.kstr === 'fertigung') stdKosten *= fgk;
-    const hk = r.hausteil + r.kaufteil * mgk + r.fremd * mgk + r.sonder + stdKosten;
+    hk = r.hausteil + r.kaufteil * mgk + r.fremd * mgk + r.sonder + stdKosten;
     const deckung = r.deckung / 100;
     const vp = deckung < 1 ? hk / (1 - deckung) : hk;
     return { hkEinzel: hk, vpEinzel: vp, hkGesamt: hk * r.stueck, vpGesamt: vp * r.stueck };
