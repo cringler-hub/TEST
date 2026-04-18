@@ -1628,6 +1628,7 @@
     { key: 'material', name: 'Material',            defaultRate:   0, unit: '' },
     { key: 'fremd',    name: 'Fremdleistung',       defaultRate:   0, unit: '' },
     { key: 'sonder',   name: 'Sonderkosten',        defaultRate:   0, unit: '' },
+    { key: 'swlizenz', name: 'SW-Lizenzen',         defaultRate:   0, unit: '' },
   ];
 
   let rowCounter = 0;
@@ -1815,7 +1816,7 @@
         <input type="text" placeholder="Leistung / Produkt" value="${escapeHtml(desc)}" data-f="desc" />
       </td>
       <td class="col-kstr">
-        <select data-f="kstr" onchange="recalcRow(${id})">${buildKstrOptions(kstr)}</select>
+        <select data-f="kstr" onchange="onKstrChange(${id})">${buildKstrOptions(kstr)}</select>
       </td>
       <td class="col-num"><div class="input-eur">
         <input type="number" step="0.01" min="0" value="${hausteil}" data-f="hausteil" oninput="recalcRow(${id})" />
@@ -1870,8 +1871,32 @@
     const addSubRow = document.querySelector(`#quoteBody tr.add-sub-row[data-gid="${gid}"]`);
     document.getElementById('quoteBody').insertBefore(tr, addSubRow);
     renumberAll();
+    applyKstrLock(id);
     recalcRow(id);
     updateClipboardUI();
+  }
+
+  // Lock Deckung at 100% when SW-Lizenzen is selected
+  function applyKstrLock(id) {
+    const tr = document.getElementById(`row-${id}`);
+    if (!tr) return;
+    const kstr = tr.querySelector('[data-f="kstr"]').value;
+    const deckungInput = tr.querySelector('[data-f="deckung"]');
+    if (kstr === 'swlizenz') {
+      deckungInput.value = 100;
+      deckungInput.readOnly = true;
+      deckungInput.style.opacity = '0.6';
+      deckungInput.style.cursor = 'not-allowed';
+    } else {
+      deckungInput.readOnly = false;
+      deckungInput.style.opacity = '';
+      deckungInput.style.cursor = '';
+    }
+  }
+
+  function onKstrChange(id) {
+    applyKstrLock(id);
+    recalcRow(id);
   }
 
   // --- Move items within their group ---
@@ -2113,6 +2138,11 @@
     const fgk = getFGK();
     const rate = getRate(r.kstr);
     let hk;
+    if (r.kstr === 'swlizenz') {
+      // SW-Lizenzen: 100% Deckung, HK = 0, VP = Materialpreis (Kaufteil-Feld)
+      const vp = r.kaufteil;
+      return { hkEinzel: 0, vpEinzel: vp, hkGesamt: 0, vpGesamt: vp * r.stueck };
+    }
     if (r.kstr === 'km') {
       // Kilometer: Stück = Anzahl km, HK = Stück × Km-Satz
       hk = r.stueck * rate + r.hausteil + r.kaufteil * mgk + r.fremd * mgk + r.sonder;
