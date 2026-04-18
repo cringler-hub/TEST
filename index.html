@@ -1340,16 +1340,16 @@ td.pct{color:#6b7280}
 </div>
 </div></div>
 <div class="sync-badge" id="syncBadge">Aktualisiert</div>
-<script>
-window.addEventListener('message', function(e) {
-  if (e.data && e.data.type === 'ceo-update') {
-    document.querySelector('.card').innerHTML = e.data.html;
-    const b = document.getElementById('syncBadge');
-    b.classList.add('show');
-    setTimeout(() => b.classList.remove('show'), 1500);
+<scr'+'ipt>
+window.addEventListener("message", function(e) {
+  if (e.data && e.data.type === "ceo-update") {
+    document.querySelector(".card").innerHTML = e.data.html;
+    var b = document.getElementById("syncBadge");
+    b.classList.add("show");
+    setTimeout(function(){ b.classList.remove("show"); }, 1500);
   }
 });
-</script>
+</scr'+'ipt>
 </body></html>`;
   }
 
