@@ -2182,22 +2182,17 @@
     const grpSums = {};
     let totalHK = 0, totalVP = 0, totalStd = 0;
 
+    // First pass: accumulate per-group HK/VP subtotals (without grpStk)
     document.querySelectorAll('#quoteBody tr.item-row').forEach(tr => {
       const r = readRow(parseInt(tr.dataset.id, 10));
       if (!r) return;
       const c = computeRow(r);
-      kostenart.hausteil += r.hausteil * r.stueck;
-      kostenart.kaufteil += r.kaufteil * r.stueck;
-      kostenart.fremd    += r.fremd * r.stueck;
-      kostenart.sonder   += r.sonder * r.stueck;
-      kostenart.std      += r.std * r.stueck;
-      kstrSums[r.kstr].std += r.std * r.stueck;
       if (!grpSums[r.gid]) grpSums[r.gid] = { hk: 0, vp: 0 };
       grpSums[r.gid].hk += c.hkGesamt;
       grpSums[r.gid].vp += c.vpGesamt;
     });
 
-    // Update group subtotals in heading rows (with group Stück multiplier)
+    // Second pass: apply group Stück multiplier to heading subtotals and all summaries
     document.querySelectorAll('#quoteBody tr.heading-row').forEach(tr => {
       const gid = tr.dataset.gid;
       const s = grpSums[gid] || { hk: 0, vp: 0 };
@@ -2221,13 +2216,21 @@
       totalHK += grpHK;
       totalVP += grpVP;
 
-      // Stunden × Gruppenstück für Abteilungs-Summe
+      // Accumulate kostenart, kstrSums, and hours WITH grpStk
       document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`).forEach(itr => {
         const r = readRow(parseInt(itr.dataset.id, 10));
         if (!r) return;
-        kstrSums[r.kstr].hk += computeRow(r).hkGesamt * grpStk;
-        kstrSums[r.kstr].vp += computeRow(r).vpGesamt * grpStk;
-        totalStd += r.std * r.stueck * grpStk;
+        const c = computeRow(r);
+        const mul = r.stueck * grpStk;
+        kostenart.hausteil += r.hausteil * mul;
+        kostenart.kaufteil += r.kaufteil * mul;
+        kostenart.fremd    += r.fremd * mul;
+        kostenart.sonder   += r.sonder * mul;
+        kostenart.std      += r.std * mul;
+        kstrSums[r.kstr].hk  += c.hkGesamt * grpStk;
+        kstrSums[r.kstr].vp  += c.vpGesamt * grpStk;
+        kstrSums[r.kstr].std += r.std * mul;
+        totalStd += r.std * mul;
       });
     });
 
