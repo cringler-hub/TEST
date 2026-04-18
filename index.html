@@ -1340,16 +1340,6 @@ td.pct{color:#6b7280}
 </div>
 </div></div>
 <div class="sync-badge" id="syncBadge">Aktualisiert</div>
-<scr'+'ipt>
-window.addEventListener("message", function(e) {
-  if (e.data && e.data.type === "ceo-update") {
-    document.querySelector(".card").innerHTML = e.data.html;
-    var b = document.getElementById("syncBadge");
-    b.classList.add("show");
-    setTimeout(function(){ b.classList.remove("show"); }, 1500);
-  }
-});
-</scr'+'ipt>
 </body></html>`;
   }
 
@@ -1379,6 +1369,14 @@ window.addEventListener("message", function(e) {
       ceoWin = window.open('', 'ceoView', 'width=1000,height=800');
       ceoWin.document.write(html);
       ceoWin.document.close();
+      ceoWin.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'ceo-update') {
+          ceoWin.document.querySelector('.card').innerHTML = e.data.html;
+          var b = ceoWin.document.getElementById('syncBadge');
+          b.classList.add('show');
+          setTimeout(function(){ b.classList.remove('show'); }, 1500);
+        }
+      });
     }
   }
 
