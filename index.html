@@ -618,7 +618,16 @@
 
       .btn-add, .btn-add-sub, .add-sub-row, .actions, .row-actions,
       .col-del, .btn-del, .btn-move, .btn-toggle,
-      .toast, details.config { display: none !important; }
+      .toast { display: none !important; }
+
+      details.config { display: none !important; }
+      details.config.config-summary {
+        display: block !important;
+        border: none;
+        background: none;
+      }
+      details.config.config-summary > summary { display: none !important; }
+      details.config.config-summary .summary-grid { display: grid !important; }
 
       .card { box-shadow: none; border-radius: 0; padding: 0.5rem 0; }
 
@@ -722,7 +731,7 @@
     </div>
 
     <!-- Konfigurations-Panel -->
-    <details class="config" open>
+    <details class="config">
       <summary>Konfiguration (Stundensätze, MGK, Deckung)</summary>
       <div class="config-body">
         <div class="config-group">
@@ -810,20 +819,23 @@
     </div>
 
     <!-- Summary: Kostenarten + Kostenstrukturen -->
-    <div class="summary-grid">
-      <div class="summary-box">
-        <h3>Gesamteinzelsummen nach Kostenart</h3>
-        <div id="sumKostenarten"></div>
+    <details class="config config-summary">
+      <summary>Gesamteinzelsummen &amp; Stunden je Abteilung</summary>
+      <div class="summary-grid" style="padding:0 0 0.5rem;">
+        <div class="summary-box">
+          <h3>Gesamteinzelsummen nach Kostenart</h3>
+          <div id="sumKostenarten"></div>
+        </div>
+        <div class="summary-box">
+          <h3>Gesamteinzelsummen nach Kostenstruktur</h3>
+          <div id="sumKostenstrukturen"></div>
+        </div>
+        <div class="summary-box">
+          <h3>Stunden je Abteilung</h3>
+          <div id="sumStunden"></div>
+        </div>
       </div>
-      <div class="summary-box">
-        <h3>Gesamteinzelsummen nach Kostenstruktur</h3>
-        <div id="sumKostenstrukturen"></div>
-      </div>
-      <div class="summary-box">
-        <h3>Stunden je Abteilung</h3>
-        <div id="sumStunden"></div>
-      </div>
-    </div>
+    </details>
 
     <!-- Gesamt-Totals -->
     <div class="totals">
