@@ -750,6 +750,7 @@
     <!-- Aktionen -->
     <div class="actions">
       <button class="btn-primary" onclick="printQuote()">Drucken / als PDF</button>
+      <button class="btn-primary" onclick="openCeoView()" style="background:#4338ca;">CEO-Ansicht</button>
       <button class="btn-secondary" onclick="exportJSON()">Als JSON exportieren</button>
       <button class="btn-secondary" onclick="resetTable()">Zurücksetzen</button>
     </div>
@@ -1204,6 +1205,195 @@
   ['cfgMGK','cfgFGK','cfgDeckung','cfgPreisnachlass'].forEach(id => {
     document.getElementById(id).addEventListener('input', recalcAll);
   });
+
+  // --- CEO-Ansicht ---
+  let ceoWin = null;
+
+  function buildCeoData() {
+    const gruppen = [];
+    let currentGrp = null;
+    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+      if (tr.dataset.type === 'heading') {
+        const gid = tr.dataset.gid;
+        const titel = tr.querySelector('.h-title-cell input').value || 'Ohne Titel';
+        const posNr = tr.querySelector('[data-f="hpos"]').value || '';
+        const stkInput = tr.querySelector('[data-f="grp-stk"]');
+        const stk = Math.max(1, parseInt(stkInput ? stkInput.value : 1) || 1);
+        currentGrp = { gid, posNr, titel, stk, hk: 0, vp: 0, items: [] };
+        gruppen.push(currentGrp);
+      } else if (tr.dataset.type === 'item' && currentGrp) {
+        const r = readRow(parseInt(tr.dataset.id, 10));
+        if (!r) return;
+        const c = computeRow(r);
+        const posNr = tr.querySelector('[data-f="pos"]').value || '';
+        currentGrp.items.push({
+          posNr, desc: r.desc, kstr: r.kstr,
+          kstrName: KOSTENSTRUKTUREN.find(k => k.key === r.kstr)?.name || r.kstr,
+          hkGesamt: c.hkGesamt, vpGesamt: c.vpGesamt, stueck: r.stueck
+        });
+        currentGrp.hk += c.hkGesamt;
+        currentGrp.vp += c.vpGesamt;
+      }
+    });
+    // Apply group Stück
+    gruppen.forEach(g => { g.hkTotal = g.hk * g.stk; g.vpTotal = g.vp * g.stk; });
+    const totalHK = gruppen.reduce((s,g) => s + g.hkTotal, 0);
+    const totalVP = gruppen.reduce((s,g) => s + g.vpTotal, 0);
+    const deckungVP = totalVP > 0 ? ((totalVP - totalHK) / totalVP) * 100 : 0;
+    const nachlass = getPreisnachlass();
+    const endpreis = totalVP * (1 - nachlass / 100);
+    const deckungEnd = endpreis > 0 ? ((endpreis - totalHK) / endpreis) * 100 : 0;
+    return {
+      titel: document.getElementById('angebotTitel').value || 'Angebot',
+      kunde: document.getElementById('kundeName').value,
+      angebotNr: document.getElementById('angebotNr').value,
+      datum: document.getElementById('angebotDatum').value,
+      gruppen, totalHK, totalVP, deckungVP, endpreis, deckungEnd, nachlass
+    };
+  }
+
+  function renderCeoHtml(d) {
+    const f = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
+    let rows = '';
+    d.gruppen.forEach(g => {
+      const gDeck = g.vpTotal > 0 ? ((g.vpTotal - g.hkTotal) / g.vpTotal) * 100 : 0;
+      rows += `<tr class="grp-row">
+        <td class="pos">${g.posNr}</td>
+        <td class="title">${g.titel}</td>
+        <td class="num">${g.stk}</td>
+        <td class="num">${f(g.hkTotal)} €</td>
+        <td class="num pct">${pct(gDeck)} %</td>
+        <td class="num vp">${f(g.vpTotal)} €</td>
+      </tr>`;
+      g.items.forEach(it => {
+        const iDeck = it.vpGesamt > 0 ? ((it.vpGesamt - it.hkGesamt) / it.vpGesamt) * 100 : 0;
+        rows += `<tr class="item-row">
+          <td class="pos">${it.posNr}</td>
+          <td class="title">${it.desc || it.kstrName}</td>
+          <td class="num">${it.stueck}</td>
+          <td class="num">${f(it.hkGesamt)} €</td>
+          <td class="num pct">${pct(iDeck)} %</td>
+          <td class="num vp">${f(it.vpGesamt)} €</td>
+        </tr>`;
+      });
+    });
+    return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CEO-Ansicht — ${d.titel}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1a1a2e;padding:2rem}
+.container{max-width:960px;margin:0 auto}
+header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:1.5rem 2rem;border-radius:12px 12px 0 0}
+header h1{font-size:1.4rem;font-weight:600}
+.meta{display:flex;gap:2rem;margin-top:0.5rem;font-size:0.85rem;opacity:0.8}
+.card{background:#fff;border-radius:0 0 12px 12px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:1.5rem 2rem}
+table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:0.88rem}
+thead th{text-align:left;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;padding:0.6rem 0.7rem;border-bottom:2px solid #e5e7eb}
+thead th.num{text-align:right}
+tbody td{padding:0.55rem 0.7rem;border-bottom:1px solid #f3f4f6}
+.grp-row{background:#eef2ff;font-weight:700;border-bottom:2px solid #c7d2fe !important}
+.grp-row td{padding:0.65rem 0.7rem}
+.grp-row .title{color:#1e1b4b}
+.item-row .pos{color:#9ca3af;padding-left:1.5rem}
+.item-row .title{padding-left:1.5rem;color:#4b5563}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.vp{color:#1d4ed8;font-weight:600}
+td.pct{color:#6b7280}
+.grp-row td.vp{color:#4338ca}
+.totals{margin-top:1.5rem;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;border-radius:10px;padding:1.25rem 2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem}
+.t-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;opacity:.7;margin-bottom:.2rem}
+.t-value{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.t-value.hl{color:#60a5fa;font-size:1.35rem}
+.sync-badge{position:fixed;top:1rem;right:1rem;background:#22c55e;color:#fff;padding:0.35rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:600;opacity:0;transition:opacity .3s}
+.sync-badge.show{opacity:1}
+@media print{body{padding:0;background:#fff}.container{max-width:100%}header{border-radius:0}.totals{-webkit-print-color-adjust:exact}.sync-badge{display:none}}
+</style></head><body>
+<div class="container">
+<header>
+  <h1>${d.titel} — CEO-Übersicht</h1>
+  <div class="meta">
+    <span>Kunde: ${d.kunde||'–'}</span>
+    <span>Angebot: ${d.angebotNr||'–'}</span>
+    <span>Datum: ${d.datum||'–'}</span>
+  </div>
+</header>
+<div class="card">
+<table>
+  <thead><tr>
+    <th style="width:6%">Pos.</th>
+    <th>Bezeichnung</th>
+    <th class="num" style="width:6%">Stk.</th>
+    <th class="num" style="width:14%">HK Gesamt</th>
+    <th class="num" style="width:10%">Deckung</th>
+    <th class="num" style="width:14%">VP Gesamt</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="totals">
+  <div><div class="t-label">Gesamt HK</div><div class="t-value">${f(d.totalHK)} €</div></div>
+  <div><div class="t-label">Gesamt VP</div><div class="t-value">${f(d.totalVP)} €</div></div>
+  <div><div class="t-label">Deckung (VP)</div><div class="t-value">${pct(d.deckungVP)} %</div></div>
+  <div><div class="t-label">Endpreis${d.nachlass>0?' (−'+pct(d.nachlass)+'%)':''}</div><div class="t-value hl">${f(d.endpreis)} €</div></div>
+  <div><div class="t-label">Deckung (Endpreis)</div><div class="t-value hl">${pct(d.deckungEnd)} %</div></div>
+</div>
+</div></div>
+<div class="sync-badge" id="syncBadge">Aktualisiert</div>
+<script>
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'ceo-update') {
+    document.querySelector('.card').innerHTML = e.data.html;
+    const b = document.getElementById('syncBadge');
+    b.classList.add('show');
+    setTimeout(() => b.classList.remove('show'), 1500);
+  }
+});
+</script>
+</body></html>`;
+  }
+
+  function getCeoCardHtml(d) {
+    const f = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
+    let rows = '';
+    d.gruppen.forEach(g => {
+      const gDeck = g.vpTotal > 0 ? ((g.vpTotal - g.hkTotal) / g.vpTotal) * 100 : 0;
+      rows += `<tr class="grp-row"><td class="pos">${g.posNr}</td><td class="title">${g.titel}</td><td class="num">${g.stk}</td><td class="num">${f(g.hkTotal)} €</td><td class="num pct">${pct(gDeck)} %</td><td class="num vp">${f(g.vpTotal)} €</td></tr>`;
+      g.items.forEach(it => {
+        const iDeck = it.vpGesamt > 0 ? ((it.vpGesamt - it.hkGesamt) / it.vpGesamt) * 100 : 0;
+        rows += `<tr class="item-row"><td class="pos">${it.posNr}</td><td class="title">${it.desc||it.kstrName}</td><td class="num">${it.stueck}</td><td class="num">${f(it.hkGesamt)} €</td><td class="num pct">${pct(iDeck)} %</td><td class="num vp">${f(it.vpGesamt)} €</td></tr>`;
+      });
+    });
+    return `<table><thead><tr><th style="width:6%">Pos.</th><th>Bezeichnung</th><th class="num" style="width:6%">Stk.</th><th class="num" style="width:14%">HK Gesamt</th><th class="num" style="width:10%">Deckung</th><th class="num" style="width:14%">VP Gesamt</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="totals"><div><div class="t-label">Gesamt HK</div><div class="t-value">${f(d.totalHK)} €</div></div><div><div class="t-label">Gesamt VP</div><div class="t-value">${f(d.totalVP)} €</div></div><div><div class="t-label">Deckung (VP)</div><div class="t-value">${pct(d.deckungVP)} %</div></div><div><div class="t-label">Endpreis${d.nachlass>0?' (−'+pct(d.nachlass)+'%)':''}</div><div class="t-value hl">${f(d.endpreis)} €</div></div><div><div class="t-label">Deckung (Endpreis)</div><div class="t-value hl">${pct(d.deckungEnd)} %</div></div></div>`;
+  }
+
+  function openCeoView() {
+    const d = buildCeoData();
+    const html = renderCeoHtml(d);
+    if (ceoWin && !ceoWin.closed) {
+      ceoWin.document.querySelector('.card').innerHTML = getCeoCardHtml(d);
+      ceoWin.focus();
+    } else {
+      ceoWin = window.open('', 'ceoView', 'width=1000,height=800');
+      ceoWin.document.write(html);
+      ceoWin.document.close();
+    }
+  }
+
+  function syncCeoView() {
+    if (!ceoWin || ceoWin.closed) return;
+    const d = buildCeoData();
+    ceoWin.postMessage({ type: 'ceo-update', html: getCeoCardHtml(d) }, '*');
+  }
+
+  // Hook sync into recalcTotal
+  const _origRecalcTotal = recalcTotal;
+  recalcTotal = function() {
+    _origRecalcTotal();
+    syncCeoView();
+  };
 
   addHeading('Position 1');
 </script>
