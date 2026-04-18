@@ -1366,7 +1366,7 @@ td.pct{color:#6b7280}
       ceoWin.document.querySelector('.card').innerHTML = getCeoCardHtml(d);
       ceoWin.focus();
     } else {
-      ceoWin = window.open('', 'ceoView', 'width=1000,height=800');
+      ceoWin = window.open('', '_blank');
       ceoWin.document.write(html);
       ceoWin.document.close();
       ceoWin.addEventListener('message', function(e) {
