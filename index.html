@@ -1317,7 +1317,7 @@
 
     const fmtStd = v => v.toLocaleString('de-DE', {minimumFractionDigits:1, maximumFractionDigits:1}) + ' Std.';
     document.getElementById('sumStunden').innerHTML =
-      KOSTENSTRUKTUREN.filter(k => kstrSums[k.key].std > 0 || getRate(k.key) > 0).map(k =>
+      KOSTENSTRUKTUREN.filter(k => k.unit === '€/h' && (kstrSums[k.key].std > 0 || getRate(k.key) > 0)).map(k =>
         `<div class="summary-line"><span>${k.name}</span><span class="val">${fmtStd(kstrSums[k.key].std)}</span></div>`
       ).join('') +
       `<div class="summary-line" style="border-top:1px solid #e5e7eb;margin-top:0.3rem;padding-top:0.4rem;font-weight:600;">
