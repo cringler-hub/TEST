@@ -581,10 +581,17 @@
         <div class="config-group">
           <h3>Globale Faktoren</h3>
           <div class="config-row">
-            <label>Materialgemeinkosten-Faktor (MGK)</label>
+            <label>Materialgemeinkosten (MGK)</label>
             <span class="input-suffix">
-              <input type="number" id="cfgMGK" step="0.01" min="1" value="1.06" />
-              <span>×</span>
+              <input type="number" id="cfgMGK" step="0.5" min="0" max="100" value="4" />
+              <span>%</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>Fertigungsgemeinkosten (FGK)</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgFGK" step="0.5" min="0" max="100" value="6" />
+              <span>%</span>
             </span>
           </div>
           <div class="config-row">
@@ -622,7 +629,7 @@
             <th class="col-num num">Kaufteil&nbsp;€</th>
             <th class="col-num num">Fremd&nbsp;UA&nbsp;€</th>
             <th class="col-num num">Sonder&nbsp;€</th>
-            <th class="col-std num">Std.</th>
+            <th class="col-std num">Std./Menge</th>
             <th class="col-stk num">Stück</th>
             <th class="col-calc num">HK Einzel</th>
             <th class="col-deckung num">Deckung&nbsp;%</th>
@@ -694,15 +701,17 @@
 
 <script>
   const KOSTENSTRUKTUREN = [
-    { key: 'pm',       name: 'Projektmanagement', defaultRate: 100 },
-    { key: 'sw',       name: 'SW Entwicklung',    defaultRate: 100 },
-    { key: 'hw',       name: 'HW Entwicklung',    defaultRate: 100 },
-    { key: 'konfig',   name: 'Konfiguration',     defaultRate:  80 },
-    { key: 'service',  name: 'Service',           defaultRate:  80 },
-    { key: 'beschall', name: 'Beschallung',       defaultRate: 100 },
-    { key: 'material', name: 'Material',          defaultRate:   0 },
-    { key: 'fremd',    name: 'Fremdleistung',     defaultRate:   0 },
-    { key: 'sonder',   name: 'Sonderkosten',      defaultRate:   0 },
+    { key: 'pm',       name: 'Projektmanagement',   defaultRate: 100, unit: '€/h' },
+    { key: 'cs',       name: 'Customer Service',    defaultRate:  80, unit: '€/h' },
+    { key: 'sw',       name: 'SW-Entwicklung',      defaultRate: 100, unit: '€/h' },
+    { key: 'embedded', name: 'Embedded Entwicklung', defaultRate: 100, unit: '€/h' },
+    { key: 'konstr',   name: 'Konstruktion',        defaultRate: 100, unit: '€/h' },
+    { key: 'hwdesign', name: 'Hardware Design',      defaultRate: 100, unit: '€/h' },
+    { key: 'fertigung',name: 'Fertigung',           defaultRate:  65, unit: '€/h' },
+    { key: 'km',       name: 'Kilometer',           defaultRate: 0.30, unit: '€/km' },
+    { key: 'material', name: 'Material',            defaultRate:   0, unit: '' },
+    { key: 'fremd',    name: 'Fremdleistung',       defaultRate:   0, unit: '' },
+    { key: 'sonder',   name: 'Sonderkosten',        defaultRate:   0, unit: '' },
   ];
 
   let rowCounter = 0;
@@ -721,19 +730,20 @@
 
   // --- Config ---
   function buildRateConfig() {
-    document.getElementById('rateConfig').innerHTML = KOSTENSTRUKTUREN.map(k => `
+    document.getElementById('rateConfig').innerHTML = KOSTENSTRUKTUREN.filter(k => k.unit).map(k => `
       <div class="config-row">
         <label>${k.name}</label>
         <span class="input-suffix">
-          <input type="number" step="0.5" min="0" id="rate-${k.key}" value="${k.defaultRate}" oninput="recalcAll()" />
-          <span>€/h</span>
+          <input type="number" step="0.01" min="0" id="rate-${k.key}" value="${k.defaultRate}" oninput="recalcAll()" />
+          <span>${k.unit}</span>
         </span>
       </div>
     `).join('');
   }
 
   function getRate(key)        { const el = document.getElementById(`rate-${key}`); return el ? (parseFloat(el.value)||0) : 0; }
-  function getMGK()            { return parseFloat(document.getElementById('cfgMGK').value) || 1; }
+  function getMGK()            { return 1 + (parseFloat(document.getElementById('cfgMGK').value) || 0) / 100; }
+  function getFGK()            { return 1 + (parseFloat(document.getElementById('cfgFGK').value) || 0) / 100; }
   function getDefaultDeckung() { return parseFloat(document.getElementById('cfgDeckung').value) || 0; }
   function getPreisnachlass()  { return parseFloat(document.getElementById('cfgPreisnachlass').value) || 0; }
 
@@ -918,8 +928,11 @@
 
   function computeRow(r) {
     const mgk = getMGK();
+    const fgk = getFGK();
     const rate = getRate(r.kstr);
-    const hk = r.hausteil + r.kaufteil * mgk + r.fremd * mgk + r.sonder + r.std * rate;
+    let stdKosten = r.std * rate;
+    if (r.kstr === 'fertigung') stdKosten *= fgk;
+    const hk = r.hausteil + r.kaufteil * mgk + r.fremd * mgk + r.sonder + stdKosten;
     const deckung = r.deckung / 100;
     const vp = deckung < 1 ? hk / (1 - deckung) : hk;
     return { hkEinzel: hk, vpEinzel: vp, hkGesamt: hk * r.stueck, vpGesamt: vp * r.stueck };
@@ -1092,7 +1105,7 @@
   document.getElementById('gueltigBis').value = gd.toISOString().slice(0, 10);
   document.getElementById('angebotNr').value = 'ANG-' + today.replace(/-/g,'') + '-' + Math.floor(100 + Math.random()*900);
 
-  ['cfgMGK','cfgDeckung','cfgPreisnachlass'].forEach(id => {
+  ['cfgMGK','cfgFGK','cfgDeckung','cfgPreisnachlass'].forEach(id => {
     document.getElementById(id).addEventListener('input', recalcAll);
   });
 
