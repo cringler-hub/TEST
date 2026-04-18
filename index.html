@@ -298,7 +298,21 @@
     .h-num-text {
       font-weight: 700;
       color: #4338ca;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
+      width: 2.5rem;
+      text-align: center;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      padding: 0.1rem 0.2rem;
+      font-family: inherit;
+      vertical-align: middle;
+    }
+
+    .h-num-text:focus {
+      outline: none;
+      border-color: #6366f1;
+      background: white;
     }
 
     .btn-toggle {
@@ -811,7 +825,7 @@
         <button class="btn-toggle" onclick="toggleGroup('${gid}')" title="Ein-/Ausklappen">
           <svg class="toggle-arrow" width="12" height="12" viewBox="0 0 12 12"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
-        <span class="h-num-text"></span>
+        <input type="text" class="h-num-text" data-f="hpos" value="" />
       </td>
       <td class="h-title-cell" colspan="7">
         <input type="text" placeholder="Überschrift eingeben…" value="${escapeHtml(title)}" />
@@ -835,6 +849,11 @@
       </td>
     `;
     tbody.appendChild(htr);
+
+    // Mark heading pos as user-edited when changed
+    htr.querySelector('[data-f="hpos"]').addEventListener('input', function() {
+      this.dataset.edited = this.value ? '1' : '';
+    });
 
     // Add-sub-item button row
     const atr = document.createElement('tr');
@@ -960,8 +979,8 @@
       if (tr.dataset.type === 'heading') {
         hNum++;
         iNum = 0;
-        const numCell = tr.querySelector('.h-num-text');
-        if (numCell) numCell.textContent = hNum;
+        const numInput = tr.querySelector('[data-f="hpos"]');
+        if (numInput && !numInput.dataset.edited) numInput.value = hNum;
       } else if (tr.dataset.type === 'item') {
         iNum++;
         const posInput = tr.querySelector('[data-f="pos"]');
