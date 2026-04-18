@@ -694,14 +694,252 @@
 
       /* Ensure summary sections stay together */
       .summary-grid, .totals { page-break-inside: avoid; }
+
+      .view-login, .view-start, .view-admin { display: none !important; }
+    }
+
+    /* Views */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Login */
+    .login-box {
+      max-width: 400px;
+      margin: 10vh auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .login-box .login-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    .login-box .login-header h1 { font-size: 1.4rem; }
+    .login-box .login-header p { opacity: 0.7; font-size: 0.85rem; margin-top: 0.3rem; }
+    .login-body { padding: 2rem; }
+    .login-body .field { margin-bottom: 1rem; }
+    .login-body .field input {
+      width: 100%;
+      padding: 0.65rem 0.8rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+    .login-body .field input:focus {
+      outline: none; border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .login-body .btn-login {
+      width: 100%;
+      padding: 0.7rem;
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .login-body .btn-login:hover { background: #1e40af; }
+    .login-error {
+      color: #ef4444;
+      font-size: 0.85rem;
+      margin-top: 0.75rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+
+    /* Startseite */
+    .start-box {
+      max-width: 600px;
+      margin: 10vh auto;
+      text-align: center;
+    }
+    .start-box .start-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      padding: 2.5rem 2rem;
+      border-radius: 12px 12px 0 0;
+    }
+    .start-box .start-header h1 { font-size: 1.6rem; }
+    .start-box .start-header p { opacity: 0.7; margin-top: 0.4rem; }
+    .start-box .start-header .user-info {
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      opacity: 0.6;
+    }
+    .start-body {
+      background: white;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .start-btn {
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      justify-content: center;
+      font-family: inherit;
+      transition: transform 0.1s, box-shadow 0.15s;
+    }
+    .start-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .start-btn:active { transform: scale(0.98); }
+    .start-btn.primary { background: #1d4ed8; color: white; }
+    .start-btn.green   { background: #059669; color: white; }
+    .start-btn.purple  { background: #4338ca; color: white; }
+    .start-btn.outline {
+      background: white; color: #374151;
+      border: 1.5px solid #d1d5db;
+    }
+    .start-btn.outline:hover { border-color: #9ca3af; }
+    .start-btn svg { flex-shrink: 0; }
+
+    /* Admin */
+    .admin-box {
+      max-width: 650px;
+      margin: 6vh auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .admin-box .admin-header {
+      background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .admin-box .admin-header h2 { font-size: 1.2rem; }
+    .admin-body { padding: 1.5rem 2rem; }
+    .admin-body h3 {
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #6b7280; margin-bottom: 0.75rem; padding-bottom: 0.4rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .user-list { margin-bottom: 1.5rem; }
+    .user-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 0; border-bottom: 1px solid #f3f4f6;
+      font-size: 0.9rem;
+    }
+    .user-row .username { font-weight: 600; }
+    .user-row .role {
+      font-size: 0.78rem; padding: 0.2rem 0.6rem; border-radius: 12px;
+      background: #eef2ff; color: #4338ca; font-weight: 500;
+    }
+    .user-row .role.admin { background: #fef3c7; color: #92400e; }
+    .add-user-form {
+      display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 0.5rem; align-items: end;
+    }
+    .add-user-form input, .add-user-form select {
+      padding: 0.5rem 0.7rem; border: 1.5px solid #e5e7eb; border-radius: 7px;
+      font-size: 0.88rem; font-family: inherit;
+    }
+    .add-user-form input:focus, .add-user-form select:focus {
+      outline: none; border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
     }
   </style>
 </head>
 <body>
+
+<!-- LOGIN -->
+<div class="view view-login active" id="viewLogin">
+  <div class="login-box">
+    <div class="login-header">
+      <h1>Angebotskalkulator</h1>
+      <p>Bitte anmelden</p>
+    </div>
+    <div class="login-body">
+      <div class="field">
+        <label>Benutzername</label>
+        <input type="text" id="loginUser" placeholder="Benutzername" autofocus />
+      </div>
+      <div class="field">
+        <label>Passwort</label>
+        <input type="password" id="loginPass" placeholder="Passwort" />
+      </div>
+      <button class="btn-login" onclick="doLogin()">Anmelden</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STARTSEITE -->
+<div class="view view-start" id="viewStart">
+  <div class="start-box">
+    <div class="start-header">
+      <h1>Angebotskalkulator</h1>
+      <p>Herstellkosten- und Verkaufspreis-Kalkulation</p>
+      <div class="user-info">Angemeldet als: <strong id="startUser"></strong> &mdash; <a href="#" onclick="doLogout();return false" style="color:#93c5fd">Abmelden</a></div>
+    </div>
+    <div class="start-body">
+      <button class="start-btn primary" onclick="startNewQuote()">
+        <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Neues Angebot
+      </button>
+      <button class="start-btn green" onclick="startLoadQuote()">
+        <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M3 14h10M8 3v8M5 8l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Angebot laden
+      </button>
+      <button class="start-btn purple" id="btnAdmin" onclick="showView('viewAdmin')" style="display:none;">
+        <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M8 2a2.5 2.5 0 010 5 2.5 2.5 0 010-5zM4 14v-1a4 4 0 018 0v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Admin Portal
+      </button>
+      <button class="start-btn outline" onclick="doLogout()">
+        Abmelden
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PORTAL -->
+<div class="view view-admin" id="viewAdmin">
+  <div class="admin-box">
+    <div class="admin-header">
+      <h2>Admin Portal</h2>
+      <button class="btn-secondary" onclick="showView('viewStart')" style="padding:0.4rem 1rem;font-size:0.82rem;">Zurück</button>
+    </div>
+    <div class="admin-body">
+      <h3>Benutzerverwaltung</h3>
+      <div class="user-list" id="userList"></div>
+      <h3>Neuen Benutzer anlegen</h3>
+      <div class="add-user-form">
+        <input type="text" id="newUsername" placeholder="Benutzername" />
+        <input type="password" id="newPassword" placeholder="Passwort" />
+        <select id="newRole"><option value="user">User</option><option value="admin">Admin</option></select>
+        <button class="btn-primary" onclick="addUser()" style="padding:0.5rem 1rem;">Anlegen</button>
+      </div>
+      <div id="adminMsg" style="margin-top:0.75rem;font-size:0.85rem;min-height:1.2em;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- KALKULATOR -->
+<div class="view view-calc" id="viewCalc">
 <div class="container">
-  <header>
-    <h1>Angebotskalkulator</h1>
-    <p>Herstellkosten- und Verkaufspreis-Kalkulation mit Deckung</p>
+  <header style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <h1>Angebotskalkulator</h1>
+      <p>Herstellkosten- und Verkaufspreis-Kalkulation mit Deckung</p>
+    </div>
+    <button class="btn-secondary" onclick="showView('viewStart')" style="color:white;border-color:rgba(255,255,255,0.3);">Startseite</button>
   </header>
 
   <div class="card">
@@ -871,10 +1109,159 @@
     </div>
   </div>
 </div>
+</div><!-- /viewCalc -->
 
 <div class="toast" id="toast"></div>
 
 <script>
+  // =======================================================================
+  // Auth & Navigation
+  // =======================================================================
+  function initUsers() {
+    if (!localStorage.getItem('ak_users')) {
+      const defaults = [
+        { username: 'admin', password: 'admin', role: 'admin' },
+        { username: 'user',  password: 'user',  role: 'user' }
+      ];
+      localStorage.setItem('ak_users', JSON.stringify(defaults));
+    }
+  }
+
+  function getUsers() {
+    return JSON.parse(localStorage.getItem('ak_users') || '[]');
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem('ak_users', JSON.stringify(users));
+  }
+
+  let currentUser = null;
+
+  function showView(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function doLogin() {
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value;
+    const users = getUsers();
+    const found = users.find(x => x.username === u && x.password === p);
+    if (!found) {
+      document.getElementById('loginError').textContent = 'Benutzername oder Passwort falsch.';
+      return;
+    }
+    currentUser = found;
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('startUser').textContent = found.username;
+    document.getElementById('btnAdmin').style.display = found.role === 'admin' ? '' : 'none';
+    showView('viewStart');
+  }
+
+  function doLogout() {
+    currentUser = null;
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    showView('viewLogin');
+  }
+
+  function startNewQuote() {
+    document.getElementById('quoteBody').innerHTML = '';
+    rowCounter = 0;
+    groupCounter = 0;
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById('angebotTitel').value = '';
+    document.getElementById('kundeName').value = '';
+    document.getElementById('angebotDatum').value = today;
+    const gd = new Date(); gd.setDate(gd.getDate() + 30);
+    document.getElementById('gueltigBis').value = gd.toISOString().slice(0, 10);
+    document.getElementById('angebotNr').value = 'ANG-' + today.replace(/-/g,'') + '-' + Math.floor(100 + Math.random()*900);
+    addHeading('Position 1');
+    showView('viewCalc');
+  }
+
+  function startLoadQuote() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          const data = JSON.parse(ev.target.result);
+          loadFromData(data);
+          showView('viewCalc');
+          showToast('Angebot geladen: ' + (data.angebotNr || file.name));
+        } catch (err) {
+          alert('Fehler beim Import: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  // Admin
+  function renderUserList() {
+    const users = getUsers();
+    const host = document.getElementById('userList');
+    host.innerHTML = users.map((u, i) => `
+      <div class="user-row">
+        <span><span class="username">${u.username}</span></span>
+        <span style="display:flex;gap:0.5rem;align-items:center;">
+          <span class="role ${u.role === 'admin' ? 'admin' : ''}">${u.role === 'admin' ? 'Admin' : 'User'}</span>
+          ${u.username !== 'admin' ? `<button class="btn-del" title="Löschen" onclick="deleteUser(${i})"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>` : ''}
+        </span>
+      </div>
+    `).join('');
+  }
+
+  function addUser() {
+    const u = document.getElementById('newUsername').value.trim();
+    const p = document.getElementById('newPassword').value;
+    const r = document.getElementById('newRole').value;
+    const msg = document.getElementById('adminMsg');
+    if (!u || !p) { msg.textContent = 'Benutzername und Passwort erforderlich.'; msg.style.color='#ef4444'; return; }
+    const users = getUsers();
+    if (users.find(x => x.username === u)) { msg.textContent = 'Benutzername existiert bereits.'; msg.style.color='#ef4444'; return; }
+    users.push({ username: u, password: p, role: r });
+    saveUsers(users);
+    document.getElementById('newUsername').value = '';
+    document.getElementById('newPassword').value = '';
+    renderUserList();
+    msg.textContent = 'Benutzer "' + u + '" angelegt.'; msg.style.color='#059669';
+  }
+
+  function deleteUser(idx) {
+    const users = getUsers();
+    if (users[idx].username === 'admin') return;
+    if (!confirm('Benutzer "' + users[idx].username + '" löschen?')) return;
+    users.splice(idx, 1);
+    saveUsers(users);
+    renderUserList();
+  }
+
+  // Enter-Taste im Login
+  document.getElementById('loginPass').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginUser').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  // Observer für Admin-View
+  const adminObserver = new MutationObserver(() => {
+    if (document.getElementById('viewAdmin').classList.contains('active')) renderUserList();
+  });
+  adminObserver.observe(document.getElementById('viewAdmin'), { attributes: true, attributeFilter: ['class'] });
+
+  initUsers();
+
+  // =======================================================================
+  // Kalkulator
+  // =======================================================================
   const KOSTENSTRUKTUREN = [
     { key: 'pm',       name: 'Projektmanagement',   defaultRate: 100, unit: '€/h' },
     { key: 'cs',       name: 'Customer Service',    defaultRate:  80, unit: '€/h' },
@@ -1513,11 +1900,6 @@
 
   // --- Init ---
   buildRateConfig();
-  const today = new Date().toISOString().slice(0, 10);
-  document.getElementById('angebotDatum').value = today;
-  const gd = new Date(); gd.setDate(gd.getDate() + 30);
-  document.getElementById('gueltigBis').value = gd.toISOString().slice(0, 10);
-  document.getElementById('angebotNr').value = 'ANG-' + today.replace(/-/g,'') + '-' + Math.floor(100 + Math.random()*900);
 
   ['cfgMGK','cfgFGK','cfgDeckung','cfgPreisnachlass'].forEach(id => {
     document.getElementById(id).addEventListener('input', recalcAll);
@@ -1719,7 +2101,8 @@ td.pct{color:#6b7280}
     tmplSel.appendChild(opt);
   });
 
-  addHeading('Position 1');
+  // Init: Konfiguration vorbereiten, aber kein Angebot laden
+  // (Angebot wird erst über Startseite erstellt/geladen)
 </script>
 </body>
 </html>
