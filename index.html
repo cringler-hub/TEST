@@ -336,18 +336,27 @@
     .col-stk     { width: 5%; }
     .col-deckung { width: 5%; }
     .col-calc    { width: 8%; }
-    .col-del     { width: 7.5%; text-align: center; }
+    .col-del     { width: 6.5%; text-align: center; padding: 0.25rem 0.2rem !important; }
 
     .row-actions {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      justify-items: center;
       align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 0.1rem;
+      max-width: 72px;
+      margin: 0 auto;
     }
 
-    .row-actions button { padding: 0.12rem !important; }
-    .row-actions svg { width: 13px; height: 13px; }
+    .row-actions button {
+      padding: 2px !important;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .row-actions button svg { width: 13px !important; height: 13px !important; display: block; }
 
     .btn-move {
       background: none;
