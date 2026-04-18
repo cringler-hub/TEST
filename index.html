@@ -675,16 +675,20 @@
         <div class="t-value" id="totalHK">0,00 €</div>
       </div>
       <div class="t-item">
-        <div class="t-label">Gesamtdeckung</div>
-        <div class="t-value" id="totalDeckung">0,00 %</div>
-      </div>
-      <div class="t-item">
         <div class="t-label">Gesamt Verkaufspreis</div>
         <div class="t-value" id="totalVP">0,00 €</div>
       </div>
       <div class="t-item">
+        <div class="t-label">Deckung (bei VP)</div>
+        <div class="t-value" id="totalDeckung">0,00 %</div>
+      </div>
+      <div class="t-item">
         <div class="t-label">Endpreis (nach Nachlass)</div>
         <div class="t-value highlight" id="totalEndpreis">0,00 €</div>
+      </div>
+      <div class="t-item">
+        <div class="t-label">Deckung (nach Nachlass)</div>
+        <div class="t-value highlight" id="totalDeckungNachlass">0,00 %</div>
       </div>
     </div>
 
@@ -1035,10 +1039,12 @@
 
     const deckung = totalVP > 0 ? ((totalVP - totalHK) / totalVP) * 100 : 0;
     const endpreis = totalVP * (1 - getPreisnachlass() / 100);
-    document.getElementById('totalHK').textContent       = formatEUR(totalHK);
-    document.getElementById('totalDeckung').textContent  = formatPct(deckung);
-    document.getElementById('totalVP').textContent       = formatEUR(totalVP);
-    document.getElementById('totalEndpreis').textContent = formatEUR(endpreis);
+    const deckungNachlass = endpreis > 0 ? ((endpreis - totalHK) / endpreis) * 100 : 0;
+    document.getElementById('totalHK').textContent              = formatEUR(totalHK);
+    document.getElementById('totalVP').textContent              = formatEUR(totalVP);
+    document.getElementById('totalDeckung').textContent         = formatPct(deckung);
+    document.getElementById('totalEndpreis').textContent        = formatEUR(endpreis);
+    document.getElementById('totalDeckungNachlass').textContent = formatPct(deckungNachlass);
   }
 
   // --- Reset / Export / Print ---
