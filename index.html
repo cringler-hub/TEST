@@ -698,12 +698,22 @@
       </table>
     </div>
 
-    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;">
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;align-items:center;">
       <button class="btn-add" onclick="addHeading()">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
         Überschrift hinzufügen
+      </button>
+      <span style="color:#6b7280;font-size:0.82rem;">oder Vorlage:</span>
+      <select id="templateSelect" style="padding:0.45rem 0.65rem;border:1.5px solid #c7d2fe;border-radius:7px;font-size:0.82rem;background:#eef2ff;color:#4338ca;font-weight:500;cursor:pointer;font-family:inherit;">
+        <option value="">— Vorlage wählen —</option>
+      </select>
+      <button class="btn-add" onclick="addFromTemplate()" style="border-color:#c7d2fe;color:#4338ca;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Vorlage einfügen
       </button>
     </div>
 
@@ -777,6 +787,21 @@
   let rowCounter = 0;
   let groupCounter = 0;
 
+  // --- Vorlagen für Überschriften mit vordefinierten Unterpositionen ---
+  const HEADING_TEMPLATES = [
+    {
+      name: 'Anzeiger',
+      items: [
+        { desc: 'Material',           kstr: 'material' },
+        { desc: 'Konstruktion',       kstr: 'konstr' },
+        { desc: 'HW Design',          kstr: 'hwdesign' },
+        { desc: 'Projektmanagement',  kstr: 'pm' },
+        { desc: 'Versand',            kstr: 'sonder' },
+        { desc: 'Sonstiges',          kstr: 'sonder' },
+      ]
+    },
+  ];
+
   function formatEUR(v) {
     return (v || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
   }
@@ -812,6 +837,22 @@
   }
 
   // --- Heading (Überschrift) ---
+  function addFromTemplate() {
+    const sel = document.getElementById('templateSelect');
+    const idx = parseInt(sel.value);
+    if (isNaN(idx)) return;
+    const tmpl = HEADING_TEMPLATES[idx];
+    const gid = addHeading(tmpl.name);
+    // Remove the default empty item that addHeading creates
+    const defaultItem = document.querySelector(`#quoteBody tr.item-row[data-gid="${gid}"]`);
+    if (defaultItem) defaultItem.remove();
+    // Add template items
+    tmpl.items.forEach(it => addItem(gid, { desc: it.desc, kstr: it.kstr }));
+    renumberAll();
+    recalcTotal();
+    sel.value = '';
+  }
+
   function addHeading(title = '') {
     const gid = 'g' + (++groupCounter);
     const tbody = document.getElementById('quoteBody');
@@ -877,6 +918,7 @@
     // Add one empty item by default
     addItem(gid);
     renumberAll();
+    return gid;
   }
 
   function toggleGroup(gid) {
@@ -1392,6 +1434,15 @@ td.pct{color:#6b7280}
     _origRecalcTotal();
     syncCeoView();
   };
+
+  // Vorlagen-Dropdown befüllen
+  const tmplSel = document.getElementById('templateSelect');
+  HEADING_TEMPLATES.forEach((t, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = t.name;
+    tmplSel.appendChild(opt);
+  });
 
   addHeading('Position 1');
 </script>
