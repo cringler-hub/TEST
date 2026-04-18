@@ -783,7 +783,8 @@
     <div class="actions">
       <button class="btn-primary" onclick="printQuote()">Drucken / als PDF</button>
       <button class="btn-primary" onclick="openCeoView()" style="background:#4338ca;">CEO-Ansicht</button>
-      <button class="btn-secondary" onclick="exportJSON()">Als JSON exportieren</button>
+      <button class="btn-primary" onclick="exportJSON()" style="background:#059669;">Angebot speichern</button>
+      <button class="btn-secondary" onclick="importJSON()">Angebot laden</button>
       <button class="btn-secondary" onclick="resetTable()">Zurücksetzen</button>
     </div>
   </div>
@@ -1266,36 +1267,157 @@
     let current = null;
     document.querySelectorAll('#quoteBody tr').forEach(tr => {
       if (tr.dataset.type === 'heading') {
+        const stkInput = tr.querySelector('[data-f="grp-stk"]');
+        const hposInput = tr.querySelector('[data-f="hpos"]');
         current = {
           titel: tr.querySelector('.h-title-cell input').value,
+          posNr: hposInput ? hposInput.value : '',
+          stueck: stkInput ? parseInt(stkInput.value) || 1 : 1,
           positionen: []
         };
         gruppen.push(current);
       } else if (tr.dataset.type === 'item' && current) {
         const r = readRow(parseInt(tr.dataset.id, 10));
-        if (r) current.positionen.push(r);
+        if (!r) return;
+        const posInput = tr.querySelector('[data-f="pos"]');
+        r.posNr = posInput ? posInput.value : '';
+        r.posEdited = posInput && posInput.dataset.edited === '1';
+        delete r.id;
+        delete r.gid;
+        current.positionen.push(r);
       }
     });
+
+    const exportDate = new Date().toISOString();
     const data = {
+      _format: 'angebotskalkulator-v1',
+      _exportiert: exportDate,
       titel:      document.getElementById('angebotTitel').value,
       kunde:      document.getElementById('kundeName').value,
       angebotNr:  document.getElementById('angebotNr').value,
       datum:      document.getElementById('angebotDatum').value,
       gueltigBis: document.getElementById('gueltigBis').value,
       config: {
-        mgk: getMGK(), defaultDeckung: getDefaultDeckung(), preisnachlass: getPreisnachlass(),
-        stundensaetze: Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, getRate(k.key)]))
+        mgk: parseFloat(document.getElementById('cfgMGK').value) || 4,
+        fgk: parseFloat(document.getElementById('cfgFGK').value) || 6,
+        defaultDeckung: getDefaultDeckung(),
+        preisnachlass: getPreisnachlass(),
+        stundensaetze: Object.fromEntries(KOSTENSTRUKTUREN.filter(k => k.unit).map(k => [k.key, getRate(k.key)]))
       },
       gruppen
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = (data.angebotNr || 'angebot') + '.json';
+    const filename = (data.angebotNr || 'angebot') + '_' + exportDate.slice(0,10) + '.json';
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('JSON exportiert');
+    showToast('Angebot exportiert: ' + filename);
+  }
+
+  function importJSON() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          const data = JSON.parse(ev.target.result);
+          loadFromData(data);
+          showToast('Angebot importiert: ' + (data.angebotNr || file.name));
+        } catch (err) {
+          alert('Fehler beim Import: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  function loadFromData(data) {
+    // Meta
+    document.getElementById('angebotTitel').value = data.titel || '';
+    document.getElementById('kundeName').value    = data.kunde || '';
+    document.getElementById('angebotNr').value    = data.angebotNr || '';
+    document.getElementById('angebotDatum').value  = data.datum || '';
+    document.getElementById('gueltigBis').value   = data.gueltigBis || '';
+
+    // Config
+    if (data.config) {
+      if (data.config.mgk != null) document.getElementById('cfgMGK').value = data.config.mgk;
+      if (data.config.fgk != null) document.getElementById('cfgFGK').value = data.config.fgk;
+      if (data.config.defaultDeckung != null) document.getElementById('cfgDeckung').value = data.config.defaultDeckung;
+      if (data.config.preisnachlass != null) document.getElementById('cfgPreisnachlass').value = data.config.preisnachlass;
+      if (data.config.stundensaetze) {
+        Object.entries(data.config.stundensaetze).forEach(([key, val]) => {
+          const el = document.getElementById('rate-' + key);
+          if (el) el.value = val;
+        });
+      }
+    }
+
+    // Clear table
+    document.getElementById('quoteBody').innerHTML = '';
+    rowCounter = 0;
+    groupCounter = 0;
+
+    // Rebuild groups
+    if (data.gruppen && data.gruppen.length > 0) {
+      data.gruppen.forEach(g => {
+        const gid = addHeading(g.titel || '');
+        // Set heading pos number
+        const htr = document.querySelector(`#quoteBody tr.heading-row[data-gid="${gid}"]`);
+        if (htr && g.posNr) {
+          const hposInput = htr.querySelector('[data-f="hpos"]');
+          if (hposInput) { hposInput.value = g.posNr; hposInput.dataset.edited = '1'; }
+        }
+        // Set heading Stück
+        if (htr && g.stueck) {
+          const stkInput = htr.querySelector('[data-f="grp-stk"]');
+          if (stkInput) stkInput.value = g.stueck;
+        }
+        // Remove default empty item
+        const defaultItem = document.querySelector(`#quoteBody tr.item-row[data-gid="${gid}"]`);
+        if (defaultItem && g.positionen && g.positionen.length > 0) defaultItem.remove();
+        // Add items
+        if (g.positionen) {
+          g.positionen.forEach(p => {
+            addItem(gid, {
+              desc: p.desc || '',
+              kstr: p.kstr || 'material',
+              hausteil: p.hausteil || 0,
+              kaufteil: p.kaufteil || 0,
+              fremd: p.fremd || 0,
+              sonder: p.sonder || 0,
+              std: p.std || 0,
+              stueck: p.stueck || 1,
+              deckung: p.deckung != null ? p.deckung : null
+            });
+            // Set custom pos number
+            if (p.posNr && p.posEdited) {
+              const items = document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`);
+              const lastItem = items[items.length - 1];
+              if (lastItem) {
+                const posInput = lastItem.querySelector('[data-f="pos"]');
+                if (posInput) { posInput.value = p.posNr; posInput.dataset.edited = '1'; }
+              }
+            }
+          });
+        }
+      });
+    } else {
+      addHeading('Position 1');
+    }
+
+    renumberAll();
+    recalcAll();
   }
 
   function printQuote() { window.print(); }
