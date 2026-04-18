@@ -360,6 +360,70 @@
 
     .btn-move:hover { color: var(--fw-primary); background: #ffecef; }
 
+    .btn-copy, .btn-paste {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #b9c2cc;
+      padding: 0.2rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, background 0.15s, opacity 0.15s;
+    }
+    .btn-copy:hover { color: var(--fw-accent); background: #e3f5fc; }
+    .btn-paste.active { color: var(--fw-primary); }
+    .btn-paste.active:hover { background: #ffecef; }
+    .btn-paste.inactive { opacity: 0.3; cursor: not-allowed; }
+    .btn-paste.inactive:hover { background: transparent; }
+
+    /* Clipboard bar */
+    .clipboard-bar {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 1rem;
+      margin-bottom: 1rem;
+      background: #fff5f6;
+      border: 1px solid #ffd5db;
+      border-left: 3px solid var(--fw-primary);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--fw-dark);
+    }
+    .clipboard-bar.show { display: flex; flex-wrap: wrap; }
+    .clipboard-bar .cb-label {
+      font-weight: 600;
+      color: var(--fw-primary);
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+    }
+    .clipboard-bar .cb-info { flex: 1; min-width: 200px; color: var(--fw-muted); }
+    .clipboard-bar .cb-info strong { color: var(--fw-dark); font-weight: 600; }
+    .clipboard-bar button {
+      padding: 0.35rem 0.85rem;
+      border-radius: 5px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid var(--fw-primary);
+      background: var(--fw-white);
+      color: var(--fw-primary);
+      transition: background 0.15s;
+    }
+    .clipboard-bar button:hover { background: var(--fw-primary); color: white; }
+    .clipboard-bar button.cb-clear {
+      border-color: var(--fw-border);
+      color: var(--fw-muted);
+    }
+    .clipboard-bar button.cb-clear:hover {
+      background: var(--fw-bg-soft);
+      color: var(--fw-dark);
+    }
+
     /* Euro-Suffix auf Eingabefeldern */
     .input-eur {
       position: relative;
@@ -724,6 +788,7 @@
 
       .btn-add, .btn-add-sub, .add-sub-row, .actions, .row-actions,
       .col-del, .btn-del, .btn-move, .btn-toggle,
+      .btn-copy, .btn-paste, .clipboard-bar,
       .fw-topbar, .toast { display: none !important; }
 
       details.config { display: none !important; }
@@ -1279,6 +1344,14 @@
       </div>
     </details>
 
+    <!-- Zwischenablage -->
+    <div class="clipboard-bar" id="clipboardBar">
+      <span class="cb-label">Zwischenablage</span>
+      <span class="cb-info" id="cbInfo"></span>
+      <button onclick="pasteAtEnd()" id="cbPasteEnd">Am Ende einfügen</button>
+      <button class="cb-clear" onclick="clearClipboard()">Verwerfen</button>
+    </div>
+
     <!-- Positionstabelle -->
     <div class="table-wrapper">
       <table id="quoteTable">
@@ -1648,6 +1721,12 @@
         <button class="btn-move" title="Nach unten" onclick="moveHeading('${gid}',1)">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 9l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
+        <button class="btn-copy" title="Überschrift kopieren" onclick="copyHeading('${gid}')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+        <button class="btn-paste inactive" title="Einfügen" onclick="pasteOnHeading('${gid}')" data-gid="${gid}" data-role="heading-paste">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 3h6a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
         <button class="btn-del" title="Löschen" onclick="removeHeading('${gid}')">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -1681,6 +1760,7 @@
     // Add one empty item by default
     addItem(gid);
     renumberAll();
+    updateClipboardUI();
     return gid;
   }
 
@@ -1756,6 +1836,12 @@
         <button class="btn-move" title="Nach unten" onclick="moveItem(${id},1)">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 9l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
+        <button class="btn-copy" title="Unterposition kopieren" onclick="copyItem(${id})">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+        <button class="btn-paste inactive" title="Nach dieser Zeile einfügen" onclick="pasteOnItem(${id})" data-role="item-paste">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 3h6a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
         <button class="btn-del" title="Löschen" onclick="removeItem(${id})">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -1772,6 +1858,7 @@
     document.getElementById('quoteBody').insertBefore(tr, addSubRow);
     renumberAll();
     recalcRow(id);
+    updateClipboardUI();
   }
 
   // --- Move items within their group ---
@@ -1822,6 +1909,150 @@
     if (tr) tr.remove();
     renumberAll();
     recalcTotal();
+  }
+
+  // --- Copy / Paste (Zwischenablage) ---
+  let clipboard = null; // { type: 'heading'|'item', data: {...} }
+
+  function readItemFromRow(tr) {
+    const g = f => tr.querySelector(`[data-f="${f}"]`);
+    const num = f => Math.max(0, parseFloat(g(f).value) || 0);
+    return {
+      desc:     g('desc').value,
+      kstr:     g('kstr').value,
+      hausteil: num('hausteil'),
+      kaufteil: num('kaufteil'),
+      fremd:    num('fremd'),
+      sonder:   num('sonder'),
+      std:      num('std'),
+      stueck:   num('stueck') || 1,
+      deckung:  Math.min(99, num('deckung')),
+    };
+  }
+
+  function copyItem(id) {
+    const tr = document.getElementById(`row-${id}`);
+    if (!tr) return;
+    clipboard = { type: 'item', data: readItemFromRow(tr) };
+    updateClipboardUI();
+    showToast('Unterposition kopiert');
+  }
+
+  function copyHeading(gid) {
+    const htr = document.querySelector(`#quoteBody tr.heading-row[data-gid="${gid}"]`);
+    if (!htr) return;
+    const title = htr.querySelector('.h-title-cell input').value;
+    const stk = parseInt(htr.querySelector('[data-f="grp-stk"]').value) || 1;
+    const items = [...document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`)]
+      .map(tr => readItemFromRow(tr));
+    clipboard = { type: 'heading', data: { title, stk, items } };
+    updateClipboardUI();
+    showToast(`Überschrift "${title || '(ohne Titel)'}" mit ${items.length} Position(en) kopiert`);
+  }
+
+  function clearClipboard() {
+    clipboard = null;
+    updateClipboardUI();
+  }
+
+  function updateClipboardUI() {
+    const bar = document.getElementById('clipboardBar');
+    const info = document.getElementById('cbInfo');
+    if (!clipboard) {
+      bar.classList.remove('show');
+    } else {
+      bar.classList.add('show');
+      if (clipboard.type === 'heading') {
+        const d = clipboard.data;
+        info.innerHTML = `Überschrift <strong>${escapeHtml(d.title || '(ohne Titel)')}</strong> mit ${d.items.length} Unterposition(en)`;
+      } else {
+        const d = clipboard.data;
+        info.innerHTML = `Unterposition <strong>${escapeHtml(d.desc || '(ohne Bezeichnung)')}</strong>`;
+      }
+    }
+    // Refresh inline paste buttons
+    document.querySelectorAll('.btn-paste').forEach(btn => {
+      const role = btn.dataset.role;
+      let active = false;
+      let title = 'Einfügen';
+      if (clipboard) {
+        if (role === 'heading-paste') {
+          active = true;
+          title = clipboard.type === 'heading'
+            ? 'Überschrift nach dieser einfügen'
+            : 'Unterposition an Ende dieser Gruppe einfügen';
+        } else if (role === 'item-paste' && clipboard.type === 'item') {
+          active = true;
+          title = 'Unterposition nach dieser Zeile einfügen';
+        }
+      }
+      btn.classList.toggle('active', active);
+      btn.classList.toggle('inactive', !active);
+      btn.title = title;
+    });
+  }
+
+  function insertHeadingWithData(afterGid, d) {
+    const gid = addHeading(d.title || '');
+    // addHeading adds one empty default item – remove it
+    [...document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`)].forEach(r => r.remove());
+    (d.items || []).forEach(it => addItem(gid, it));
+    const htr = document.querySelector(`#quoteBody tr.heading-row[data-gid="${gid}"]`);
+    const stkInput = htr.querySelector('[data-f="grp-stk"]');
+    if (stkInput) stkInput.value = d.stk || 1;
+
+    if (afterGid) {
+      // Move just-created group to be right after afterGid
+      const targetRows = document.querySelectorAll(`#quoteBody tr[data-gid="${afterGid}"]`);
+      const lastTargetRow = targetRows[targetRows.length - 1];
+      const myRows = [...document.querySelectorAll(`#quoteBody tr[data-gid="${gid}"]`)];
+      myRows.reverse().forEach(r => lastTargetRow.after(r));
+    }
+    renumberAll();
+    recalcTotal();
+    return gid;
+  }
+
+  function pasteOnHeading(gid) {
+    if (!clipboard) { showToast('Zwischenablage ist leer'); return; }
+    if (clipboard.type === 'heading') {
+      insertHeadingWithData(gid, clipboard.data);
+      showToast('Überschrift eingefügt');
+    } else {
+      addItem(gid, clipboard.data);
+      recalcTotal();
+      showToast('Unterposition eingefügt');
+    }
+  }
+
+  function pasteOnItem(id) {
+    if (!clipboard || clipboard.type !== 'item') { showToast('Keine Unterposition in der Zwischenablage'); return; }
+    const srcTr = document.getElementById(`row-${id}`);
+    if (!srcTr) return;
+    const gid = srcTr.dataset.gid;
+    addItem(gid, clipboard.data);
+    // addItem appends before the add-sub-row; move it right after srcTr
+    const items = [...document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`)];
+    const newItem = items[items.length - 1];
+    srcTr.after(newItem);
+    renumberAll();
+    recalcTotal();
+    showToast('Unterposition eingefügt');
+  }
+
+  function pasteAtEnd() {
+    if (!clipboard) return;
+    if (clipboard.type === 'heading') {
+      insertHeadingWithData(null, clipboard.data);
+      showToast('Überschrift am Ende eingefügt');
+    } else {
+      const headings = document.querySelectorAll('#quoteBody tr.heading-row');
+      if (!headings.length) { showToast('Bitte zuerst eine Überschrift anlegen'); return; }
+      const lastGid = headings[headings.length - 1].dataset.gid;
+      addItem(lastGid, clipboard.data);
+      recalcTotal();
+      showToast('Unterposition in letzter Gruppe eingefügt');
+    }
   }
 
   // --- Numbering: 1, 1.1, 1.2, 2, 2.1 etc. ---
