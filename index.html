@@ -246,7 +246,29 @@
     .col-stk     { width: 5%; }
     .col-deckung { width: 5%; }
     .col-calc    { width: 8%; }
-    .col-del     { width: 2.5%; text-align: center; }
+    .col-del     { width: 4.5%; text-align: center; }
+
+    .row-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.15rem;
+    }
+
+    .btn-move {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #c7d2fe;
+      padding: 0.15rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .btn-move:hover { color: #4338ca; background: #eef2ff; }
 
     /* Euro-Suffix auf Eingabefeldern */
     .input-eur {
@@ -584,7 +606,7 @@
       body { background: white; padding: 0; }
       .container { max-width: 100%; }
       header { border-radius: 0; }
-      .btn-add, .btn-add-sub, .add-sub-row, .actions, .btn-del, .toast, details.config { display: none !important; }
+      .btn-add, .btn-add-sub, .add-sub-row, .actions, .btn-del, .btn-move, .toast, details.config { display: none !important; }
       .card { box-shadow: none; border-radius: 0; }
       tbody input, tbody select {
         border: none !important; background: transparent !important;
@@ -881,14 +903,17 @@
       <td class="h-subtotal" id="grp-vp-${gid}">0,00 €</td>
       <td class="h-subtotal" id="grp-hkg-${gid}">0,00 €</td>
       <td class="h-subtotal" id="grp-vpg-${gid}">0,00 €</td>
-      <td class="col-del">
-        <button class="btn-del" title="Überschrift + Zeilen entfernen" onclick="removeHeading('${gid}')">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-            <path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8"
-                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+      <td class="col-del"><div class="row-actions">
+        <button class="btn-move" title="Nach oben" onclick="moveHeading('${gid}',-1)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M4 7l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-      </td>
+        <button class="btn-move" title="Nach unten" onclick="moveHeading('${gid}',1)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 9l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-del" title="Löschen" onclick="removeHeading('${gid}')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div></td>
     `;
     tbody.appendChild(htr);
 
@@ -986,14 +1011,17 @@
       <td class="col-calc"><div class="calc-display vp" id="vp-${id}">0,00 €</div></td>
       <td class="col-calc"><div class="calc-display"    id="hkg-${id}">0,00 €</div></td>
       <td class="col-calc"><div class="calc-display vp" id="vpg-${id}">0,00 €</div></td>
-      <td class="col-del">
-        <button class="btn-del" title="Zeile entfernen" onclick="removeItem(${id})">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-            <path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8"
-                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+      <td class="col-del"><div class="row-actions">
+        <button class="btn-move" title="Nach oben" onclick="moveItem(${id},-1)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M4 7l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-      </td>
+        <button class="btn-move" title="Nach unten" onclick="moveItem(${id},1)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 9l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-del" title="Löschen" onclick="removeItem(${id})">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div></td>
     `;
 
     // Mark pos input as user-edited when changed
@@ -1006,6 +1034,49 @@
     document.getElementById('quoteBody').insertBefore(tr, addSubRow);
     renumberAll();
     recalcRow(id);
+  }
+
+  // --- Move items within their group ---
+  function moveItem(id, dir) {
+    const tr = document.getElementById(`row-${id}`);
+    if (!tr) return;
+    const gid = tr.dataset.gid;
+    const items = [...document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`)];
+    const idx = items.indexOf(tr);
+    if (dir === -1 && idx > 0) {
+      items[idx - 1].before(tr);
+    } else if (dir === 1 && idx < items.length - 1) {
+      items[idx + 1].after(tr);
+    }
+    renumberAll();
+  }
+
+  // --- Move entire heading group (heading + items + add-sub-row) ---
+  function moveHeading(gid, dir) {
+    const headings = [...document.querySelectorAll('#quoteBody tr.heading-row')];
+    const htr = headings.find(h => h.dataset.gid === gid);
+    if (!htr) return;
+    const hIdx = headings.indexOf(htr);
+    if (dir === -1 && hIdx === 0) return;
+    if (dir === 1 && hIdx === headings.length - 1) return;
+
+    const targetGid = dir === -1 ? headings[hIdx - 1].dataset.gid : headings[hIdx + 1].dataset.gid;
+
+    // Collect all rows of the group being moved
+    const myRows = [...document.querySelectorAll(`#quoteBody tr[data-gid="${gid}"]`)];
+
+    if (dir === -1) {
+      // Move before the target heading
+      const targetHeading = document.querySelector(`#quoteBody tr.heading-row[data-gid="${targetGid}"]`);
+      myRows.forEach(r => targetHeading.before(r));
+    } else {
+      // Move after the last row of the target group
+      const targetRows = document.querySelectorAll(`#quoteBody tr[data-gid="${targetGid}"]`);
+      const lastTargetRow = targetRows[targetRows.length - 1];
+      myRows.reverse().forEach(r => lastTargetRow.after(r));
+    }
+    renumberAll();
+    recalcTotal();
   }
 
   function removeItem(id) {
