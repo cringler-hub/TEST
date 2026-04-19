@@ -2607,10 +2607,13 @@
     const f = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
     const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' %';
     let rows = '';
+    let totalHkE = 0, totalVpE = 0;
     d.gruppen.forEach(g => {
       const gDeck = g.vpTotal > 0 ? ((g.vpTotal - g.hkTotal) / g.vpTotal) * 100 : 0;
       const hkeSum = g.items.reduce((s, it) => s + (it.hkEinzel || 0), 0);
       const vpeSum = g.items.reduce((s, it) => s + (it.vpEinzel || 0), 0);
+      totalHkE += hkeSum * g.stk;
+      totalVpE += vpeSum * g.stk;
       rows += `<tr class="grp-row" data-gid="${g.gid}">
         <td class="grp-toggle"><button class="toggle-btn" onclick="toggleCeoGroup('${g.gid}')" title="Ein-/Ausklappen">▾</button></td>
         <td class="pos">${g.posNr}</td>
@@ -2637,6 +2640,18 @@
         </tr>`;
       });
     });
+    const totalDeck = d.totalVP > 0 ? ((d.totalVP - d.totalHK) / d.totalVP) * 100 : 0;
+    rows += `<tr class="sum-row">
+      <td></td>
+      <td></td>
+      <td class="title">Gesamt</td>
+      <td class="num col-stk"></td>
+      <td class="num col-hke">${f(totalHkE)}</td>
+      <td class="num col-vpe">${f(totalVpE)}</td>
+      <td class="num col-hkg">${f(d.totalHK)}</td>
+      <td class="num col-dk pct">${pct(totalDeck)}</td>
+      <td class="num col-vpg vp">${f(d.totalVP)}</td>
+    </tr>`;
     return rows;
   }
 
@@ -2703,6 +2718,11 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 td.vp{color:#1d4ed8;font-weight:600}
 td.pct{color:#64748b}
 .grp-row td.vp{color:#4338ca}
+.sum-row{background:#1a1a2e;color:#fff;font-weight:700}
+.sum-row td{padding:0.7rem 0.7rem;border-top:2px solid #1a1a2e;border-bottom:0;color:#fff}
+.sum-row .title{color:#fff;text-transform:uppercase;letter-spacing:.05em;font-size:0.78rem}
+.sum-row td.vp{color:#60a5fa}
+.sum-row td.pct{color:#cbd5e1}
 table.hide-stk .col-stk{display:none}
 table.hide-hke .col-hke{display:none}
 table.hide-vpe .col-vpe{display:none}
