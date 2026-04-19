@@ -9,10 +9,12 @@ define('DB_USER', 'dbu1913064');
 define('DB_PASS', 'Funkwerk123!');
 define('DB_CHARSET', 'utf8mb4');
 
-// Session-Einstellungen
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_samesite', 'Strict');
-ini_set('session.use_strict_mode', 1);
+// Session-Einstellungen (nur setzen wenn Session noch nicht gestartet)
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_samesite', 'Strict');
+    ini_set('session.use_strict_mode', 1);
+}
 
 function getDB(): PDO {
     static $pdo = null;
