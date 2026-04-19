@@ -2868,9 +2868,54 @@ td.pct{color:#6b7280}
     };
   }
 
+  // Format helpers shared between full render and cell sync
+  const _ceoFmt = {
+    eur: v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €',
+    pct: v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' %',
+    pctIn: v => (v*100).toLocaleString('de-DE',{maximumFractionDigits:4}).replace('.', ',')
+  };
+
+  function getCeoExtCellMap(d) {
+    const f = _ceoFmt.eur, pct = _ceoFmt.pct;
+    return {
+      'c-umsatz': f(d.umsatz),
+      'c-umsatzLieferungen': f(d.umsatzLieferungen),
+      'c-umsatzLeistungen': f(d.umsatzLeistungen),
+      'c-umsatzSonstiges': f(d.umsatzSonstiges),
+      'c-hkSum': f(d.hkSum),
+      'c-fremdAnteil': pct(d.fremdAnteilPct),
+      'c-materialHK': f(d.materialHK),
+      'c-hausteile': f(d.hausteile),
+      'c-vorratsmaterial': f(d.vorratsmaterial),
+      'c-bestimmungsmaterial': f(d.bestimmungsmaterial),
+      'c-unterauftraege': f(d.unterauftraege),
+      'c-leistungenHK': f(d.leistungenHK),
+      'c-eigenleistungen': f(d.eigenleistungen),
+      'c-fremdleistungenKapa': f(d.fremdleistungenKapa),
+      'c-sonstigeHK': f(d.sonstigeHK),
+      'c-db1': f(d.db1),
+      'c-db1Pct': pct(d.db1Pct),
+      'c-gk1Sum': f(d.gk1Sum),
+      'c-gk1Material': f(d.gk1Material),
+      'c-gk1Personal': f(d.gk1Personal),
+      'c-hkInklGK': f(d.hkInklGK),
+      'c-gk2Sum': f(d.gk2Sum),
+      'c-gk2Verw': f(d.gk2Verw),
+      'c-gk2Vertr': f(d.gk2Vertr),
+      'c-gk2Entw': f(d.gk2Entw),
+      'c-selbstkosten': f(d.selbstkosten),
+      'c-dbFITK': f(d.dbFITK),
+      'c-dbFITKPct': pct(d.dbFITKPct),
+      'c-garantie': f(d.garantie),
+      'c-sicherheit': f(d.sicherheit),
+      'c-gewinn': f(d.gewinn),
+      'c-gewinnPct': pct(d.gewinnPct)
+    };
+  }
+
   function renderCeoExtCard(d) {
-    const f = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
-    const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' %';
+    const f = _ceoFmt.eur, pct = _ceoFmt.pct;
+    const pctIn = (cfg, val) => `<input type="text" inputmode="decimal" class="cfg-pct" data-cfg="${cfg}" value="${_ceoFmt.pctIn(val)}" /> %`;
     return `
       <table class="ext">
         <tbody>
@@ -2879,46 +2924,46 @@ td.pct{color:#6b7280}
           <tr><td></td><td>Angebots-Titel</td><td colspan="2">${d.titel}</td></tr>
           <tr><td></td><td>Kunde</td><td colspan="2">${d.kunde || '–'}</td></tr>
 
-          <tr class="section umsatz"><td>UMSATZ</td><td></td><td class="num strong">${f(d.umsatz)}</td><td></td></tr>
-          <tr><td></td><td>Lieferungen</td><td class="num">${f(d.umsatzLieferungen)}</td><td></td></tr>
-          <tr><td></td><td>Leistungen</td><td class="num">${f(d.umsatzLeistungen)}</td><td></td></tr>
-          <tr><td></td><td>Sonstiges</td><td class="num">${f(d.umsatzSonstiges)}</td><td></td></tr>
+          <tr class="section umsatz"><td>UMSATZ</td><td></td><td class="num strong" id="c-umsatz">${f(d.umsatz)}</td><td></td></tr>
+          <tr><td></td><td>Lieferungen</td><td class="num" id="c-umsatzLieferungen">${f(d.umsatzLieferungen)}</td><td></td></tr>
+          <tr><td></td><td>Leistungen</td><td class="num" id="c-umsatzLeistungen">${f(d.umsatzLeistungen)}</td><td></td></tr>
+          <tr><td></td><td>Sonstiges</td><td class="num" id="c-umsatzSonstiges">${f(d.umsatzSonstiges)}</td><td></td></tr>
 
-          <tr class="section hk"><td>HERSTELLKOSTEN</td><td></td><td class="num strong">${f(d.hkSum)}</td><td class="num small">${pct(d.fremdAnteilPct)} <span class="lbl">FREMDANTEIL</span></td></tr>
+          <tr class="section hk"><td>HERSTELLKOSTEN</td><td></td><td class="num strong" id="c-hkSum">${f(d.hkSum)}</td><td class="num small"><span id="c-fremdAnteil">${pct(d.fremdAnteilPct)}</span> <span class="lbl">FREMDANTEIL</span></td></tr>
 
-          <tr class="sub"><td></td><td>MATERIAL</td><td class="num">${f(d.materialHK)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Eigenmaterial – Hausteile</td><td class="num">${f(d.hausteile)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Vorratsmaterial</td><td class="num">${f(d.vorratsmaterial)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Bestimmungsmaterial</td><td class="num">${f(d.bestimmungsmaterial)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Unteraufträge / Fremd UA</td><td class="num">${f(d.unterauftraege)}</td><td></td></tr>
+          <tr class="sub"><td></td><td>MATERIAL</td><td class="num" id="c-materialHK">${f(d.materialHK)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Eigenmaterial – Hausteile</td><td class="num" id="c-hausteile">${f(d.hausteile)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Vorratsmaterial</td><td class="num" id="c-vorratsmaterial">${f(d.vorratsmaterial)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Bestimmungsmaterial</td><td class="num" id="c-bestimmungsmaterial">${f(d.bestimmungsmaterial)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Unteraufträge / Fremd UA</td><td class="num" id="c-unterauftraege">${f(d.unterauftraege)}</td><td></td></tr>
 
-          <tr class="sub"><td></td><td>LEISTUNGEN</td><td class="num">${f(d.leistungenHK)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Eigenleistungen (Personal)</td><td class="num">${f(d.eigenleistungen)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Fremdleistungen (Kapa-Engpass)</td><td class="num">${f(d.fremdleistungenKapa)}</td><td></td></tr>
+          <tr class="sub"><td></td><td>LEISTUNGEN</td><td class="num" id="c-leistungenHK">${f(d.leistungenHK)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Eigenleistungen (Personal)</td><td class="num" id="c-eigenleistungen">${f(d.eigenleistungen)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Fremdleistungen (Kapa-Engpass)</td><td class="num" id="c-fremdleistungenKapa">${f(d.fremdleistungenKapa)}</td><td></td></tr>
 
-          <tr class="sub"><td></td><td>SONSTIGE</td><td class="num">${f(d.sonstigeHK)}</td><td></td></tr>
+          <tr class="sub"><td></td><td>SONSTIGE</td><td class="num" id="c-sonstigeHK">${f(d.sonstigeHK)}</td><td></td></tr>
 
-          <tr class="section db"><td>DECKUNGSBEITRAG 1</td><td></td><td class="num strong">${f(d.db1)}</td><td class="num small">${pct(d.db1Pct)}</td></tr>
+          <tr class="section db"><td>DECKUNGSBEITRAG 1</td><td></td><td class="num strong" id="c-db1">${f(d.db1)}</td><td class="num small" id="c-db1Pct">${pct(d.db1Pct)}</td></tr>
 
-          <tr class="section gk"><td>GEMEINKOSTEN 1</td><td></td><td class="num strong">${f(d.gk1Sum)}</td><td></td></tr>
-          <tr><td></td><td>Material (auf Material-HK)</td><td class="num">${f(d.gk1Material)}</td><td class="num small">${pct(d.gk1MaterialPct*100)}</td></tr>
-          <tr><td></td><td>Personal (auf Personalkosten)</td><td class="num">${f(d.gk1Personal)}</td><td class="num small">${pct(d.gk1PersonalPct*100)}</td></tr>
+          <tr class="section gk"><td>GEMEINKOSTEN 1</td><td></td><td class="num strong" id="c-gk1Sum">${f(d.gk1Sum)}</td><td></td></tr>
+          <tr><td></td><td>Material (auf Material-HK)</td><td class="num" id="c-gk1Material">${f(d.gk1Material)}</td><td class="num small">${pctIn('cfgGK1Material', d.gk1MaterialPct)}</td></tr>
+          <tr><td></td><td>Personal (auf Personalkosten)</td><td class="num" id="c-gk1Personal">${f(d.gk1Personal)}</td><td class="num small">${pctIn('cfgGK1Personal', d.gk1PersonalPct)}</td></tr>
 
-          <tr class="section sub-total"><td>HERSTELLKOSTEN INKL. GK</td><td></td><td class="num strong">${f(d.hkInklGK)}</td><td></td></tr>
+          <tr class="section sub-total"><td>HERSTELLKOSTEN INKL. GK</td><td></td><td class="num strong" id="c-hkInklGK">${f(d.hkInklGK)}</td><td></td></tr>
 
-          <tr class="section gk"><td>GEMEINKOSTEN 2</td><td></td><td class="num strong">${f(d.gk2Sum)}</td><td></td></tr>
-          <tr><td></td><td>Verwaltung</td><td class="num">${f(d.gk2Verw)}</td><td class="num small">${pct(d.gk2VerwPct*100)}</td></tr>
-          <tr><td></td><td>Vertrieb</td><td class="num">${f(d.gk2Vertr)}</td><td class="num small">${pct(d.gk2VertrPct*100)}</td></tr>
-          <tr><td></td><td>Entwicklung</td><td class="num">${f(d.gk2Entw)}</td><td class="num small">${pct(d.gk2EntwPct*100)}</td></tr>
+          <tr class="section gk"><td>GEMEINKOSTEN 2</td><td></td><td class="num strong" id="c-gk2Sum">${f(d.gk2Sum)}</td><td></td></tr>
+          <tr><td></td><td>Verwaltung</td><td class="num" id="c-gk2Verw">${f(d.gk2Verw)}</td><td class="num small">${pctIn('cfgGK2Verwaltung', d.gk2VerwPct)}</td></tr>
+          <tr><td></td><td>Vertrieb</td><td class="num" id="c-gk2Vertr">${f(d.gk2Vertr)}</td><td class="num small">${pctIn('cfgGK2Vertrieb', d.gk2VertrPct)}</td></tr>
+          <tr><td></td><td>Entwicklung</td><td class="num" id="c-gk2Entw">${f(d.gk2Entw)}</td><td class="num small">${pctIn('cfgGK2Entwicklung', d.gk2EntwPct)}</td></tr>
 
-          <tr class="section sub-total"><td>SELBSTKOSTEN</td><td></td><td class="num strong">${f(d.selbstkosten)}</td><td></td></tr>
+          <tr class="section sub-total"><td>SELBSTKOSTEN</td><td></td><td class="num strong" id="c-selbstkosten">${f(d.selbstkosten)}</td><td></td></tr>
 
-          <tr class="section db"><td>DECKUNGSBEITRAG FITK <span class="hint">(Umsatz − Selbstkosten)</span></td><td></td><td class="num strong">${f(d.dbFITK)}</td><td class="num small">${pct(d.dbFITKPct)}</td></tr>
+          <tr class="section db"><td>DECKUNGSBEITRAG FITK <span class="hint">(Umsatz − Selbstkosten)</span></td><td></td><td class="num strong" id="c-dbFITK">${f(d.dbFITK)}</td><td class="num small" id="c-dbFITKPct">${pct(d.dbFITKPct)}</td></tr>
 
-          <tr class="section gk"><td>GARANTIEKOSTEN <span class="hint">(auf Herstellkosten)</span></td><td></td><td class="num strong">${f(d.garantie)}</td><td class="num small">${pct(d.garantiePct*100)}</td></tr>
-          <tr class="section gk"><td>SICHERHEIT <span class="hint">(auf Herstellkosten)</span></td><td></td><td class="num strong">${f(d.sicherheit)}</td><td class="num small">${pct(d.sicherheitPct*100)}</td></tr>
+          <tr class="section gk"><td>GARANTIEKOSTEN <span class="hint">(auf Herstellkosten)</span></td><td></td><td class="num strong" id="c-garantie">${f(d.garantie)}</td><td class="num small">${pctIn('cfgGarantie', d.garantiePct)}</td></tr>
+          <tr class="section gk"><td>SICHERHEIT <span class="hint">(auf Herstellkosten)</span></td><td></td><td class="num strong" id="c-sicherheit">${f(d.sicherheit)}</td><td class="num small">${pctIn('cfgSicherheit', d.sicherheitPct)}</td></tr>
 
-          <tr class="section gewinn"><td>GEWINN</td><td></td><td class="num strong">${f(d.gewinn)}</td><td class="num small">${pct(d.gewinnPct)}</td></tr>
+          <tr class="section gewinn"><td>GEWINN</td><td></td><td class="num strong" id="c-gewinn">${f(d.gewinn)}</td><td class="num small" id="c-gewinnPct">${pct(d.gewinnPct)}</td></tr>
 
           <tr class="section sig"><td>BEARBEITER / FREIGABE</td><td></td><td></td><td></td></tr>
           <tr><td></td><td>Angebotsleiter</td><td>${d.bearbeiter || '–'}</td><td>Datum: ${d.datum || '–'}</td></tr>
@@ -2966,9 +3011,11 @@ table.ext tr.sub td{font-weight:700;color:#0f172a;background:#f8fafc;border-top:
 .actions{margin-top:1rem;display:flex;gap:0.5rem;justify-content:flex-end;flex-wrap:wrap}
 .actions button{background:#1a1a2e;color:#fff;border:0;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-size:0.82rem}
 .actions button.secondary{background:#64748b}
+input.cfg-pct{width:60px;padding:3px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:0.78rem;text-align:right;font-variant-numeric:tabular-nums;background:#fff;color:#1e293b}
+input.cfg-pct:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.2)}
 .sync-badge{position:fixed;top:1rem;right:1rem;background:#22c55e;color:#fff;padding:0.35rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:600;opacity:0;transition:opacity .3s}
 .sync-badge.show{opacity:1}
-@media print{body{padding:0;background:#fff}.container{max-width:100%}header{border-radius:0}.actions,.sync-badge{display:none}table.ext tr td{-webkit-print-color-adjust:exact}}
+@media print{body{padding:0;background:#fff}.container{max-width:100%}header{border-radius:0}.actions,.sync-badge{display:none}input.cfg-pct{border:0;padding:0;background:transparent}table.ext tr td{-webkit-print-color-adjust:exact}}
 </style></head><body>
 <div class="container">
   <header>
@@ -2986,6 +3033,32 @@ table.ext tr.sub td{font-weight:700;color:#0f172a;background:#f8fafc;border-top:
   </div>
 </div>
 <div class="sync-badge" id="syncBadge">Aktualisiert</div>
+<script>
+(function(){
+  // Outgoing: % input changes are sent to opener (no rebuild here)
+  document.addEventListener('input', function(e){
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('cfg-pct')) {
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({ type:'ceo-cfg-pct', cfg:t.dataset.cfg, value:t.value }, '*');
+      }
+    }
+  });
+  // Incoming: only updates calculated cells; never touches inputs (preserves focus/typing)
+  window.addEventListener('message', function(e){
+    var d = e.data || {};
+    if (d.type === 'ceo-ext-cells') {
+      var cells = d.cells || {};
+      Object.keys(cells).forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.textContent = cells[id];
+      });
+      var b = document.getElementById('syncBadge');
+      if (b) { b.classList.add('show'); setTimeout(function(){ b.classList.remove('show'); }, 1200); }
+    }
+  });
+})();
+<\/script>
 </body></html>`;
   }
 
@@ -2993,34 +3066,38 @@ table.ext tr.sub td{font-weight:700;color:#0f172a;background:#f8fafc;border-top:
     const d = buildCeoExtData();
     const html = renderCeoExtHtml(d);
     if (ceoExtWin && !ceoExtWin.closed) {
+      // Re-render full card on re-open (in case structure changed)
       const card = ceoExtWin.document.getElementById('extCard');
       if (card) {
-        card.innerHTML = renderCeoExtCard(d) + card.querySelector('.actions').outerHTML;
+        const actions = card.querySelector('.actions').outerHTML;
+        card.innerHTML = renderCeoExtCard(d) + actions;
       }
       ceoExtWin.focus();
     } else {
       ceoExtWin = window.open('', '_blank');
       ceoExtWin.document.write(html);
       ceoExtWin.document.close();
-      ceoExtWin.addEventListener('message', function(e) {
-        if (e.data && e.data.type === 'ceo-ext-update') {
-          const card = ceoExtWin.document.getElementById('extCard');
-          if (card) {
-            const actions = card.querySelector('.actions').outerHTML;
-            card.innerHTML = e.data.html + actions;
-          }
-          var b = ceoExtWin.document.getElementById('syncBadge');
-          if (b) { b.classList.add('show'); setTimeout(function(){ b.classList.remove('show'); }, 1500); }
-        }
-      });
     }
   }
 
   function syncCeoExtView() {
     if (!ceoExtWin || ceoExtWin.closed) return;
     const d = buildCeoExtData();
-    ceoExtWin.postMessage({ type: 'ceo-ext-update', html: renderCeoExtCard(d) }, '*');
+    // Only update calculated cells; the % inputs in the popup keep user focus.
+    ceoExtWin.postMessage({ type: 'ceo-ext-cells', cells: getCeoExtCellMap(d) }, '*');
   }
+
+  // Receive % updates from popup → write into config field & recalc (which triggers sync back)
+  window.addEventListener('message', function(e) {
+    const d = e.data || {};
+    if (d.type === 'ceo-cfg-pct' && d.cfg) {
+      const el = document.getElementById(d.cfg);
+      if (el) {
+        el.value = d.value;
+        recalcAll();
+      }
+    }
+  });
 
   // Hook sync into recalcTotal
   const _origRecalcTotal = recalcTotal;
