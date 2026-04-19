@@ -3729,8 +3729,6 @@ table.hide-vpg .col-vpg{display:none}
       'c-meta-angebotNr':   d.angebotNr || '–',
       'c-meta-titel':       d.titel,
       'c-meta-kunde':       d.kunde || '–',
-      'c-meta-bearbeiter':  d.bearbeiter || '–',
-      'c-meta-freigabe':    d.freigabe || '–',
       'c-meta-datum':       'Datum: ' + (d.datum || '–'),
       'c-meta-headerline':  `${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${d.datum || '–'}`
     };
@@ -3788,9 +3786,6 @@ table.hide-vpg .col-vpg{display:none}
 
           <tr class="section gewinn"><td>GEWINN</td><td></td><td class="num strong" id="c-gewinn">${f(d.gewinn)}</td><td class="num small" id="c-gewinnPct">${pct(d.gewinnPct)}</td></tr>
 
-          <tr class="section sig"><td>BEARBEITER / FREIGABE</td><td></td><td></td><td></td></tr>
-          <tr><td></td><td>Angebotsleiter</td><td id="c-meta-bearbeiter">${d.bearbeiter || '–'}</td><td id="c-meta-datum">Datum: ${d.datum || '–'}</td></tr>
-          <tr><td></td><td>Freigabe</td><td id="c-meta-freigabe">${d.freigabe || '–'}</td><td></td></tr>
         </tbody>
       </table>
     `;
