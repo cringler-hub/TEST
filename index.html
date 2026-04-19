@@ -1360,49 +1360,49 @@
           <div class="config-row">
             <label>GK 1 – Material</label>
             <span class="input-suffix">
-              <input type="number" id="cfgGK1Material" step="0.01" min="0" value="6" />
+              <input type="text" inputmode="decimal" id="cfgGK1Material" value="6" />
               <span>%</span>
             </span>
           </div>
           <div class="config-row">
             <label>GK 1 – Personal</label>
             <span class="input-suffix">
-              <input type="number" id="cfgGK1Personal" step="0.01" min="0" value="0" />
+              <input type="text" inputmode="decimal" id="cfgGK1Personal" value="0" />
               <span>%</span>
             </span>
           </div>
           <div class="config-row">
             <label>GK 2 – Verwaltung</label>
             <span class="input-suffix">
-              <input type="number" id="cfgGK2Verwaltung" step="0.01" min="0" value="9" />
+              <input type="text" inputmode="decimal" id="cfgGK2Verwaltung" value="9" />
               <span>%</span>
             </span>
           </div>
           <div class="config-row">
             <label>GK 2 – Vertrieb</label>
             <span class="input-suffix">
-              <input type="number" id="cfgGK2Vertrieb" step="0.01" min="0" value="6" />
+              <input type="text" inputmode="decimal" id="cfgGK2Vertrieb" value="6" />
               <span>%</span>
             </span>
           </div>
           <div class="config-row">
             <label>GK 2 – Entwicklung</label>
             <span class="input-suffix">
-              <input type="number" id="cfgGK2Entwicklung" step="0.01" min="0" value="3" />
+              <input type="text" inputmode="decimal" id="cfgGK2Entwicklung" value="3" />
               <span>%</span>
             </span>
           </div>
           <div class="config-row">
             <label>Garantiekosten (auf HK)</label>
             <span class="input-suffix">
-              <input type="number" id="cfgGarantie" step="0.01" min="0" value="3" />
+              <input type="text" inputmode="decimal" id="cfgGarantie" value="3" />
               <span>%</span>
             </span>
           </div>
           <div class="config-row">
             <label>Sicherheit (auf HK)</label>
             <span class="input-suffix">
-              <input type="number" id="cfgSicherheit" step="0.01" min="0" value="2" />
+              <input type="text" inputmode="decimal" id="cfgSicherheit" value="2" />
               <span>%</span>
             </span>
           </div>
@@ -1740,7 +1740,8 @@
   function getRate(key)        { const el = document.getElementById(`rate-${key}`); return el ? (parseFloat(el.value)||0) : 0; }
   function getMGK()            { return 1 + (parseFloat(document.getElementById('cfgMGK').value) || 0) / 100; }
   function getFGK()            { return 1 + (parseFloat(document.getElementById('cfgFGK').value) || 0) / 100; }
-  function getPct(id)          { return (parseFloat(document.getElementById(id).value) || 0) / 100; }
+  function parseNum(s) { return parseFloat(String(s ?? '').replace(',', '.')) || 0; }
+  function getPct(id)          { return parseNum(document.getElementById(id).value) / 100; }
   function getGK1Material()    { return getPct('cfgGK1Material'); }
   function getGK1Personal()    { return getPct('cfgGK1Personal'); }
   function getGK2Verwaltung()  { return getPct('cfgGK2Verwaltung'); }
@@ -2388,13 +2389,13 @@
         fgk: parseFloat(document.getElementById('cfgFGK').value) || 6,
         defaultDeckung: getDefaultDeckung(),
         preisnachlass: getPreisnachlass(),
-        gk1Material:    parseFloat(document.getElementById('cfgGK1Material').value)    || 0,
-        gk1Personal:    parseFloat(document.getElementById('cfgGK1Personal').value)    || 0,
-        gk2Verwaltung:  parseFloat(document.getElementById('cfgGK2Verwaltung').value)  || 0,
-        gk2Vertrieb:    parseFloat(document.getElementById('cfgGK2Vertrieb').value)    || 0,
-        gk2Entwicklung: parseFloat(document.getElementById('cfgGK2Entwicklung').value) || 0,
-        garantie:       parseFloat(document.getElementById('cfgGarantie').value)       || 0,
-        sicherheit:     parseFloat(document.getElementById('cfgSicherheit').value)     || 0,
+        gk1Material:    parseNum(document.getElementById('cfgGK1Material').value),
+        gk1Personal:    parseNum(document.getElementById('cfgGK1Personal').value),
+        gk2Verwaltung:  parseNum(document.getElementById('cfgGK2Verwaltung').value),
+        gk2Vertrieb:    parseNum(document.getElementById('cfgGK2Vertrieb').value),
+        gk2Entwicklung: parseNum(document.getElementById('cfgGK2Entwicklung').value),
+        garantie:       parseNum(document.getElementById('cfgGarantie').value),
+        sicherheit:     parseNum(document.getElementById('cfgSicherheit').value),
         bearbeiter:     document.getElementById('cfgBearbeiter').value,
         freigabe:       document.getElementById('cfgFreigabe').value,
         stundensaetze: Object.fromEntries(KOSTENSTRUKTUREN.filter(k => k.unit).map(k => [k.key, getRate(k.key)]))
