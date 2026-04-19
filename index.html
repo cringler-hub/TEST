@@ -2609,13 +2609,15 @@
     let rows = '';
     d.gruppen.forEach(g => {
       const gDeck = g.vpTotal > 0 ? ((g.vpTotal - g.hkTotal) / g.vpTotal) * 100 : 0;
+      const hkeSum = g.items.reduce((s, it) => s + (it.hkEinzel || 0), 0);
+      const vpeSum = g.items.reduce((s, it) => s + (it.vpEinzel || 0), 0);
       rows += `<tr class="grp-row" data-gid="${g.gid}">
         <td class="grp-toggle"><button class="toggle-btn" onclick="toggleCeoGroup('${g.gid}')" title="Ein-/Ausklappen">▾</button></td>
         <td class="pos">${g.posNr}</td>
         <td class="title">${escapeForHtml(g.titel)}</td>
         <td class="num col-stk">${g.stk}</td>
-        <td class="num col-hke">—</td>
-        <td class="num col-vpe">—</td>
+        <td class="num col-hke">${f(hkeSum)}</td>
+        <td class="num col-vpe">${f(vpeSum)}</td>
         <td class="num col-hkg">${f(g.hkTotal)}</td>
         <td class="num col-dk pct">${pct(gDeck)}</td>
         <td class="num col-vpg vp">${f(g.vpTotal)}</td>
