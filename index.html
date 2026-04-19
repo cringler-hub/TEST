@@ -2578,6 +2578,7 @@
         currentGrp.items.push({
           posNr, desc: r.desc, kstr: r.kstr,
           kstrName: KOSTENSTRUKTUREN.find(k => k.key === r.kstr)?.name || r.kstr,
+          hkEinzel: c.hkEinzel, vpEinzel: c.vpEinzel,
           hkGesamt: c.hkGesamt, vpGesamt: c.vpGesamt, stueck: r.stueck
         });
         currentGrp.hk += c.hkGesamt;
@@ -2601,138 +2602,236 @@
     };
   }
 
-  function renderCeoHtml(d) {
-    const f = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
-    const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
+  // Build the rows HTML for the CEO positions table
+  function buildCeoRowsHtml(d) {
+    const f = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+    const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' %';
     let rows = '';
     d.gruppen.forEach(g => {
       const gDeck = g.vpTotal > 0 ? ((g.vpTotal - g.hkTotal) / g.vpTotal) * 100 : 0;
-      rows += `<tr class="grp-row">
+      rows += `<tr class="grp-row" data-gid="${g.gid}">
+        <td class="grp-toggle"><button class="toggle-btn" onclick="toggleCeoGroup('${g.gid}')" title="Ein-/Ausklappen">▾</button></td>
         <td class="pos">${g.posNr}</td>
-        <td class="title">${g.titel}</td>
-        <td class="num">${g.stk}</td>
-        <td class="num">${f(g.hkTotal)} €</td>
-        <td class="num pct">${pct(gDeck)} %</td>
-        <td class="num vp">${f(g.vpTotal)} €</td>
+        <td class="title">${escapeForHtml(g.titel)}</td>
+        <td class="num col-stk">${g.stk}</td>
+        <td class="num col-hke">—</td>
+        <td class="num col-vpe">—</td>
+        <td class="num col-hkg">${f(g.hkTotal)}</td>
+        <td class="num col-dk pct">${pct(gDeck)}</td>
+        <td class="num col-vpg vp">${f(g.vpTotal)}</td>
       </tr>`;
       g.items.forEach(it => {
         const iDeck = it.vpGesamt > 0 ? ((it.vpGesamt - it.hkGesamt) / it.vpGesamt) * 100 : 0;
-        rows += `<tr class="item-row">
+        rows += `<tr class="item-row" data-gid="${g.gid}">
+          <td></td>
           <td class="pos">${it.posNr}</td>
-          <td class="title">${it.desc || it.kstrName}</td>
-          <td class="num">${it.stueck}</td>
-          <td class="num">${f(it.hkGesamt)} €</td>
-          <td class="num pct">${pct(iDeck)} %</td>
-          <td class="num vp">${f(it.vpGesamt)} €</td>
+          <td class="title">${escapeForHtml(it.desc || it.kstrName)}</td>
+          <td class="num col-stk">${it.stueck}</td>
+          <td class="num col-hke">${f(it.hkEinzel)}</td>
+          <td class="num col-vpe">${f(it.vpEinzel)}</td>
+          <td class="num col-hkg">${f(it.hkGesamt)}</td>
+          <td class="num col-dk pct">${pct(iDeck)}</td>
+          <td class="num col-vpg vp">${f(it.vpGesamt)}</td>
         </tr>`;
       });
     });
+    return rows;
+  }
+
+  function escapeForHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function buildCeoTotalsHtml(d) {
+    const f = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+    const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' %';
+    return `
+      <div><div class="t-label">Gesamt HK</div><div class="t-value">${f(d.totalHK)}</div></div>
+      <div><div class="t-label">Gesamt VP</div><div class="t-value">${f(d.totalVP)}</div></div>
+      <div><div class="t-label">Deckung (VP)</div><div class="t-value">${pct(d.deckungVP)}</div></div>
+      <div><div class="t-label">Endpreis${d.nachlass>0?' (−'+pct(d.nachlass)+')':''}</div><div class="t-value hl">${f(d.endpreis)}</div></div>
+      <div><div class="t-label">Deckung (Endpreis)</div><div class="t-value hl">${pct(d.deckungEnd)}</div></div>
+    `;
+  }
+
+  function getCeoMetaCells(d) {
+    return {
+      'ceo-meta-headerline': `${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${d.datum || '–'}`
+    };
+  }
+
+  function renderCeoHtml(d) {
+    const rows = buildCeoRowsHtml(d);
+    const totals = buildCeoTotalsHtml(d);
     return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>CEO-Ansicht — ${d.titel}</title>
+<title>CEO-Ansicht — ${escapeForHtml(d.titel)}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1a1a2e;padding:2rem}
-.container{max-width:960px;margin:0 auto}
-header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:1.5rem 2rem;border-radius:12px 12px 0 0}
-header h1{font-size:1.4rem;font-weight:600}
-.meta{display:flex;gap:2rem;margin-top:0.5rem;font-size:0.85rem;opacity:0.8}
+.container{max-width:1180px;margin:0 auto}
+header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:1.5rem 2rem;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+header h1{font-size:1.3rem;font-weight:600}
+header .sub{font-size:0.78rem;opacity:0.75;margin-top:0.3rem}
+.brand{font-size:0.75rem;letter-spacing:.1em;opacity:0.7;text-transform:uppercase}
 .card{background:#fff;border-radius:0 0 12px 12px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:1.5rem 2rem}
-table{width:100%;border-collapse:collapse;margin-top:1rem;font-size:0.88rem}
-thead th{text-align:left;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;padding:0.6rem 0.7rem;border-bottom:2px solid #e5e7eb}
+.toolbar{display:flex;flex-wrap:wrap;gap:0.5rem 1.2rem;align-items:center;padding:0.6rem 0.8rem;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:1rem;font-size:0.82rem}
+.toolbar .lbl{font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.04em;font-size:0.72rem}
+.toolbar label{display:inline-flex;align-items:center;gap:0.3rem;cursor:pointer;color:#334155}
+.toolbar input[type=checkbox]{accent-color:#1a1a2e;cursor:pointer}
+.toolbar .sep{color:#cbd5e1}
+.toolbar button{background:#1a1a2e;color:#fff;border:0;padding:0.3rem 0.7rem;border-radius:5px;cursor:pointer;font-size:0.78rem}
+.toolbar button.secondary{background:#64748b}
+table{width:100%;border-collapse:collapse;font-size:0.86rem}
+thead th{text-align:left;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#475569;padding:0.6rem 0.7rem;border-bottom:2px solid #cbd5e1;background:#f1f5f9}
 thead th.num{text-align:right}
-tbody td{padding:0.55rem 0.7rem;border-bottom:1px solid #f3f4f6}
-.grp-row{background:#eef2ff;font-weight:700;border-bottom:2px solid #c7d2fe !important}
-.grp-row td{padding:0.65rem 0.7rem}
+thead th.tg{width:30px;text-align:center}
+tbody td{padding:0.5rem 0.7rem;border-bottom:1px solid #f1f5f9}
+.grp-row{background:#eef2ff;font-weight:700}
+.grp-row td{padding:0.6rem 0.7rem;border-bottom:2px solid #c7d2fe;color:#1e1b4b}
 .grp-row .title{color:#1e1b4b}
-.item-row .pos{color:#9ca3af;padding-left:1.5rem}
-.item-row .title{padding-left:1.5rem;color:#4b5563}
+.grp-toggle{text-align:center;width:30px}
+.toggle-btn{background:transparent;border:0;cursor:pointer;color:#4338ca;font-size:0.95rem;line-height:1;padding:2px 4px;border-radius:3px;transition:transform .15s}
+.toggle-btn:hover{background:rgba(67,56,202,.1)}
+.grp-row.collapsed .toggle-btn{transform:rotate(-90deg)}
+.item-row .pos{color:#94a3b8;padding-left:1.5rem}
+.item-row .title{padding-left:1.5rem;color:#475569}
+.item-row.hidden{display:none}
 td.num{text-align:right;font-variant-numeric:tabular-nums}
 td.vp{color:#1d4ed8;font-weight:600}
-td.pct{color:#6b7280}
+td.pct{color:#64748b}
 .grp-row td.vp{color:#4338ca}
+table.hide-stk .col-stk{display:none}
+table.hide-hke .col-hke{display:none}
+table.hide-vpe .col-vpe{display:none}
+table.hide-hkg .col-hkg{display:none}
+table.hide-dk  .col-dk {display:none}
+table.hide-vpg .col-vpg{display:none}
 .totals{margin-top:1.5rem;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;border-radius:10px;padding:1.25rem 2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem}
 .t-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;opacity:.7;margin-bottom:.2rem}
 .t-value{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
 .t-value.hl{color:#60a5fa;font-size:1.35rem}
+.actions{margin-top:1rem;display:flex;gap:0.5rem;justify-content:flex-end;flex-wrap:wrap}
+.actions button{background:#1a1a2e;color:#fff;border:0;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-size:0.82rem}
+.actions button.secondary{background:#64748b}
 .sync-badge{position:fixed;top:1rem;right:1rem;background:#22c55e;color:#fff;padding:0.35rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:600;opacity:0;transition:opacity .3s}
 .sync-badge.show{opacity:1}
-@media print{body{padding:0;background:#fff}.container{max-width:100%}header{border-radius:0}.totals{-webkit-print-color-adjust:exact}.sync-badge{display:none}}
+@media print{body{padding:0;background:#fff}.container{max-width:100%}header{border-radius:0}.toolbar,.actions,.sync-badge{display:none}.totals{-webkit-print-color-adjust:exact}}
 </style></head><body>
 <div class="container">
-<header>
-  <h1>${d.titel} — CEO-Übersicht</h1>
-  <div class="meta">
-    <span>Kunde: ${d.kunde||'–'}</span>
-    <span>Angebot: ${d.angebotNr||'–'}</span>
-    <span>Datum: ${d.datum||'–'}</span>
+  <header>
+    <div>
+      <h1>CEO-Übersicht</h1>
+      <div class="sub" id="ceo-meta-headerline">${escapeForHtml(d.titel)} · Angebot ${escapeForHtml(d.angebotNr || '–')} · Kunde: ${escapeForHtml(d.kunde || '–')} · Datum: ${escapeForHtml(d.datum || '–')}</div>
+    </div>
+    <div class="brand">Funkwerk · CEO-Sicht</div>
+  </header>
+  <div class="card">
+    <div class="toolbar">
+      <span class="lbl">Spalten:</span>
+      <label><input type="checkbox" data-col="stk" checked /> Stk.</label>
+      <label><input type="checkbox" data-col="hke" checked /> HK Einzel</label>
+      <label><input type="checkbox" data-col="vpe" checked /> VP Einzel</label>
+      <label><input type="checkbox" data-col="hkg" checked /> HK Gesamt</label>
+      <label><input type="checkbox" data-col="dk"  checked /> Deckung</label>
+      <label><input type="checkbox" data-col="vpg" checked /> VP Gesamt</label>
+      <span class="sep">|</span>
+      <button onclick="ceoCollapseAll(true)">Alle einklappen</button>
+      <button onclick="ceoCollapseAll(false)">Alle ausklappen</button>
+    </div>
+    <table id="ceoTable">
+      <thead><tr>
+        <th class="tg"></th>
+        <th style="width:7%">Pos.</th>
+        <th>Bezeichnung</th>
+        <th class="num col-stk" style="width:5%">Stk.</th>
+        <th class="num col-hke" style="width:11%">HK Einzel</th>
+        <th class="num col-vpe" style="width:11%">VP Einzel</th>
+        <th class="num col-hkg" style="width:11%">HK Gesamt</th>
+        <th class="num col-dk"  style="width:9%">Deckung</th>
+        <th class="num col-vpg" style="width:11%">VP Gesamt</th>
+      </tr></thead>
+      <tbody id="ceoTableBody">${rows}</tbody>
+    </table>
+    <div class="totals" id="ceoTotals">${totals}</div>
+    <div class="actions">
+      <button onclick="window.print()">Drucken / PDF</button>
+      <button class="secondary" onclick="window.close()">Schließen</button>
+    </div>
   </div>
-</header>
-<div class="card">
-<table>
-  <thead><tr>
-    <th style="width:6%">Pos.</th>
-    <th>Bezeichnung</th>
-    <th class="num" style="width:6%">Stk.</th>
-    <th class="num" style="width:14%">HK Gesamt</th>
-    <th class="num" style="width:10%">Deckung</th>
-    <th class="num" style="width:14%">VP Gesamt</th>
-  </tr></thead>
-  <tbody>${rows}</tbody>
-</table>
-<div class="totals">
-  <div><div class="t-label">Gesamt HK</div><div class="t-value">${f(d.totalHK)} €</div></div>
-  <div><div class="t-label">Gesamt VP</div><div class="t-value">${f(d.totalVP)} €</div></div>
-  <div><div class="t-label">Deckung (VP)</div><div class="t-value">${pct(d.deckungVP)} %</div></div>
-  <div><div class="t-label">Endpreis${d.nachlass>0?' (−'+pct(d.nachlass)+'%)':''}</div><div class="t-value hl">${f(d.endpreis)} €</div></div>
-  <div><div class="t-label">Deckung (Endpreis)</div><div class="t-value hl">${pct(d.deckungEnd)} %</div></div>
 </div>
-</div></div>
 <div class="sync-badge" id="syncBadge">Aktualisiert</div>
-</body></html>`;
-  }
-
-  function getCeoCardHtml(d) {
-    const f = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
-    const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
-    let rows = '';
-    d.gruppen.forEach(g => {
-      const gDeck = g.vpTotal > 0 ? ((g.vpTotal - g.hkTotal) / g.vpTotal) * 100 : 0;
-      rows += `<tr class="grp-row"><td class="pos">${g.posNr}</td><td class="title">${g.titel}</td><td class="num">${g.stk}</td><td class="num">${f(g.hkTotal)} €</td><td class="num pct">${pct(gDeck)} %</td><td class="num vp">${f(g.vpTotal)} €</td></tr>`;
-      g.items.forEach(it => {
-        const iDeck = it.vpGesamt > 0 ? ((it.vpGesamt - it.hkGesamt) / it.vpGesamt) * 100 : 0;
-        rows += `<tr class="item-row"><td class="pos">${it.posNr}</td><td class="title">${it.desc||it.kstrName}</td><td class="num">${it.stueck}</td><td class="num">${f(it.hkGesamt)} €</td><td class="num pct">${pct(iDeck)} %</td><td class="num vp">${f(it.vpGesamt)} €</td></tr>`;
-      });
+<script>
+(function(){
+  var collapsedGroups = new Set();
+  window.toggleCeoGroup = function(gid) {
+    if (collapsedGroups.has(gid)) collapsedGroups.delete(gid);
+    else collapsedGroups.add(gid);
+    applyCollapsed();
+  };
+  window.ceoCollapseAll = function(collapse) {
+    document.querySelectorAll('#ceoTableBody tr.grp-row').forEach(function(tr){
+      if (collapse) collapsedGroups.add(tr.dataset.gid);
+      else collapsedGroups.delete(tr.dataset.gid);
     });
-    return `<table><thead><tr><th style="width:6%">Pos.</th><th>Bezeichnung</th><th class="num" style="width:6%">Stk.</th><th class="num" style="width:14%">HK Gesamt</th><th class="num" style="width:10%">Deckung</th><th class="num" style="width:14%">VP Gesamt</th></tr></thead><tbody>${rows}</tbody></table>
-<div class="totals"><div><div class="t-label">Gesamt HK</div><div class="t-value">${f(d.totalHK)} €</div></div><div><div class="t-label">Gesamt VP</div><div class="t-value">${f(d.totalVP)} €</div></div><div><div class="t-label">Deckung (VP)</div><div class="t-value">${pct(d.deckungVP)} %</div></div><div><div class="t-label">Endpreis${d.nachlass>0?' (−'+pct(d.nachlass)+'%)':''}</div><div class="t-value hl">${f(d.endpreis)} €</div></div><div><div class="t-label">Deckung (Endpreis)</div><div class="t-value hl">${pct(d.deckungEnd)} %</div></div></div>`;
+    applyCollapsed();
+  };
+  function applyCollapsed(){
+    document.querySelectorAll('#ceoTableBody tr.grp-row').forEach(function(tr){
+      tr.classList.toggle('collapsed', collapsedGroups.has(tr.dataset.gid));
+    });
+    document.querySelectorAll('#ceoTableBody tr.item-row').forEach(function(tr){
+      tr.classList.toggle('hidden', collapsedGroups.has(tr.dataset.gid));
+    });
+  }
+  document.querySelectorAll('.toolbar input[type=checkbox]').forEach(function(cb){
+    cb.addEventListener('change', function(){
+      document.getElementById('ceoTable').classList.toggle('hide-' + cb.dataset.col, !cb.checked);
+    });
+  });
+  window.addEventListener('message', function(e){
+    var m = e.data || {};
+    if (m.type === 'ceo-update') {
+      if (m.rowsHtml != null) document.getElementById('ceoTableBody').innerHTML = m.rowsHtml;
+      if (m.totalsHtml != null) document.getElementById('ceoTotals').innerHTML = m.totalsHtml;
+      if (m.meta) Object.keys(m.meta).forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.textContent = m.meta[id];
+      });
+      applyCollapsed();
+      var b = document.getElementById('syncBadge');
+      if (b) { b.classList.add('show'); setTimeout(function(){ b.classList.remove('show'); }, 1200); }
+    }
+  });
+})();
+<\/script>
+</body></html>`;
   }
 
   function openCeoView() {
     const d = buildCeoData();
-    const html = renderCeoHtml(d);
     if (ceoWin && !ceoWin.closed) {
-      ceoWin.document.querySelector('.card').innerHTML = getCeoCardHtml(d);
+      // Re-write entire view (toolbar may have changed structurally)
+      ceoWin.document.open();
+      ceoWin.document.write(renderCeoHtml(d));
+      ceoWin.document.close();
       ceoWin.focus();
     } else {
       ceoWin = window.open('', '_blank');
-      ceoWin.document.write(html);
+      ceoWin.document.write(renderCeoHtml(d));
       ceoWin.document.close();
-      ceoWin.addEventListener('message', function(e) {
-        if (e.data && e.data.type === 'ceo-update') {
-          ceoWin.document.querySelector('.card').innerHTML = e.data.html;
-          var b = ceoWin.document.getElementById('syncBadge');
-          b.classList.add('show');
-          setTimeout(function(){ b.classList.remove('show'); }, 1500);
-        }
-      });
     }
   }
 
   function syncCeoView() {
     if (!ceoWin || ceoWin.closed) return;
     const d = buildCeoData();
-    ceoWin.postMessage({ type: 'ceo-update', html: getCeoCardHtml(d) }, '*');
+    ceoWin.postMessage({
+      type: 'ceo-update',
+      rowsHtml: buildCeoRowsHtml(d),
+      totalsHtml: buildCeoTotalsHtml(d),
+      meta: getCeoMetaCells(d)
+    }, '*');
   }
 
   // --- Erweiterte CEO-Ansicht (Kalkulationsübersicht / Deckungsbeitrag) ---
