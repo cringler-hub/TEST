@@ -4,7 +4,7 @@
 // ============================================================
 
 define('DB_HOST', 'db5020268215.hosting-data.io');
-define('DB_NAME', 'ringler_kalktool');       // ← DB-Name anpassen
+define('DB_NAME', 'dbs15580207');
 define('DB_USER', 'dbu1913064');
 define('DB_PASS', 'Funkwerk123!');
 define('DB_CHARSET', 'utf8mb4');
