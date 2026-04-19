@@ -1354,6 +1354,67 @@
           <h3>Stundensätze pro Kostenstruktur</h3>
           <div id="rateConfig"></div>
         </div>
+
+        <div class="config-group">
+          <h3>Gemeinkosten &amp; Zuschläge (CEO-Ansicht)</h3>
+          <div class="config-row">
+            <label>GK 1 – Material</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgGK1Material" step="0.5" min="0" max="100" value="6" />
+              <span>%</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>GK 1 – Personal</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgGK1Personal" step="0.5" min="0" max="100" value="0" />
+              <span>%</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>GK 2 – Verwaltung</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgGK2Verwaltung" step="0.5" min="0" max="100" value="9" />
+              <span>%</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>GK 2 – Vertrieb</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgGK2Vertrieb" step="0.5" min="0" max="100" value="6" />
+              <span>%</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>GK 2 – Entwicklung</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgGK2Entwicklung" step="0.5" min="0" max="100" value="3" />
+              <span>%</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>Garantiekosten (auf HK)</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgGarantie" step="0.5" min="0" max="100" value="3" />
+              <span>%</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>Sicherheit (auf HK)</label>
+            <span class="input-suffix">
+              <input type="number" id="cfgSicherheit" step="0.5" min="0" max="100" value="2" />
+              <span>%</span>
+            </span>
+          </div>
+          <div class="config-row">
+            <label>Bearbeiter (Name)</label>
+            <input type="text" id="cfgBearbeiter" value="" style="flex:1" />
+          </div>
+          <div class="config-row">
+            <label>Freigabe (Name)</label>
+            <input type="text" id="cfgFreigabe" value="" style="flex:1" />
+          </div>
+        </div>
       </div>
     </details>
 
@@ -1457,6 +1518,7 @@
     <div class="actions">
       <button class="btn-primary" onclick="printQuote()">Drucken / als PDF</button>
       <button class="btn-primary" onclick="openCeoView()" style="background:var(--fw-dark);">CEO-Ansicht</button>
+      <button class="btn-primary" onclick="openCeoViewExt()" style="background:var(--fw-primary);">Erweiterte CEO-Ansicht</button>
       <button class="btn-primary" onclick="exportJSON()" style="background:#047857;">Angebot speichern</button>
       <button class="btn-secondary" onclick="importJSON()">Angebot laden</button>
       <button class="btn-secondary" onclick="resetTable()">Zurücksetzen</button>
@@ -1678,6 +1740,14 @@
   function getRate(key)        { const el = document.getElementById(`rate-${key}`); return el ? (parseFloat(el.value)||0) : 0; }
   function getMGK()            { return 1 + (parseFloat(document.getElementById('cfgMGK').value) || 0) / 100; }
   function getFGK()            { return 1 + (parseFloat(document.getElementById('cfgFGK').value) || 0) / 100; }
+  function getPct(id)          { return (parseFloat(document.getElementById(id).value) || 0) / 100; }
+  function getGK1Material()    { return getPct('cfgGK1Material'); }
+  function getGK1Personal()    { return getPct('cfgGK1Personal'); }
+  function getGK2Verwaltung()  { return getPct('cfgGK2Verwaltung'); }
+  function getGK2Vertrieb()    { return getPct('cfgGK2Vertrieb'); }
+  function getGK2Entwicklung() { return getPct('cfgGK2Entwicklung'); }
+  function getGarantiePct()    { return getPct('cfgGarantie'); }
+  function getSicherheitPct()  { return getPct('cfgSicherheit'); }
   function getDefaultDeckung() { return parseFloat(document.getElementById('cfgDeckung').value) || 0; }
   function getPreisnachlass()  { return parseFloat(document.getElementById('cfgPreisnachlass').value) || 0; }
 
@@ -2318,6 +2388,15 @@
         fgk: parseFloat(document.getElementById('cfgFGK').value) || 6,
         defaultDeckung: getDefaultDeckung(),
         preisnachlass: getPreisnachlass(),
+        gk1Material:    parseFloat(document.getElementById('cfgGK1Material').value)    || 0,
+        gk1Personal:    parseFloat(document.getElementById('cfgGK1Personal').value)    || 0,
+        gk2Verwaltung:  parseFloat(document.getElementById('cfgGK2Verwaltung').value)  || 0,
+        gk2Vertrieb:    parseFloat(document.getElementById('cfgGK2Vertrieb').value)    || 0,
+        gk2Entwicklung: parseFloat(document.getElementById('cfgGK2Entwicklung').value) || 0,
+        garantie:       parseFloat(document.getElementById('cfgGarantie').value)       || 0,
+        sicherheit:     parseFloat(document.getElementById('cfgSicherheit').value)     || 0,
+        bearbeiter:     document.getElementById('cfgBearbeiter').value,
+        freigabe:       document.getElementById('cfgFreigabe').value,
         stundensaetze: Object.fromEntries(KOSTENSTRUKTUREN.filter(k => k.unit).map(k => [k.key, getRate(k.key)]))
       },
       gruppen
@@ -2371,6 +2450,15 @@
       if (data.config.fgk != null) document.getElementById('cfgFGK').value = data.config.fgk;
       if (data.config.defaultDeckung != null) document.getElementById('cfgDeckung').value = data.config.defaultDeckung;
       if (data.config.preisnachlass != null) document.getElementById('cfgPreisnachlass').value = data.config.preisnachlass;
+      if (data.config.gk1Material    != null) document.getElementById('cfgGK1Material').value    = data.config.gk1Material;
+      if (data.config.gk1Personal    != null) document.getElementById('cfgGK1Personal').value    = data.config.gk1Personal;
+      if (data.config.gk2Verwaltung  != null) document.getElementById('cfgGK2Verwaltung').value  = data.config.gk2Verwaltung;
+      if (data.config.gk2Vertrieb    != null) document.getElementById('cfgGK2Vertrieb').value    = data.config.gk2Vertrieb;
+      if (data.config.gk2Entwicklung != null) document.getElementById('cfgGK2Entwicklung').value = data.config.gk2Entwicklung;
+      if (data.config.garantie       != null) document.getElementById('cfgGarantie').value       = data.config.garantie;
+      if (data.config.sicherheit     != null) document.getElementById('cfgSicherheit').value     = data.config.sicherheit;
+      if (data.config.bearbeiter     != null) document.getElementById('cfgBearbeiter').value     = data.config.bearbeiter;
+      if (data.config.freigabe       != null) document.getElementById('cfgFreigabe').value       = data.config.freigabe;
       if (data.config.stundensaetze) {
         Object.entries(data.config.stundensaetze).forEach(([key, val]) => {
           const el = document.getElementById('rate-' + key);
@@ -2448,8 +2536,11 @@
   // --- Init ---
   buildRateConfig();
 
-  ['cfgMGK','cfgFGK','cfgDeckung','cfgPreisnachlass'].forEach(id => {
-    document.getElementById(id).addEventListener('input', recalcAll);
+  ['cfgMGK','cfgFGK','cfgDeckung','cfgPreisnachlass',
+   'cfgGK1Material','cfgGK1Personal','cfgGK2Verwaltung','cfgGK2Vertrieb','cfgGK2Entwicklung',
+   'cfgGarantie','cfgSicherheit','cfgBearbeiter','cfgFreigabe'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', recalcAll);
   });
 
   // --- CEO-Ansicht ---
@@ -2632,11 +2723,310 @@ td.pct{color:#6b7280}
     ceoWin.postMessage({ type: 'ceo-update', html: getCeoCardHtml(d) }, '*');
   }
 
+  // --- Erweiterte CEO-Ansicht (Kalkulationsübersicht / Deckungsbeitrag) ---
+  let ceoExtWin = null;
+
+  function buildCeoExtData() {
+    // Material kategorien
+    let hausteile = 0, vorratsmaterial = 0, bestimmungsmaterial = 0, unterauftraege = 0;
+    // Leistungen
+    let eigenleistungen = 0, fremdleistungenKapa = 0;
+    // Sonstige
+    let sonstige = 0;
+    // Stundenaufwände gesamt (für GK1 Personal)
+    let personalkosten = 0;
+    // Fremdanteil (Material und Leistungen, die extern eingekauft werden)
+    let fremdAnteil = 0;
+    // Umsatz nach Kategorie (VP)
+    let umsatzLieferungen = 0, umsatzLeistungen = 0, umsatzSonstiges = 0;
+    let totalHK = 0, totalVP = 0;
+
+    const mgk = getMGK();
+    const fgk = getFGK();
+    const grpStkMap = {};
+
+    document.querySelectorAll('#quoteBody tr.heading-row').forEach(htr => {
+      const gid = htr.dataset.gid;
+      const stkInput = htr.querySelector('[data-f="grp-stk"]');
+      grpStkMap[gid] = Math.max(1, parseInt(stkInput ? stkInput.value : 1) || 1);
+    });
+
+    document.querySelectorAll('#quoteBody tr.item-row').forEach(tr => {
+      const r = readRow(parseInt(tr.dataset.id, 10));
+      if (!r) return;
+      const c = computeRow(r);
+      const grpStk = grpStkMap[r.gid] || 1;
+      const mul = r.stueck * grpStk;        // pro-Stück Mengen
+      const factor = grpStk;                  // bereits durch hkGesamt × stueck multipliziert
+
+      totalHK += c.hkGesamt * factor;
+      totalVP += c.vpGesamt * factor;
+
+      // Material-Aufschlüsselung (mit Multiplikator)
+      hausteile += r.hausteil * mul;
+      // Kaufteil → je nach Kostenstruktur
+      if (r.kstr === 'fremd') {
+        unterauftraege += r.kaufteil * mgk * mul;
+      } else if (r.kstr === 'material') {
+        vorratsmaterial += r.kaufteil * mgk * mul;
+      } else {
+        // bei anderen Strukturen (z.B. PM mit Material) als Kaufteil → Vorratsmaterial
+        vorratsmaterial += r.kaufteil * mgk * mul;
+      }
+      // Fremd UA-Spalte → immer Unteraufträge
+      unterauftraege += r.fremd * mgk * mul;
+      // Sonderkosten
+      sonstige += r.sonder * mul;
+      // Personalkosten (Std × Rate, ggf. mit FGK)
+      const rate = getRate(r.kstr);
+      if (rate > 0 && r.kstr !== 'km' && r.kstr !== 'swlizenz') {
+        let std = r.std * rate;
+        if (r.kstr === 'fertigung') std *= fgk;
+        eigenleistungen += std * mul;
+        personalkosten += std * mul;
+      }
+      // Sonderfälle
+      if (r.kstr === 'km') {
+        sonstige += r.stueck * rate * grpStk;
+      }
+      // SW-Lizenzen: HK = 0, läuft nur in Umsatz
+      // Fremdanteil-Bestandteile
+      fremdAnteil += (r.kaufteil * mgk + r.fremd * mgk) * mul;
+
+      // Umsatz-Zuordnung (nach VP, gesamt)
+      if (r.kstr === 'material' || r.kstr === 'fremd' || r.kstr === 'swlizenz') {
+        umsatzLieferungen += c.vpGesamt * factor;
+      } else if (rate > 0 && r.kstr !== 'km') {
+        umsatzLeistungen += c.vpGesamt * factor;
+      } else {
+        umsatzSonstiges += c.vpGesamt * factor;
+      }
+    });
+
+    const materialHK = hausteile + vorratsmaterial + bestimmungsmaterial + unterauftraege;
+    const leistungenHK = eigenleistungen + fremdleistungenKapa;
+    const sonstigeHK = sonstige;
+    const hkSum = materialHK + leistungenHK + sonstigeHK;
+
+    const fremdAnteilPct = hkSum > 0 ? (fremdAnteil / hkSum) * 100 : 0;
+
+    // Umsatz = totalVP (vor Preisnachlass — wie in CSV)
+    const umsatz = totalVP;
+    const db1 = umsatz - hkSum;
+    const db1Pct = umsatz > 0 ? (db1 / umsatz) * 100 : 0;
+
+    // GK 1
+    const gk1MaterialPct = getGK1Material();
+    const gk1PersonalPct = getGK1Personal();
+    const gk1Material = materialHK * gk1MaterialPct;
+    const gk1Personal = personalkosten * gk1PersonalPct;
+    const gk1Sum = gk1Material + gk1Personal;
+
+    const hkInklGK = hkSum + gk1Sum;
+
+    // GK 2 (auf HK inkl. GK)
+    const gk2VerwPct = getGK2Verwaltung();
+    const gk2VertrPct = getGK2Vertrieb();
+    const gk2EntwPct = getGK2Entwicklung();
+    const gk2Verw = hkInklGK * gk2VerwPct;
+    const gk2Vertr = hkInklGK * gk2VertrPct;
+    const gk2Entw = hkInklGK * gk2EntwPct;
+    const gk2Sum = gk2Verw + gk2Vertr + gk2Entw;
+
+    const selbstkosten = hkInklGK + gk2Sum;
+    const dbFITK = umsatz - selbstkosten;
+    const dbFITKPct = umsatz > 0 ? (dbFITK / umsatz) * 100 : 0;
+
+    const garantiePct = getGarantiePct();
+    const sicherheitPct = getSicherheitPct();
+    const garantie = hkSum * garantiePct;
+    const sicherheit = hkSum * sicherheitPct;
+    const gewinn = dbFITK - garantie - sicherheit;
+    const gewinnPct = umsatz > 0 ? (gewinn / umsatz) * 100 : 0;
+
+    return {
+      titel: document.getElementById('angebotTitel').value || 'Angebot',
+      kunde: document.getElementById('kundeName').value,
+      angebotNr: document.getElementById('angebotNr').value,
+      datum: document.getElementById('angebotDatum').value,
+      bearbeiter: document.getElementById('cfgBearbeiter').value,
+      freigabe: document.getElementById('cfgFreigabe').value,
+      umsatz, umsatzLieferungen, umsatzLeistungen, umsatzSonstiges,
+      hkSum, materialHK, leistungenHK, sonstigeHK,
+      hausteile, vorratsmaterial, bestimmungsmaterial, unterauftraege,
+      eigenleistungen, fremdleistungenKapa, sonstige,
+      fremdAnteilPct,
+      db1, db1Pct,
+      gk1Material, gk1Personal, gk1Sum, gk1MaterialPct, gk1PersonalPct,
+      hkInklGK,
+      gk2Verw, gk2Vertr, gk2Entw, gk2Sum, gk2VerwPct, gk2VertrPct, gk2EntwPct,
+      selbstkosten,
+      dbFITK, dbFITKPct,
+      garantie, sicherheit, garantiePct, sicherheitPct,
+      gewinn, gewinnPct
+    };
+  }
+
+  function renderCeoExtCard(d) {
+    const f = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+    const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' %';
+    return `
+      <table class="ext">
+        <tbody>
+          <tr class="section"><td colspan="4">PROJEKT</td></tr>
+          <tr><td></td><td>Angebots-Nr.</td><td colspan="2">${d.angebotNr || '–'}</td></tr>
+          <tr><td></td><td>Angebots-Titel</td><td colspan="2">${d.titel}</td></tr>
+          <tr><td></td><td>Kunde</td><td colspan="2">${d.kunde || '–'}</td></tr>
+
+          <tr class="section umsatz"><td>UMSATZ</td><td></td><td class="num strong">${f(d.umsatz)}</td><td></td></tr>
+          <tr><td></td><td>Lieferungen</td><td class="num">${f(d.umsatzLieferungen)}</td><td></td></tr>
+          <tr><td></td><td>Leistungen</td><td class="num">${f(d.umsatzLeistungen)}</td><td></td></tr>
+          <tr><td></td><td>Sonstiges</td><td class="num">${f(d.umsatzSonstiges)}</td><td></td></tr>
+
+          <tr class="section hk"><td>HERSTELLKOSTEN</td><td></td><td class="num strong">${f(d.hkSum)}</td><td class="num small">${pct(d.fremdAnteilPct)} <span class="lbl">FREMDANTEIL</span></td></tr>
+
+          <tr class="sub"><td></td><td>MATERIAL</td><td class="num">${f(d.materialHK)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Eigenmaterial – Hausteile</td><td class="num">${f(d.hausteile)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Vorratsmaterial</td><td class="num">${f(d.vorratsmaterial)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Bestimmungsmaterial</td><td class="num">${f(d.bestimmungsmaterial)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Unteraufträge / Fremd UA</td><td class="num">${f(d.unterauftraege)}</td><td></td></tr>
+
+          <tr class="sub"><td></td><td>LEISTUNGEN</td><td class="num">${f(d.leistungenHK)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Eigenleistungen (Personal)</td><td class="num">${f(d.eigenleistungen)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Fremdleistungen (Kapa-Engpass)</td><td class="num">${f(d.fremdleistungenKapa)}</td><td></td></tr>
+
+          <tr class="sub"><td></td><td>SONSTIGE</td><td class="num">${f(d.sonstigeHK)}</td><td></td></tr>
+
+          <tr class="section db"><td>DECKUNGSBEITRAG 1</td><td></td><td class="num strong">${f(d.db1)}</td><td class="num small">${pct(d.db1Pct)}</td></tr>
+
+          <tr class="section gk"><td>GEMEINKOSTEN 1</td><td></td><td class="num strong">${f(d.gk1Sum)}</td><td></td></tr>
+          <tr><td></td><td>Material (auf Material-HK)</td><td class="num">${f(d.gk1Material)}</td><td class="num small">${pct(d.gk1MaterialPct*100)}</td></tr>
+          <tr><td></td><td>Personal (auf Personalkosten)</td><td class="num">${f(d.gk1Personal)}</td><td class="num small">${pct(d.gk1PersonalPct*100)}</td></tr>
+
+          <tr class="section sub-total"><td>HERSTELLKOSTEN INKL. GK</td><td></td><td class="num strong">${f(d.hkInklGK)}</td><td></td></tr>
+
+          <tr class="section gk"><td>GEMEINKOSTEN 2</td><td></td><td class="num strong">${f(d.gk2Sum)}</td><td></td></tr>
+          <tr><td></td><td>Verwaltung</td><td class="num">${f(d.gk2Verw)}</td><td class="num small">${pct(d.gk2VerwPct*100)}</td></tr>
+          <tr><td></td><td>Vertrieb</td><td class="num">${f(d.gk2Vertr)}</td><td class="num small">${pct(d.gk2VertrPct*100)}</td></tr>
+          <tr><td></td><td>Entwicklung</td><td class="num">${f(d.gk2Entw)}</td><td class="num small">${pct(d.gk2EntwPct*100)}</td></tr>
+
+          <tr class="section sub-total"><td>SELBSTKOSTEN</td><td></td><td class="num strong">${f(d.selbstkosten)}</td><td></td></tr>
+
+          <tr class="section db"><td>DECKUNGSBEITRAG FITK <span class="hint">(Umsatz − Selbstkosten)</span></td><td></td><td class="num strong">${f(d.dbFITK)}</td><td class="num small">${pct(d.dbFITKPct)}</td></tr>
+
+          <tr class="section gk"><td>GARANTIEKOSTEN <span class="hint">(auf Herstellkosten)</span></td><td></td><td class="num strong">${f(d.garantie)}</td><td class="num small">${pct(d.garantiePct*100)}</td></tr>
+          <tr class="section gk"><td>SICHERHEIT <span class="hint">(auf Herstellkosten)</span></td><td></td><td class="num strong">${f(d.sicherheit)}</td><td class="num small">${pct(d.sicherheitPct*100)}</td></tr>
+
+          <tr class="section gewinn"><td>GEWINN</td><td></td><td class="num strong">${f(d.gewinn)}</td><td class="num small">${pct(d.gewinnPct)}</td></tr>
+
+          <tr class="section sig"><td>BEARBEITER / FREIGABE</td><td></td><td></td><td></td></tr>
+          <tr><td></td><td>Angebotsleiter</td><td>${d.bearbeiter || '–'}</td><td>Datum: ${d.datum || '–'}</td></tr>
+          <tr><td></td><td>Freigabe</td><td>${d.freigabe || '–'}</td><td></td></tr>
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderCeoExtHtml(d) {
+    return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Erweiterte CEO-Ansicht — ${d.titel}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1a1a2e;padding:2rem}
+.container{max-width:1080px;margin:0 auto}
+header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:1.5rem 2rem;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+header h1{font-size:1.3rem;font-weight:600}
+header .sub{font-size:0.78rem;opacity:0.75;margin-top:0.3rem}
+.brand{font-size:0.75rem;letter-spacing:.1em;opacity:0.7;text-transform:uppercase}
+.card{background:#fff;border-radius:0 0 12px 12px;box-shadow:0 4px 24px rgba(0,0,0,.08);padding:1.5rem 2rem}
+table.ext{width:100%;border-collapse:collapse;font-size:0.86rem}
+table.ext td{padding:0.4rem 0.7rem;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+table.ext td:first-child{width:24%;font-weight:600;color:#1e293b}
+table.ext td:nth-child(2){width:38%}
+table.ext td:nth-child(3){width:18%;text-align:right;font-variant-numeric:tabular-nums}
+table.ext td:nth-child(4){width:20%;text-align:right;font-variant-numeric:tabular-nums;color:#64748b;font-size:0.78rem}
+table.ext .num{text-align:right;font-variant-numeric:tabular-nums}
+table.ext .num.strong{font-weight:700}
+table.ext .num.small{font-size:0.78rem;color:#64748b}
+table.ext .ind{padding-left:1.6rem;color:#475569}
+table.ext .lbl{font-size:0.65rem;letter-spacing:.05em;color:#94a3b8;text-transform:uppercase;margin-left:0.25rem}
+table.ext .hint{font-weight:400;color:#94a3b8;font-size:0.78rem;margin-left:0.3rem}
+table.ext tr.section td{background:#f1f5f9;border-top:2px solid #cbd5e1;border-bottom:1px solid #cbd5e1;padding:0.55rem 0.7rem;text-transform:uppercase;letter-spacing:.04em;font-size:0.8rem}
+table.ext tr.umsatz td{background:#eef2ff;color:#312e81}
+table.ext tr.hk td{background:#fef2f2;color:#7f1d1d}
+table.ext tr.db td{background:#ecfdf5;color:#064e3b;border-top:2px solid #6ee7b7}
+table.ext tr.gk td{background:#fff7ed;color:#7c2d12}
+table.ext tr.sub-total td{background:#e0e7ff;color:#312e81}
+table.ext tr.gewinn td{background:linear-gradient(90deg,#16a34a,#15803d);color:#fff;border-top:2px solid #14532d;font-size:0.95rem}
+table.ext tr.gewinn td.num.small{color:#dcfce7}
+table.ext tr.sig td{background:#1a1a2e;color:#fff;margin-top:1rem}
+table.ext tr.sub td{font-weight:700;color:#0f172a;background:#f8fafc;border-top:1px solid #e2e8f0}
+.actions{margin-top:1rem;display:flex;gap:0.5rem;justify-content:flex-end;flex-wrap:wrap}
+.actions button{background:#1a1a2e;color:#fff;border:0;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-size:0.82rem}
+.actions button.secondary{background:#64748b}
+.sync-badge{position:fixed;top:1rem;right:1rem;background:#22c55e;color:#fff;padding:0.35rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:600;opacity:0;transition:opacity .3s}
+.sync-badge.show{opacity:1}
+@media print{body{padding:0;background:#fff}.container{max-width:100%}header{border-radius:0}.actions,.sync-badge{display:none}table.ext tr td{-webkit-print-color-adjust:exact}}
+</style></head><body>
+<div class="container">
+  <header>
+    <div>
+      <h1>Kalkulationsübersicht (I) — Deckungsbeitrag</h1>
+      <div class="sub">${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${d.datum || '–'}</div>
+    </div>
+    <div class="brand">Funkwerk · Erweiterte CEO-Sicht</div>
+  </header>
+  <div class="card" id="extCard">${renderCeoExtCard(d)}
+    <div class="actions">
+      <button onclick="window.print()">Drucken / PDF</button>
+      <button class="secondary" onclick="window.close()">Schließen</button>
+    </div>
+  </div>
+</div>
+<div class="sync-badge" id="syncBadge">Aktualisiert</div>
+</body></html>`;
+  }
+
+  function openCeoViewExt() {
+    const d = buildCeoExtData();
+    const html = renderCeoExtHtml(d);
+    if (ceoExtWin && !ceoExtWin.closed) {
+      const card = ceoExtWin.document.getElementById('extCard');
+      if (card) {
+        card.innerHTML = renderCeoExtCard(d) + card.querySelector('.actions').outerHTML;
+      }
+      ceoExtWin.focus();
+    } else {
+      ceoExtWin = window.open('', '_blank');
+      ceoExtWin.document.write(html);
+      ceoExtWin.document.close();
+      ceoExtWin.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'ceo-ext-update') {
+          const card = ceoExtWin.document.getElementById('extCard');
+          if (card) {
+            const actions = card.querySelector('.actions').outerHTML;
+            card.innerHTML = e.data.html + actions;
+          }
+          var b = ceoExtWin.document.getElementById('syncBadge');
+          if (b) { b.classList.add('show'); setTimeout(function(){ b.classList.remove('show'); }, 1500); }
+        }
+      });
+    }
+  }
+
+  function syncCeoExtView() {
+    if (!ceoExtWin || ceoExtWin.closed) return;
+    const d = buildCeoExtData();
+    ceoExtWin.postMessage({ type: 'ceo-ext-update', html: renderCeoExtCard(d) }, '*');
+  }
+
   // Hook sync into recalcTotal
   const _origRecalcTotal = recalcTotal;
   recalcTotal = function() {
     _origRecalcTotal();
     syncCeoView();
+    syncCeoExtView();
   };
 
   // Vorlagen-Dropdown befüllen
