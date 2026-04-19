@@ -1021,6 +1021,24 @@
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1rem;
     }
+    .quote-list-section { margin-top: 2rem; }
+    .q-row {
+      display: grid; grid-template-columns: 1fr auto auto auto auto;
+      align-items: center; gap: 0.5rem; padding: 0.7rem 0;
+      border-bottom: 1px solid var(--fw-border-s); font-size: 0.88rem;
+    }
+    .q-row:hover { background: var(--fw-bg-soft); }
+    .q-title { font-weight: 600; color: var(--fw-dark); }
+    .q-meta { color: var(--fw-muted); font-size: 0.8rem; }
+    .q-user { font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 10px;
+      background: var(--fw-bg-soft); color: var(--fw-muted); font-weight: 600; }
+    .q-btn { background: transparent; border: 1px solid var(--fw-border); border-radius: 5px;
+      padding: 0.35rem 0.7rem; font-size: 0.8rem; cursor: pointer; color: var(--fw-dark);
+      font-weight: 600; font-family: inherit; }
+    .q-btn:hover { border-color: var(--fw-primary); color: var(--fw-primary); }
+    .q-btn.del { color: var(--fw-muted); }
+    .q-btn.del:hover { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+    .q-empty { padding: 1.5rem; text-align: center; color: var(--fw-muted); font-size: 0.88rem; }
     .start-btn {
       padding: 1.75rem 1.5rem;
       border-radius: 10px;
@@ -1389,13 +1407,13 @@
           <div class="btn-sub">Kalkulation von Grund auf anlegen</div>
         </div>
       </button>
-      <button class="start-btn green" onclick="startLoadQuote()">
+      <button class="start-btn green" onclick="document.getElementById('quoteListSection').scrollIntoView({behavior:'smooth'})">
         <div class="icon-wrap">
           <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M3 14h10M8 3v8M5 8l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div>
-          <div class="btn-title">Angebot laden</div>
-          <div class="btn-sub">Gespeicherte JSON-Datei öffnen</div>
+          <div class="btn-title">Angebote anzeigen</div>
+          <div class="btn-sub">Gespeicherte Angebote öffnen</div>
         </div>
       </button>
       <button class="start-btn purple" id="btnAdmin" onclick="showView('viewAdmin')" style="display:none;">
@@ -1408,10 +1426,13 @@
         </div>
       </button>
     </div>
+
+    <div class="quote-list-section" id="quoteListSection">
+      <h2 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fw-muted);font-weight:700;margin-bottom:0.8rem;padding-bottom:0.45rem;border-bottom:1px solid var(--fw-border);">Gespeicherte Angebote</h2>
+      <div id="quoteList" style="min-height:2rem;"></div>
+    </div>
   </div>
 </div>
-
-<!-- ADMIN PORTAL -->
 <div class="view view-admin" id="viewAdmin">
   <nav class="fw-topbar">
     <div class="fw-brand">
@@ -1752,8 +1773,9 @@
       <button class="btn-primary" onclick="printQuote()">Drucken / als PDF</button>
       <button class="btn-primary" onclick="openCeoView()" style="background:var(--fw-dark);">CEO-Ansicht</button>
       <button class="btn-primary" onclick="openCeoViewExt()" style="background:var(--fw-primary);">Erweiterte CEO-Ansicht</button>
-      <button class="btn-primary" onclick="exportJSON()" style="background:#047857;">Angebot speichern</button>
-      <button class="btn-secondary" onclick="importJSON()">Angebot laden</button>
+      <button class="btn-primary" onclick="saveQuoteToServer()" style="background:#047857;">Angebot speichern</button>
+      <button class="btn-secondary" onclick="exportJSON()">Als JSON exportieren</button>
+      <button class="btn-secondary" onclick="importJSON()">JSON importieren</button>
       <button class="btn-secondary" onclick="resetTable()">Zurücksetzen</button>
     </div>
   </div>
@@ -1764,57 +1786,67 @@
 
 <script>
   // =======================================================================
-  // Auth & Navigation
+  // API-Helper & Auth
   // =======================================================================
-  function initUsers() {
-    if (!localStorage.getItem('ak_users')) {
-      const defaults = [
-        { username: 'admin', password: 'admin', role: 'admin' },
-        { username: 'user',  password: 'user',  role: 'user' }
-      ];
-      localStorage.setItem('ak_users', JSON.stringify(defaults));
-    }
-  }
-
-  function getUsers() {
-    return JSON.parse(localStorage.getItem('ak_users') || '[]');
-  }
-
-  function saveUsers(users) {
-    localStorage.setItem('ak_users', JSON.stringify(users));
+  async function api(endpoint, options = {}) {
+    const resp = await fetch('api/' + endpoint, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      ...options,
+      body: options.body ? JSON.stringify(options.body) : undefined
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Serverfehler');
+    return data;
   }
 
   let currentUser = null;
+  let currentQuoteId = null;
 
   function showView(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    if (id === 'viewStart') loadQuoteList();
   }
 
-  function doLogin() {
+  async function doLogin() {
     const u = document.getElementById('loginUser').value.trim();
     const p = document.getElementById('loginPass').value;
-    const users = getUsers();
-    const found = users.find(x => x.username === u && x.password === p);
-    if (!found) {
-      document.getElementById('loginError').textContent = 'Benutzername oder Passwort falsch.';
-      return;
+    try {
+      const res = await api('auth.php?action=login', { method: 'POST', body: { username: u, password: p } });
+      currentUser = { username: res.username, role: res.role };
+      document.getElementById('loginError').textContent = '';
+      document.getElementById('startUser').textContent = res.username;
+      document.getElementById('btnAdmin').style.display = res.role === 'admin' ? '' : 'none';
+      showView('viewStart');
+    } catch (e) {
+      document.getElementById('loginError').textContent = e.message || 'Anmeldung fehlgeschlagen.';
     }
-    currentUser = found;
-    document.getElementById('loginError').textContent = '';
-    document.getElementById('startUser').textContent = found.username;
-    document.getElementById('btnAdmin').style.display = found.role === 'admin' ? '' : 'none';
-    showView('viewStart');
   }
 
-  function doLogout() {
+  async function doLogout() {
+    try { await api('auth.php?action=logout', { method: 'POST' }); } catch(e) {}
     currentUser = null;
+    currentQuoteId = null;
     document.getElementById('loginUser').value = '';
     document.getElementById('loginPass').value = '';
     showView('viewLogin');
   }
 
+  async function checkSession() {
+    try {
+      const res = await api('auth.php?action=me');
+      if (res.loggedIn) {
+        currentUser = { username: res.username, role: res.role };
+        document.getElementById('startUser').textContent = res.username;
+        document.getElementById('btnAdmin').style.display = res.role === 'admin' ? '' : 'none';
+        showView('viewStart');
+      }
+    } catch(e) {}
+  }
+
   function startNewQuote() {
+    currentQuoteId = null;
     document.getElementById('quoteBody').innerHTML = '';
     rowCounter = 0;
     groupCounter = 0;
@@ -1829,67 +1861,173 @@
     showView('viewCalc');
   }
 
-  function startLoadQuote() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        try {
-          const data = JSON.parse(ev.target.result);
-          loadFromData(data);
-          showView('viewCalc');
-          showToast('Angebot geladen: ' + (data.angebotNr || file.name));
-        } catch (err) {
-          alert('Fehler beim Import: ' + err.message);
-        }
-      };
-      reader.readAsText(file);
+  // ----- Angebote auf Server speichern/laden/auflisten -----
+  function buildQuoteData() {
+    const gruppen = [];
+    let current = null;
+    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+      if (tr.dataset.type === 'heading') {
+        const stkInput = tr.querySelector('[data-f="grp-stk"]');
+        const hposInput = tr.querySelector('[data-f="hpos"]');
+        current = {
+          titel: tr.querySelector('.h-title-cell input').value,
+          posNr: hposInput ? hposInput.value : '',
+          stueck: stkInput ? parseInt(stkInput.value) || 1 : 1,
+          positionen: []
+        };
+        gruppen.push(current);
+      } else if (tr.dataset.type === 'item' && current) {
+        const r = readRow(parseInt(tr.dataset.id, 10));
+        if (!r) return;
+        const posInput = tr.querySelector('[data-f="pos"]');
+        r.posNr = posInput ? posInput.value : '';
+        r.posEdited = posInput && posInput.dataset.edited === '1';
+        delete r.id; delete r.gid;
+        current.positionen.push(r);
+      }
+    });
+    return {
+      _format: 'angebotskalkulator-v1',
+      titel:      document.getElementById('angebotTitel').value,
+      kunde:      document.getElementById('kundeName').value,
+      angebotNr:  document.getElementById('angebotNr').value,
+      datum:      document.getElementById('angebotDatum').value,
+      gueltigBis: document.getElementById('gueltigBis').value,
+      config: {
+        mgk: parseFloat(document.getElementById('cfgMGK').value) || 4,
+        fgk: parseFloat(document.getElementById('cfgFGK').value) || 6,
+        defaultDeckung: getDefaultDeckung(),
+        preisnachlass: getPreisnachlass(),
+        gk1Material:    parseNum(document.getElementById('cfgGK1Material').value),
+        gk1Personal:    parseNum(document.getElementById('cfgGK1Personal').value),
+        gk2Verwaltung:  parseNum(document.getElementById('cfgGK2Verwaltung').value),
+        gk2Vertrieb:    parseNum(document.getElementById('cfgGK2Vertrieb').value),
+        gk2Entwicklung: parseNum(document.getElementById('cfgGK2Entwicklung').value),
+        garantie:       parseNum(document.getElementById('cfgGarantie').value),
+        sicherheit:     parseNum(document.getElementById('cfgSicherheit').value),
+        bearbeiter:     document.getElementById('cfgBearbeiter').value,
+        freigabe:       document.getElementById('cfgFreigabe').value,
+        stundensaetze: Object.fromEntries(KOSTENSTRUKTUREN.filter(k => k.unit).map(k => [k.key, getRate(k.key)]))
+      },
+      gruppen
     };
-    input.click();
   }
 
-  // Admin
-  function renderUserList() {
-    const users = getUsers();
+  async function saveQuoteToServer() {
+    try {
+      const qd = buildQuoteData();
+      const res = await api('quotes.php?action=save', {
+        method: 'POST',
+        body: {
+          id: currentQuoteId || 0,
+          titel: qd.titel,
+          kunde: qd.kunde,
+          angebot_nr: qd.angebotNr,
+          json_data: qd
+        }
+      });
+      currentQuoteId = res.id;
+      showToast('Angebot gespeichert' + (qd.angebotNr ? ': ' + qd.angebotNr : ''));
+    } catch (e) {
+      alert('Fehler beim Speichern: ' + e.message);
+    }
+  }
+
+  async function loadQuoteList() {
+    const host = document.getElementById('quoteList');
+    if (!host) return;
+    try {
+      const res = await api('quotes.php?action=list');
+      const quotes = res.quotes || [];
+      if (quotes.length === 0) {
+        host.innerHTML = '<div class="q-empty">Noch keine gespeicherten Angebote.</div>';
+        return;
+      }
+      host.innerHTML = quotes.map(q => `
+        <div class="q-row">
+          <div>
+            <div class="q-title">${escapeHtml(q.titel || 'Ohne Titel')}</div>
+            <div class="q-meta">${escapeHtml(q.angebot_nr || '')} · ${escapeHtml(q.kunde || '–')} · ${(q.updated_at || '').slice(0, 10)}</div>
+          </div>
+          ${currentUser?.role === 'admin' ? '<span class="q-user">' + escapeHtml(q.ersteller) + '</span>' : ''}
+          <button class="q-btn" onclick="openQuote(${q.id})">Öffnen</button>
+          <button class="q-btn del" onclick="deleteQuote(${q.id}, '${escapeHtml(q.titel || '')}')">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      `).join('');
+    } catch (e) {
+      host.innerHTML = '<div class="q-empty">Fehler beim Laden: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
+  async function openQuote(id) {
+    try {
+      const res = await api('quotes.php?action=load&id=' + id);
+      currentQuoteId = res.quote.id;
+      loadFromData(res.quote.json_data);
+      showView('viewCalc');
+      showToast('Angebot geladen: ' + (res.quote.angebot_nr || res.quote.titel));
+    } catch (e) {
+      alert('Fehler: ' + e.message);
+    }
+  }
+
+  async function deleteQuote(id, titel) {
+    if (!confirm('Angebot „' + titel + '" wirklich löschen?')) return;
+    try {
+      await api('quotes.php?action=delete', { method: 'POST', body: { id } });
+      loadQuoteList();
+    } catch (e) {
+      alert('Fehler: ' + e.message);
+    }
+  }
+
+  // ----- Admin: Benutzerverwaltung (Server) -----
+  async function renderUserList() {
     const host = document.getElementById('userList');
-    host.innerHTML = users.map((u, i) => `
-      <div class="user-row">
-        <span><span class="username">${u.username}</span></span>
-        <span style="display:flex;gap:0.5rem;align-items:center;">
-          <span class="role ${u.role === 'admin' ? 'admin' : ''}">${u.role === 'admin' ? 'Admin' : 'User'}</span>
-          ${u.username !== 'admin' ? `<button class="btn-del" title="Löschen" onclick="deleteUser(${i})"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>` : ''}
-        </span>
-      </div>
-    `).join('');
+    try {
+      const res = await api('users.php?action=list');
+      const users = res.users || [];
+      host.innerHTML = users.map(u => `
+        <div class="user-row">
+          <span><span class="username">${escapeHtml(u.username)}</span></span>
+          <span style="display:flex;gap:0.5rem;align-items:center;">
+            <span class="role ${u.role === 'admin' ? 'admin' : ''}">${u.role === 'admin' ? 'Admin' : 'User'}</span>
+            ${u.username !== 'admin' ? `<button class="btn-del" title="Löschen" onclick="deleteUser(${u.id})"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>` : ''}
+          </span>
+        </div>
+      `).join('');
+    } catch (e) {
+      host.innerHTML = '<div class="q-empty">Fehler: ' + escapeHtml(e.message) + '</div>';
+    }
   }
 
-  function addUser() {
+  async function addUser() {
     const u = document.getElementById('newUsername').value.trim();
     const p = document.getElementById('newPassword').value;
     const r = document.getElementById('newRole').value;
     const msg = document.getElementById('adminMsg');
     if (!u || !p) { msg.textContent = 'Benutzername und Passwort erforderlich.'; msg.style.color='#ef4444'; return; }
-    const users = getUsers();
-    if (users.find(x => x.username === u)) { msg.textContent = 'Benutzername existiert bereits.'; msg.style.color='#ef4444'; return; }
-    users.push({ username: u, password: p, role: r });
-    saveUsers(users);
-    document.getElementById('newUsername').value = '';
-    document.getElementById('newPassword').value = '';
-    renderUserList();
-    msg.textContent = 'Benutzer "' + u + '" angelegt.'; msg.style.color='#059669';
+    try {
+      await api('users.php?action=create', { method: 'POST', body: { username: u, password: p, role: r } });
+      document.getElementById('newUsername').value = '';
+      document.getElementById('newPassword').value = '';
+      renderUserList();
+      msg.textContent = 'Benutzer "' + u + '" angelegt.'; msg.style.color='#059669';
+    } catch (e) {
+      msg.textContent = e.message; msg.style.color = '#ef4444';
+    }
   }
 
-  function deleteUser(idx) {
-    const users = getUsers();
-    if (users[idx].username === 'admin') return;
-    if (!confirm('Benutzer "' + users[idx].username + '" löschen?')) return;
-    users.splice(idx, 1);
-    saveUsers(users);
-    renderUserList();
+  async function deleteUser(id) {
+    if (!confirm('Benutzer wirklich löschen?')) return;
+    try {
+      await api('users.php?action=delete', { method: 'POST', body: { id } });
+      renderUserList();
+    } catch (e) {
+      alert('Fehler: ' + e.message);
+    }
   }
 
   // ----- Vorlagen-Verwaltung (Admin) -----
@@ -1954,7 +2092,7 @@
     if (card) card.classList.toggle('collapsed');
   }
 
-  function addTemplate() {
+  async function addTemplate() {
     const inp = document.getElementById('newTplName');
     const msg = document.getElementById('tplMsg');
     const name = inp.value.trim();
@@ -1963,19 +2101,22 @@
     if (tpls.find(t => t.name.toLowerCase() === name.toLowerCase())) {
       msg.textContent = 'Eine Vorlage mit diesem Namen existiert bereits.'; msg.style.color = '#ef4444'; return;
     }
-    tpls.push({ name, items: [] });
-    saveTemplates(tpls);
+    const newTpl = { name, items: [] };
+    await saveTemplateToServer(newTpl);
+    tpls.push(newTpl);
+    populateTemplateDropdown();
     inp.value = '';
     msg.textContent = 'Vorlage „' + name + '" angelegt.'; msg.style.color = '#059669';
     renderTemplateList();
   }
 
-  function deleteTemplate(ti) {
+  async function deleteTemplate(ti) {
     const tpls = getTemplates();
     if (!tpls[ti]) return;
     if (!confirm('Vorlage „' + tpls[ti].name + '" wirklich löschen?')) return;
+    if (tpls[ti].id) await deleteTemplateFromServer(tpls[ti].id);
     tpls.splice(ti, 1);
-    saveTemplates(tpls);
+    populateTemplateDropdown();
     renderTemplateList();
   }
 
@@ -1983,14 +2124,15 @@
     const tpls = getTemplates();
     if (!tpls[ti]) return;
     tpls[ti].name = value;
-    saveTemplates(tpls);
+    saveTemplateToServer(tpls[ti]);
+    populateTemplateDropdown();
   }
 
   function addTemplateItem(ti) {
     const tpls = getTemplates();
     if (!tpls[ti]) return;
     tpls[ti].items.push({ desc: '', kstr: KOSTENSTRUKTUREN[0]?.key || 'material' });
-    saveTemplates(tpls);
+    saveTemplateToServer(tpls[ti]);
     renderTemplateList();
   }
 
@@ -1998,7 +2140,7 @@
     const tpls = getTemplates();
     if (!tpls[ti] || !tpls[ti].items[ii]) return;
     tpls[ti].items.splice(ii, 1);
-    saveTemplates(tpls);
+    saveTemplateToServer(tpls[ti]);
     renderTemplateList();
   }
 
@@ -2006,7 +2148,7 @@
     const tpls = getTemplates();
     if (!tpls[ti] || !tpls[ti].items[ii]) return;
     tpls[ti].items[ii][field] = value;
-    saveTemplates(tpls);
+    saveTemplateToServer(tpls[ti]);
   }
 
   // ----- Produktkatalog -----
@@ -2020,13 +2162,19 @@
   let modalGid = null;
   let modalCatFilter = 'Alle';
 
-  function getProducts() {
-    const raw = localStorage.getItem('ak_catalog');
-    if (!raw) return [];
-    try { return JSON.parse(raw); } catch(e) { return []; }
-  }
-  function saveProducts(list) {
-    localStorage.setItem('ak_catalog', JSON.stringify(list));
+  let _catalogCache = [];
+  function getProducts() { return _catalogCache; }
+
+  async function loadCatalogFromServer() {
+    try {
+      const res = await api('catalog.php?action=list');
+      _catalogCache = (res.products || []).map(p => ({
+        id: p.id, beschreibung: p.beschreibung,
+        hkPreis: parseFloat(p.hk_preis) || 0,
+        vkPreis: parseFloat(p.vk_preis) || 0,
+        kategorie: p.kategorie
+      }));
+    } catch(e) { _catalogCache = []; }
   }
 
   function renderCatTabs(hostId, active, onClick) {
@@ -2094,36 +2242,42 @@
     renderCatalogAdmin();
   }
 
-  function addProduct() {
+  async function addProduct() {
     const desc = document.getElementById('newProdDesc').value.trim();
     const hk = parseDeNum(document.getElementById('newProdHK').value);
     const vk = parseDeNum(document.getElementById('newProdVK').value);
     const kat = document.getElementById('newProdCat').value;
     const msg = document.getElementById('prodMsg');
     if (!desc) { msg.textContent = 'Bitte Beschreibung eingeben.'; msg.style.color = '#ef4444'; return; }
-    const prods = getProducts();
-    prods.push({ beschreibung: desc, hkPreis: hk, vkPreis: vk, kategorie: kat });
-    saveProducts(prods);
-    document.getElementById('newProdDesc').value = '';
-    document.getElementById('newProdHK').value = '';
-    document.getElementById('newProdVK').value = '';
-    msg.textContent = '„' + desc + '" hinzugefügt.'; msg.style.color = '#059669';
-    renderCatalogAdmin();
+    try {
+      const res = await api('catalog.php?action=save', { method: 'POST', body: { beschreibung: desc, hk_preis: hk, vk_preis: vk, kategorie: kat } });
+      _catalogCache.push({ id: res.id, beschreibung: desc, hkPreis: hk, vkPreis: vk, kategorie: kat });
+      document.getElementById('newProdDesc').value = '';
+      document.getElementById('newProdHK').value = '';
+      document.getElementById('newProdVK').value = '';
+      msg.textContent = '„' + desc + '" hinzugefügt.'; msg.style.color = '#059669';
+      renderCatalogAdmin();
+    } catch(e) { msg.textContent = e.message; msg.style.color = '#ef4444'; }
   }
 
-  function deleteProduct(pi) {
+  async function deleteProduct(pi) {
     const prods = getProducts();
     if (!prods[pi]) return;
-    prods.splice(pi, 1);
-    saveProducts(prods);
-    renderCatalogAdmin();
+    try {
+      await api('catalog.php?action=delete', { method: 'POST', body: { id: prods[pi].id } });
+      prods.splice(pi, 1);
+      renderCatalogAdmin();
+    } catch(e) { alert('Fehler: ' + e.message); }
   }
 
   function updateProduct(pi, field, value) {
     const prods = getProducts();
     if (!prods[pi]) return;
     prods[pi][field] = value;
-    saveProducts(prods);
+    const p = prods[pi];
+    api('catalog.php?action=save', { method: 'POST', body: {
+      id: p.id, beschreibung: p.beschreibung, hk_preis: p.hkPreis, vk_preis: p.vkPreis, kategorie: p.kategorie
+    }}).catch(e => console.error('Catalog save error:', e));
   }
 
   // --- CSV Import ---
@@ -2196,24 +2350,22 @@
     document.getElementById('csvFileInput').value = '';
   }
 
-  function confirmCSVImport() {
+  async function confirmCSVImport() {
     if (!pendingCSVData) return;
     const kat = document.getElementById('csvImportCat')?.value || 'Sonstiges';
-    const prods = getProducts();
-    pendingCSVData.forEach(r => {
-      prods.push({
-        beschreibung: r[0] || '',
-        hkPreis: parseDeNum(r[1] || '0'),
-        vkPreis: parseDeNum(r[2] || '0'),
-        kategorie: r[3] || kat
-      });
-    });
-    saveProducts(prods);
-    const msg = document.getElementById('prodMsg');
-    msg.textContent = pendingCSVData.length + ' Produkte importiert.';
-    msg.style.color = '#059669';
-    cancelCSVImport();
-    renderCatalogAdmin();
+    const products = pendingCSVData.map(r => ({
+      beschreibung: r[0] || '', hk_preis: parseDeNum(r[1] || '0'),
+      vk_preis: parseDeNum(r[2] || '0'), kategorie: r[3] || kat
+    }));
+    try {
+      const res = await api('catalog.php?action=bulkImport', { method: 'POST', body: { products } });
+      const msg = document.getElementById('prodMsg');
+      msg.textContent = (res.imported || pendingCSVData.length) + ' Produkte importiert.';
+      msg.style.color = '#059669';
+      cancelCSVImport();
+      await loadCatalogFromServer();
+      renderCatalogAdmin();
+    } catch(e) { alert('Import-Fehler: ' + e.message); }
   }
 
   // Drag & Drop
@@ -2318,16 +2470,16 @@
   });
 
   // Observer für Admin-View
-  const adminObserver = new MutationObserver(() => {
+  const adminObserver = new MutationObserver(async () => {
     if (document.getElementById('viewAdmin').classList.contains('active')) {
       renderUserList();
+      await loadTemplatesFromServer();
       renderTemplateList();
+      await loadCatalogFromServer();
       renderCatalogAdmin();
     }
   });
   adminObserver.observe(document.getElementById('viewAdmin'), { attributes: true, attributeFilter: ['class'] });
-
-  initUsers();
 
   // =======================================================================
   // Kalkulator
@@ -2353,40 +2505,35 @@
   let groupCounter = 0;
 
   // --- Vorlagen für Überschriften mit vordefinierten Unterpositionen ---
-  // Default-Vorlagen werden beim ersten Start in localStorage abgelegt.
-  // Anschließend verwaltet der Admin sie über den Admin-Bereich.
-  const DEFAULT_TEMPLATES = [
-    {
-      name: 'Anzeiger',
-      items: [
-        { desc: 'Material',           kstr: 'material' },
-        { desc: 'Konstruktion',       kstr: 'konstr' },
-        { desc: 'HW Design',          kstr: 'hwdesign' },
-        { desc: 'Projektmanagement',  kstr: 'pm' },
-        { desc: 'Versand',            kstr: 'sonder' },
-        { desc: 'Sonstiges',          kstr: 'sonder' },
-      ]
-    },
-  ];
+  // Vorlagen-Cache (geladen vom Server)
+  let _templatesCache = [];
 
-  function getTemplates() {
-    const raw = localStorage.getItem('ak_templates');
-    if (!raw) {
-      localStorage.setItem('ak_templates', JSON.stringify(DEFAULT_TEMPLATES));
-      return JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
-    }
-    try { return JSON.parse(raw); } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); }
-  }
-  function saveTemplates(list) {
-    localStorage.setItem('ak_templates', JSON.stringify(list));
+  function getTemplates() { return _templatesCache; }
+
+  async function loadTemplatesFromServer() {
+    try {
+      const res = await api('templates.php?action=list');
+      _templatesCache = (res.templates || []).map(t => ({ id: t.id, name: t.name, items: t.items || [] }));
+    } catch(e) { _templatesCache = []; }
     populateTemplateDropdown();
   }
+
+  async function saveTemplateToServer(tpl) {
+    try {
+      const res = await api('templates.php?action=save', { method: 'POST', body: { id: tpl.id || 0, name: tpl.name, items: tpl.items } });
+      if (!tpl.id) tpl.id = res.id;
+    } catch(e) { console.error('Template save error:', e); }
+  }
+
+  async function deleteTemplateFromServer(id) {
+    try { await api('templates.php?action=delete', { method: 'POST', body: { id } }); } catch(e) {}
+  }
+
   function populateTemplateDropdown() {
     const sel = document.getElementById('templateSelect');
     if (!sel) return;
-    const tpls = getTemplates();
     sel.innerHTML = '<option value="">— Vorlage wählen —</option>' +
-      tpls.map((t, i) => `<option value="${i}">${escapeHtml(t.name)}</option>`).join('');
+      _templatesCache.map((t, i) => `<option value="${i}">${escapeHtml(t.name)}</option>`).join('');
   }
 
   function formatEUR(v) {
@@ -3039,65 +3186,14 @@
   }
 
   function exportJSON() {
-    const gruppen = [];
-    let current = null;
-    document.querySelectorAll('#quoteBody tr').forEach(tr => {
-      if (tr.dataset.type === 'heading') {
-        const stkInput = tr.querySelector('[data-f="grp-stk"]');
-        const hposInput = tr.querySelector('[data-f="hpos"]');
-        current = {
-          titel: tr.querySelector('.h-title-cell input').value,
-          posNr: hposInput ? hposInput.value : '',
-          stueck: stkInput ? parseInt(stkInput.value) || 1 : 1,
-          positionen: []
-        };
-        gruppen.push(current);
-      } else if (tr.dataset.type === 'item' && current) {
-        const r = readRow(parseInt(tr.dataset.id, 10));
-        if (!r) return;
-        const posInput = tr.querySelector('[data-f="pos"]');
-        r.posNr = posInput ? posInput.value : '';
-        r.posEdited = posInput && posInput.dataset.edited === '1';
-        delete r.id;
-        delete r.gid;
-        current.positionen.push(r);
-      }
-    });
-
-    const exportDate = new Date().toISOString();
-    const data = {
-      _format: 'angebotskalkulator-v1',
-      _exportiert: exportDate,
-      titel:      document.getElementById('angebotTitel').value,
-      kunde:      document.getElementById('kundeName').value,
-      angebotNr:  document.getElementById('angebotNr').value,
-      datum:      document.getElementById('angebotDatum').value,
-      gueltigBis: document.getElementById('gueltigBis').value,
-      config: {
-        mgk: parseFloat(document.getElementById('cfgMGK').value) || 4,
-        fgk: parseFloat(document.getElementById('cfgFGK').value) || 6,
-        defaultDeckung: getDefaultDeckung(),
-        preisnachlass: getPreisnachlass(),
-        gk1Material:    parseNum(document.getElementById('cfgGK1Material').value),
-        gk1Personal:    parseNum(document.getElementById('cfgGK1Personal').value),
-        gk2Verwaltung:  parseNum(document.getElementById('cfgGK2Verwaltung').value),
-        gk2Vertrieb:    parseNum(document.getElementById('cfgGK2Vertrieb').value),
-        gk2Entwicklung: parseNum(document.getElementById('cfgGK2Entwicklung').value),
-        garantie:       parseNum(document.getElementById('cfgGarantie').value),
-        sicherheit:     parseNum(document.getElementById('cfgSicherheit').value),
-        bearbeiter:     document.getElementById('cfgBearbeiter').value,
-        freigabe:       document.getElementById('cfgFreigabe').value,
-        stundensaetze: Object.fromEntries(KOSTENSTRUKTUREN.filter(k => k.unit).map(k => [k.key, getRate(k.key)]))
-      },
-      gruppen
-    };
-
+    const data = buildQuoteData();
+    data._exportiert = new Date().toISOString();
     const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const filename = (data.angebotNr || 'angebot') + '_' + exportDate.slice(0,10) + '.json';
+    const filename = (data.angebotNr || 'angebot') + '_' + data._exportiert.slice(0,10) + '.json';
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
@@ -3931,11 +4027,12 @@ input.cfg-pct:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(
     syncCeoExtView();
   };
 
-  // Vorlagen-Dropdown befüllen (Quelle: localStorage via getTemplates)
-  populateTemplateDropdown();
-
-  // Init: Konfiguration vorbereiten, aber kein Angebot laden
-  // (Angebot wird erst über Startseite erstellt/geladen)
+  // Vorlagen + Katalog vom Server laden, dann Session prüfen
+  (async function init() {
+    await loadTemplatesFromServer();
+    await loadCatalogFromServer();
+    await checkSession();
+  })();
 </script>
 </body>
 </html>
