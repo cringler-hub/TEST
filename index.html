@@ -1135,6 +1135,67 @@
       font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
     }
     .user-row .role.admin { background: #fff5f6; color: var(--fw-primary); }
+
+    .tpl-card {
+      border: 1px solid var(--fw-border); border-radius: 8px;
+      margin-bottom: 0.85rem; background: var(--fw-white); overflow: hidden;
+    }
+    .tpl-head {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.65rem 0.85rem; background: var(--fw-bg-soft);
+      border-bottom: 1px solid var(--fw-border-s);
+    }
+    .tpl-head input.tpl-name {
+      flex: 1; padding: 0.45rem 0.6rem; border: 1px solid var(--fw-border);
+      border-radius: 5px; font-size: 0.92rem; font-family: inherit;
+      font-weight: 600; color: var(--fw-dark);
+    }
+    .tpl-head .tpl-count {
+      font-size: 0.75rem; color: var(--fw-muted); font-weight: 600;
+      padding: 0.25rem 0.6rem; background: var(--fw-white);
+      border: 1px solid var(--fw-border-s); border-radius: 12px;
+    }
+    .tpl-body { padding: 0.7rem 0.85rem; }
+    .tpl-items { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .tpl-items th {
+      text-align: left; font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--fw-muted); font-weight: 700;
+      padding: 0.35rem 0.4rem; border-bottom: 1px solid var(--fw-border-s);
+    }
+    .tpl-items td { padding: 0.3rem 0.4rem; }
+    .tpl-items input, .tpl-items select {
+      width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--fw-border);
+      border-radius: 5px; font-size: 0.85rem; font-family: inherit; background: var(--fw-white);
+    }
+    .tpl-items td.tpl-pos { width: 40px; color: var(--fw-muted); font-weight: 600; text-align: center; }
+    .tpl-items td.tpl-act { width: 36px; text-align: center; }
+    .tpl-items .btn-del-sm {
+      background: transparent; border: 0; cursor: pointer;
+      color: var(--fw-muted); padding: 4px; border-radius: 4px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .tpl-items .btn-del-sm:hover { color: #ef4444; background: #fef2f2; }
+    .tpl-actions {
+      display: flex; gap: 0.5rem; padding: 0.6rem 0.85rem;
+      border-top: 1px solid var(--fw-border-s); background: #fafafa;
+      justify-content: flex-end;
+    }
+    .tpl-actions .btn-add-pos {
+      background: var(--fw-white); border: 1px solid var(--fw-border);
+      color: var(--fw-dark); padding: 0.4rem 0.85rem; border-radius: 5px;
+      font-size: 0.82rem; cursor: pointer; font-weight: 600; margin-right: auto;
+    }
+    .tpl-actions .btn-add-pos:hover { border-color: var(--fw-primary); color: var(--fw-primary); }
+    .tpl-actions .btn-tpl-del {
+      background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
+      padding: 0.4rem 0.85rem; border-radius: 5px; font-size: 0.82rem;
+      cursor: pointer; font-weight: 600;
+    }
+    .tpl-actions .btn-tpl-del:hover { background: #fee2e2; }
+    .tpl-empty {
+      text-align: center; padding: 1rem; color: var(--fw-muted);
+      font-size: 0.85rem; font-style: italic;
+    }
     .add-user-form {
       display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 0.5rem; align-items: end;
     }
@@ -1260,6 +1321,15 @@
           <button class="btn-primary" onclick="addUser()" style="padding:0.55rem 1.1rem;">Anlegen</button>
         </div>
         <div id="adminMsg" style="margin-top:0.85rem;font-size:0.85rem;min-height:1.2em;color:var(--fw-primary);"></div>
+
+        <h3 style="margin-top:2rem;">Vorlagen verwalten</h3>
+        <p style="font-size:0.82rem;color:var(--fw-muted);margin:0 0 0.8rem;">Vorlagen werden in der Angebotskalkulation als Schnellauswahl angeboten.</p>
+        <div id="templateList"></div>
+        <div style="display:flex;gap:0.5rem;margin-top:0.85rem;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="newTplName" placeholder="Name der neuen Vorlage" style="flex:1;min-width:220px;padding:0.55rem 0.7rem;border:1px solid var(--fw-border);border-radius:6px;font-size:0.85rem;font-family:inherit;" />
+          <button class="btn-primary" onclick="addTemplate()" style="padding:0.55rem 1.1rem;">Vorlage anlegen</button>
+        </div>
+        <div id="tplMsg" style="margin-top:0.6rem;font-size:0.85rem;min-height:1.2em;color:var(--fw-primary);"></div>
       </div>
     </div>
   </div>
@@ -1659,6 +1729,114 @@
     renderUserList();
   }
 
+  // ----- Vorlagen-Verwaltung (Admin) -----
+  function renderTemplateList() {
+    const host = document.getElementById('templateList');
+    if (!host) return;
+    const tpls = getTemplates();
+    if (tpls.length === 0) {
+      host.innerHTML = '<div class="tpl-empty">Noch keine Vorlagen angelegt.</div>';
+      return;
+    }
+    host.innerHTML = tpls.map((t, ti) => `
+      <div class="tpl-card" data-ti="${ti}">
+        <div class="tpl-head">
+          <input type="text" class="tpl-name" value="${escapeHtml(t.name)}"
+                 oninput="updateTemplateName(${ti}, this.value)" />
+          <span class="tpl-count">${t.items.length} Position${t.items.length === 1 ? '' : 'en'}</span>
+        </div>
+        <div class="tpl-body">
+          ${t.items.length === 0
+            ? '<div class="tpl-empty">Noch keine Positionen. Mit „Position hinzufügen" ergänzen.</div>'
+            : `<table class="tpl-items">
+                <thead><tr>
+                  <th>#</th>
+                  <th>Bezeichnung</th>
+                  <th>Kostenstruktur</th>
+                  <th></th>
+                </tr></thead>
+                <tbody>
+                  ${t.items.map((it, ii) => `
+                    <tr>
+                      <td class="tpl-pos">${ii + 1}</td>
+                      <td><input type="text" value="${escapeHtml(it.desc || '')}"
+                                 oninput="updateTemplateItem(${ti}, ${ii}, 'desc', this.value)" /></td>
+                      <td><select onchange="updateTemplateItem(${ti}, ${ii}, 'kstr', this.value)">
+                        ${KOSTENSTRUKTUREN.map(k => `<option value="${k.key}" ${k.key === it.kstr ? 'selected' : ''}>${escapeHtml(k.name)}</option>`).join('')}
+                      </select></td>
+                      <td class="tpl-act">
+                        <button class="btn-del-sm" title="Position entfernen" onclick="removeTemplateItem(${ti}, ${ii})">
+                          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>`}
+        </div>
+        <div class="tpl-actions">
+          <button class="btn-add-pos" onclick="addTemplateItem(${ti})">+ Position hinzufügen</button>
+          <button class="btn-tpl-del" onclick="deleteTemplate(${ti})">Vorlage löschen</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function addTemplate() {
+    const inp = document.getElementById('newTplName');
+    const msg = document.getElementById('tplMsg');
+    const name = inp.value.trim();
+    if (!name) { msg.textContent = 'Bitte einen Namen eingeben.'; msg.style.color = '#ef4444'; return; }
+    const tpls = getTemplates();
+    if (tpls.find(t => t.name.toLowerCase() === name.toLowerCase())) {
+      msg.textContent = 'Eine Vorlage mit diesem Namen existiert bereits.'; msg.style.color = '#ef4444'; return;
+    }
+    tpls.push({ name, items: [] });
+    saveTemplates(tpls);
+    inp.value = '';
+    msg.textContent = 'Vorlage „' + name + '" angelegt.'; msg.style.color = '#059669';
+    renderTemplateList();
+  }
+
+  function deleteTemplate(ti) {
+    const tpls = getTemplates();
+    if (!tpls[ti]) return;
+    if (!confirm('Vorlage „' + tpls[ti].name + '" wirklich löschen?')) return;
+    tpls.splice(ti, 1);
+    saveTemplates(tpls);
+    renderTemplateList();
+  }
+
+  function updateTemplateName(ti, value) {
+    const tpls = getTemplates();
+    if (!tpls[ti]) return;
+    tpls[ti].name = value;
+    saveTemplates(tpls);
+  }
+
+  function addTemplateItem(ti) {
+    const tpls = getTemplates();
+    if (!tpls[ti]) return;
+    tpls[ti].items.push({ desc: '', kstr: KOSTENSTRUKTUREN[0]?.key || 'material' });
+    saveTemplates(tpls);
+    renderTemplateList();
+  }
+
+  function removeTemplateItem(ti, ii) {
+    const tpls = getTemplates();
+    if (!tpls[ti] || !tpls[ti].items[ii]) return;
+    tpls[ti].items.splice(ii, 1);
+    saveTemplates(tpls);
+    renderTemplateList();
+  }
+
+  function updateTemplateItem(ti, ii, field, value) {
+    const tpls = getTemplates();
+    if (!tpls[ti] || !tpls[ti].items[ii]) return;
+    tpls[ti].items[ii][field] = value;
+    saveTemplates(tpls);
+  }
+
   // Enter-Taste im Login
   document.getElementById('loginPass').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') doLogin();
@@ -1669,7 +1847,10 @@
 
   // Observer für Admin-View
   const adminObserver = new MutationObserver(() => {
-    if (document.getElementById('viewAdmin').classList.contains('active')) renderUserList();
+    if (document.getElementById('viewAdmin').classList.contains('active')) {
+      renderUserList();
+      renderTemplateList();
+    }
   });
   adminObserver.observe(document.getElementById('viewAdmin'), { attributes: true, attributeFilter: ['class'] });
 
@@ -1699,7 +1880,9 @@
   let groupCounter = 0;
 
   // --- Vorlagen für Überschriften mit vordefinierten Unterpositionen ---
-  const HEADING_TEMPLATES = [
+  // Default-Vorlagen werden beim ersten Start in localStorage abgelegt.
+  // Anschließend verwaltet der Admin sie über den Admin-Bereich.
+  const DEFAULT_TEMPLATES = [
     {
       name: 'Anzeiger',
       items: [
@@ -1712,6 +1895,26 @@
       ]
     },
   ];
+
+  function getTemplates() {
+    const raw = localStorage.getItem('ak_templates');
+    if (!raw) {
+      localStorage.setItem('ak_templates', JSON.stringify(DEFAULT_TEMPLATES));
+      return JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+    }
+    try { return JSON.parse(raw); } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); }
+  }
+  function saveTemplates(list) {
+    localStorage.setItem('ak_templates', JSON.stringify(list));
+    populateTemplateDropdown();
+  }
+  function populateTemplateDropdown() {
+    const sel = document.getElementById('templateSelect');
+    if (!sel) return;
+    const tpls = getTemplates();
+    sel.innerHTML = '<option value="">— Vorlage wählen —</option>' +
+      tpls.map((t, i) => `<option value="${i}">${escapeHtml(t.name)}</option>`).join('');
+  }
 
   function formatEUR(v) {
     return (v || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
@@ -1761,7 +1964,8 @@
     const sel = document.getElementById('templateSelect');
     const idx = parseInt(sel.value);
     if (isNaN(idx)) return;
-    const tmpl = HEADING_TEMPLATES[idx];
+    const tmpl = getTemplates()[idx];
+    if (!tmpl) return;
     const gid = addHeading(tmpl.name);
     // Remove the default empty item that addHeading creates
     const defaultItem = document.querySelector(`#quoteBody tr.item-row[data-gid="${gid}"]`);
@@ -3252,14 +3456,8 @@ input.cfg-pct:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(
     syncCeoExtView();
   };
 
-  // Vorlagen-Dropdown befüllen
-  const tmplSel = document.getElementById('templateSelect');
-  HEADING_TEMPLATES.forEach((t, i) => {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = t.name;
-    tmplSel.appendChild(opt);
-  });
+  // Vorlagen-Dropdown befüllen (Quelle: localStorage via getTemplates)
+  populateTemplateDropdown();
 
   // Init: Konfiguration vorbereiten, aber kein Angebot laden
   // (Angebot wird erst über Startseite erstellt/geladen)
