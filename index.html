@@ -1821,10 +1821,13 @@
     `;
     tbody.appendChild(htr);
 
-    // Mark heading pos as user-edited when changed
+    // Mark heading pos as user-edited when changed; also sync CEO views
     htr.querySelector('[data-f="hpos"]').addEventListener('input', function() {
       this.dataset.edited = this.value ? '1' : '';
+      syncCeoBoth();
     });
+    // Heading title → sync CEO views (text only)
+    htr.querySelector('.h-title-cell input').addEventListener('input', syncCeoBoth);
 
     // Add-sub-item button row
     const atr = document.createElement('tr');
@@ -1886,7 +1889,7 @@
     tr.innerHTML = `
       <td class="col-pos"><input type="text" data-f="pos" value="" /></td>
       <td class="col-desc">
-        <input type="text" placeholder="Leistung / Produkt" value="${escapeHtml(desc)}" data-f="desc" />
+        <input type="text" placeholder="Leistung / Produkt" value="${escapeHtml(desc)}" data-f="desc" oninput="syncCeoBoth()" />
       </td>
       <td class="col-kstr">
         <select data-f="kstr" onchange="onKstrChange(${id})">${buildKstrOptions(kstr)}</select>
@@ -1938,6 +1941,7 @@
     // Mark pos input as user-edited when changed
     tr.querySelector('[data-f="pos"]').addEventListener('input', function() {
       this.dataset.edited = this.value ? '1' : '';
+      syncCeoBoth();
     });
 
     // Insert before the add-sub-row of this group
@@ -1985,6 +1989,7 @@
       items[idx + 1].after(tr);
     }
     renumberAll();
+    syncCeoBoth();
   }
 
   // --- Move entire heading group (heading + items + add-sub-row) ---
@@ -2544,6 +2549,12 @@
     if (el) el.addEventListener('input', recalcAll);
   });
 
+  // Project meta fields → CEO views (no recalc needed, just text)
+  ['angebotTitel','kundeName','angebotNr','angebotDatum','gueltigBis'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', syncCeoBoth);
+  });
+
   // --- CEO-Ansicht ---
   let ceoWin = null;
 
@@ -2909,7 +2920,14 @@ td.pct{color:#6b7280}
       'c-garantie': f(d.garantie),
       'c-sicherheit': f(d.sicherheit),
       'c-gewinn': f(d.gewinn),
-      'c-gewinnPct': pct(d.gewinnPct)
+      'c-gewinnPct': pct(d.gewinnPct),
+      'c-meta-angebotNr':   d.angebotNr || '–',
+      'c-meta-titel':       d.titel,
+      'c-meta-kunde':       d.kunde || '–',
+      'c-meta-bearbeiter':  d.bearbeiter || '–',
+      'c-meta-freigabe':    d.freigabe || '–',
+      'c-meta-datum':       'Datum: ' + (d.datum || '–'),
+      'c-meta-headerline':  `${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${d.datum || '–'}`
     };
   }
 
@@ -2920,9 +2938,9 @@ td.pct{color:#6b7280}
       <table class="ext">
         <tbody>
           <tr class="section"><td colspan="4">PROJEKT</td></tr>
-          <tr><td></td><td>Angebots-Nr.</td><td colspan="2">${d.angebotNr || '–'}</td></tr>
-          <tr><td></td><td>Angebots-Titel</td><td colspan="2">${d.titel}</td></tr>
-          <tr><td></td><td>Kunde</td><td colspan="2">${d.kunde || '–'}</td></tr>
+          <tr><td></td><td>Angebots-Nr.</td><td colspan="2" id="c-meta-angebotNr">${d.angebotNr || '–'}</td></tr>
+          <tr><td></td><td>Angebots-Titel</td><td colspan="2" id="c-meta-titel">${d.titel}</td></tr>
+          <tr><td></td><td>Kunde</td><td colspan="2" id="c-meta-kunde">${d.kunde || '–'}</td></tr>
 
           <tr class="section umsatz"><td>UMSATZ</td><td></td><td class="num strong" id="c-umsatz">${f(d.umsatz)}</td><td></td></tr>
           <tr><td></td><td>Lieferungen</td><td class="num" id="c-umsatzLieferungen">${f(d.umsatzLieferungen)}</td><td></td></tr>
@@ -2966,8 +2984,8 @@ td.pct{color:#6b7280}
           <tr class="section gewinn"><td>GEWINN</td><td></td><td class="num strong" id="c-gewinn">${f(d.gewinn)}</td><td class="num small" id="c-gewinnPct">${pct(d.gewinnPct)}</td></tr>
 
           <tr class="section sig"><td>BEARBEITER / FREIGABE</td><td></td><td></td><td></td></tr>
-          <tr><td></td><td>Angebotsleiter</td><td>${d.bearbeiter || '–'}</td><td>Datum: ${d.datum || '–'}</td></tr>
-          <tr><td></td><td>Freigabe</td><td>${d.freigabe || '–'}</td><td></td></tr>
+          <tr><td></td><td>Angebotsleiter</td><td id="c-meta-bearbeiter">${d.bearbeiter || '–'}</td><td id="c-meta-datum">Datum: ${d.datum || '–'}</td></tr>
+          <tr><td></td><td>Freigabe</td><td id="c-meta-freigabe">${d.freigabe || '–'}</td><td></td></tr>
         </tbody>
       </table>
     `;
@@ -3021,7 +3039,7 @@ input.cfg-pct:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(
   <header>
     <div>
       <h1>Kalkulationsübersicht (I) — Deckungsbeitrag</h1>
-      <div class="sub">${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${d.datum || '–'}</div>
+      <div class="sub" id="c-meta-headerline">${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${d.datum || '–'}</div>
     </div>
     <div class="brand">Funkwerk · Erweiterte CEO-Sicht</div>
   </header>
@@ -3085,6 +3103,12 @@ input.cfg-pct:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(
     const d = buildCeoExtData();
     // Only update calculated cells; the % inputs in the popup keep user focus.
     ceoExtWin.postMessage({ type: 'ceo-ext-cells', cells: getCeoExtCellMap(d) }, '*');
+  }
+
+  // Trigger both CEO views without recomputing rows (for non-numeric changes)
+  function syncCeoBoth() {
+    syncCeoView();
+    syncCeoExtView();
   }
 
   // Receive % updates from popup → write into config field & recalc (which triggers sync back)
