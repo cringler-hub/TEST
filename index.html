@@ -1143,8 +1143,17 @@
     .tpl-head {
       display: flex; align-items: center; gap: 0.6rem;
       padding: 0.65rem 0.85rem; background: var(--fw-bg-soft);
-      border-bottom: 1px solid var(--fw-border-s);
+      border-bottom: 1px solid var(--fw-border-s); cursor: pointer;
     }
+    .tpl-head:hover { background: #eef0f4; }
+    .tpl-toggle {
+      background: transparent; border: 0; cursor: pointer; color: var(--fw-muted);
+      font-size: 0.9rem; line-height: 1; padding: 2px 4px; transition: transform .15s;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .tpl-card.collapsed .tpl-toggle { transform: rotate(-90deg); }
+    .tpl-card.collapsed .tpl-body,
+    .tpl-card.collapsed .tpl-actions { display: none; }
     .tpl-head input.tpl-name {
       flex: 1; padding: 0.45rem 0.6rem; border: 1px solid var(--fw-border);
       border-radius: 5px; font-size: 0.92rem; font-family: inherit;
@@ -1155,6 +1164,12 @@
       padding: 0.25rem 0.6rem; background: var(--fw-white);
       border: 1px solid var(--fw-border-s); border-radius: 12px;
     }
+    .tpl-head .btn-tpl-del {
+      background: transparent; border: 1px solid transparent; color: var(--fw-muted);
+      padding: 0.35rem 0.6rem; border-radius: 5px; font-size: 0.78rem;
+      cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem;
+    }
+    .tpl-head .btn-tpl-del:hover { color: #dc2626; background: #fef2f2; border-color: #fecaca; }
     .tpl-body { padding: 0.7rem 0.85rem; }
     .tpl-items { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     .tpl-items th {
@@ -1178,20 +1193,13 @@
     .tpl-actions {
       display: flex; gap: 0.5rem; padding: 0.6rem 0.85rem;
       border-top: 1px solid var(--fw-border-s); background: #fafafa;
-      justify-content: flex-end;
     }
     .tpl-actions .btn-add-pos {
       background: var(--fw-white); border: 1px solid var(--fw-border);
       color: var(--fw-dark); padding: 0.4rem 0.85rem; border-radius: 5px;
-      font-size: 0.82rem; cursor: pointer; font-weight: 600; margin-right: auto;
+      font-size: 0.82rem; cursor: pointer; font-weight: 600;
     }
     .tpl-actions .btn-add-pos:hover { border-color: var(--fw-primary); color: var(--fw-primary); }
-    .tpl-actions .btn-tpl-del {
-      background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
-      padding: 0.4rem 0.85rem; border-radius: 5px; font-size: 0.82rem;
-      cursor: pointer; font-weight: 600;
-    }
-    .tpl-actions .btn-tpl-del:hover { background: #fee2e2; }
     .tpl-empty {
       text-align: center; padding: 1rem; color: var(--fw-muted);
       font-size: 0.85rem; font-style: italic;
@@ -1739,11 +1747,16 @@
       return;
     }
     host.innerHTML = tpls.map((t, ti) => `
-      <div class="tpl-card" data-ti="${ti}">
-        <div class="tpl-head">
+      <div class="tpl-card collapsed" data-ti="${ti}">
+        <div class="tpl-head" onclick="toggleTemplate(${ti}, event)">
+          <span class="tpl-toggle">▾</span>
           <input type="text" class="tpl-name" value="${escapeHtml(t.name)}"
-                 oninput="updateTemplateName(${ti}, this.value)" />
+                 onclick="event.stopPropagation()" oninput="updateTemplateName(${ti}, this.value)" />
           <span class="tpl-count">${t.items.length} Position${t.items.length === 1 ? '' : 'en'}</span>
+          <button class="btn-tpl-del" title="Vorlage löschen" onclick="event.stopPropagation(); deleteTemplate(${ti})">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Löschen
+          </button>
         </div>
         <div class="tpl-body">
           ${t.items.length === 0
@@ -1776,10 +1789,14 @@
         </div>
         <div class="tpl-actions">
           <button class="btn-add-pos" onclick="addTemplateItem(${ti})">+ Position hinzufügen</button>
-          <button class="btn-tpl-del" onclick="deleteTemplate(${ti})">Vorlage löschen</button>
         </div>
       </div>
     `).join('');
+  }
+
+  function toggleTemplate(ti, event) {
+    const card = document.querySelector(`.tpl-card[data-ti="${ti}"]`);
+    if (card) card.classList.toggle('collapsed');
   }
 
   function addTemplate() {
