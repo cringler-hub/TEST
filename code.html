@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SUSI - AI Chat Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "surface-container-highest": "#e2e2e2",
+                        "surface-container-low": "#f4f3f3",
+                        "on-secondary-fixed": "#2f1121",
+                        "on-secondary-fixed-variant": "#613c4d",
+                        "surface": "#f9f9f9",
+                        "tertiary-fixed": "#e3e2e2",
+                        "background": "#f9f9f9",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "on-primary-fixed": "#3f001a",
+                        "tertiary-container": "#3c3d3d",
+                        "on-background": "#1a1c1c",
+                        "primary-fixed-dim": "#ffb1c4",
+                        "on-tertiary-container": "#a8a7a7",
+                        "tertiary": "#262727",
+                        "on-surface-variant": "#544246",
+                        "surface-dim": "#dadada",
+                        "outline": "#877276",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "surface-tint": "#9d3c5c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#eeeeee",
+                        "secondary-container": "#fdc9de",
+                        "outline-variant": "#dac0c5",
+                        "primary": "#540025",
+                        "secondary": "#7b5364",
+                        "primary-container": "#721a3b",
+                        "on-surface": "#1a1c1c",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#ffd8e7",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e2e2e2",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#7f2545",
+                        "on-secondary-container": "#7a5263",
+                        "secondary-fixed-dim": "#ebb9cd",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed": "#ffd9e1",
+                        "surface-bright": "#f9f9f9",
+                        "on-primary-container": "#f784a5",
+                        "inverse-on-surface": "#f1f1f1",
+                        "inverse-surface": "#2f3131",
+                        "inverse-primary": "#ffb1c4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .headline-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        /* Custom Scrollbar for side panel */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e2e2e2;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="text-on-background bg-surface flex h-screen overflow-hidden">
+<!-- SideNavBar Component -->
+<aside class="hidden md:flex h-screen w-64 border-r border-[#e2e2e2] dark:border-zinc-800 bg-[#f4f3f3] dark:bg-zinc-900 flex-col sticky left-0 top-0 overflow-y-auto z-40">
+<!-- Header / Identity -->
+<div class="px-6 py-8 flex flex-col gap-1">
+<h1 class="font-['Space_Grotesk'] font-bold text-[#540025] dark:text-white text-xl tracking-tighter uppercase">SUSI</h1>
+<p class="font-['Inter'] font-medium text-[10px] uppercase tracking-[0.2em] text-zinc-500">Technical Sovereign</p>
+</div>
+<!-- CTA Action -->
+<div class="px-4 mb-8">
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-3 rounded-lg font-label text-sm font-bold tracking-tight hover:bg-primary-container transition-all active:opacity-70">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                New Session
+            </button>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex-1 flex flex-col px-2 gap-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm bg-white dark:bg-zinc-800 text-[#540025] dark:text-white border-l-4 border-[#540025] font-['Inter'] font-medium text-sm transition-all cursor-pointer" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="chat_bubble" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+                Chat
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800/50 font-['Inter'] font-medium text-sm transition-all cursor-pointer" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="database">database</span>
+                Knowledge Base
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800/50 font-['Inter'] font-medium text-sm transition-all cursor-pointer" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="history">history</span>
+                History
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800/50 font-['Inter'] font-medium text-sm transition-all cursor-pointer" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+                Settings
+            </a>
+</nav>
+<!-- Footer Tabs -->
+<div class="mt-auto p-4 border-t border-[#e2e2e2] dark:border-zinc-800 bg-surface-container-low/50">
+<div class="flex flex-col gap-1 mb-4">
+<a class="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:text-primary transition-colors text-xs font-medium" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="menu_book">menu_book</span>
+                    Documentation
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:text-primary transition-colors text-xs font-medium" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="help_outline">help_outline</span>
+                    Support
+                </a>
+</div>
+<div class="flex items-center gap-3 px-4 py-2 border-t border-[#e2e2e2] pt-4">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional headshot of an engineer in a clean white studio with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASDYnoOnbqKQftSfXuCNDIm_jJV8QhdWrM1INyXfTc4QEeFRmzRG0VRoBwopNxQXVVHwNMDuU6Mn3qQLS4ghtk2sgMWKRvESYFn0MMSa1GwIthdjwtmpglNw9yYedaq0Yl5ue_QwGfsbIJ0U7egs5x434e9Nd8BvMC2M-F77V0yYg4NPYJKjgO1GL3lJsK-1vLo_DjgUFFCIhrFDM0FBMMtr2WsDxKUsRHTk-znzHNxpfhGQqf7KMHfaLpxhWeqGQIUc6QbK-ARrFK"/>
+</div>
+<div class="flex flex-col">
+<p class="text-xs font-bold text-on-surface">Alex Sovereign</p>
+<p class="text-[10px] text-zinc-500">v1.0.4-stable</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col relative h-full bg-surface">
+<!-- TopNavBar Component -->
+<header class="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md fixed top-0 w-full z-30 md:w-[calc(100%-16rem)] md:right-0">
+<div class="flex justify-between items-center px-8 py-4 max-w-full mx-auto">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+<span class="font-['Space_Grotesk'] text-sm font-bold tracking-tight text-[#540025] uppercase">SUSI Status: Operational</span>
+</div>
+<div class="hidden lg:flex items-center gap-4 text-xs font-label uppercase tracking-widest text-zinc-400">
+<span class="text-primary font-bold">Session ID: 882-AXO</span>
+<div class="w-1 h-1 bg-zinc-300 rounded-full"></div>
+<span>Latency: 42ms</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-4">
+<a class="text-zinc-500 hover:text-[#721a3b] transition-colors text-xs font-medium uppercase tracking-widest" href="#">Enterprise</a>
+<a class="text-zinc-500 hover:text-[#721a3b] transition-colors text-xs font-medium uppercase tracking-widest" href="#">Technical Spec</a>
+</div>
+<div class="h-6 w-[1px] bg-[#eeeeee] dark:bg-zinc-800 mx-2"></div>
+<button class="bg-primary text-white px-4 py-2 rounded text-xs font-bold font-label uppercase tracking-tighter hover:opacity-90 transition-all">Get Started</button>
+</div>
+</div>
+<div class="bg-[#eeeeee] dark:bg-zinc-800 h-[1px]"></div>
+</header>
+<!-- Chat Canvas -->
+<section class="flex-1 overflow-y-auto pt-24 pb-32 px-4 md:px-12 lg:px-24">
+<div class="max-w-4xl mx-auto flex flex-col gap-12">
+<!-- System Intro / Welcome -->
+<div class="text-center py-12 flex flex-col items-center">
+<div class="w-16 h-16 bg-primary-container/10 rounded-xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="terminal">terminal</span>
+</div>
+<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tighter text-primary mb-4">How can I assist your operations?</h2>
+<p class="font-body text-zinc-500 max-w-lg mx-auto text-sm leading-relaxed">SUSI is currently indexing your enterprise technical documentation and active repository history.</p>
+</div>
+<!-- Message Log -->
+<div class="flex flex-col gap-10">
+<!-- User Message -->
+<div class="flex flex-col items-end gap-3">
+<div class="bg-surface-container-highest px-6 py-4 rounded-xl max-w-[80%] text-on-surface text-sm leading-relaxed">
+                            Analyze the recent architecture shifts in the Funkwerk platform and compare them with our current sovereign interface logic.
+                        </div>
+<span class="text-[10px] font-label uppercase tracking-widest text-zinc-400">User • 14:02</span>
+</div>
+<!-- AI Response (The Logic Feed) -->
+<div class="flex flex-col items-start gap-4">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-6 h-6 bg-primary rounded-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xs" data-icon="token">token</span>
+</div>
+<span class="text-[10px] font-label font-bold uppercase tracking-widest text-primary">SUSI Sovereign Analysis</span>
+</div>
+<div class="relative pl-6 border-l-4 border-primary-container bg-surface-container-low/30 py-6 pr-8 rounded-r-xl max-w-[90%] group">
+<div class="flex flex-col gap-4 text-sm leading-relaxed text-zinc-800">
+<p>The Funkwerk industrial platform emphasizes <strong class="text-primary">architectural rigidity</strong> over aesthetic fluidity. Applying this logic to your interface requires three key structural shifts:</p>
+<ul class="space-y-3 list-none">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-sm mt-0.5" data-icon="check_circle">check_circle</span>
+<span>Transitioning from drop shadows to <strong>Tonal Layering</strong> for spatial hierarchy.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-sm mt-0.5" data-icon="check_circle">check_circle</span>
+<span>Adopting a <strong>Technical Typographic Scale</strong> (Space Grotesk) for command-level data.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-sm mt-0.5" data-icon="check_circle">check_circle</span>
+<span>Implementing <strong>Asymmetrical Information Density</strong> to prioritize focus.</span>
+</li>
+</ul>
+<div class="mt-4 p-4 bg-surface-container-highest/50 rounded flex flex-col gap-2 border border-outline-variant/10">
+<span class="text-[10px] uppercase font-bold text-zinc-500">Technical Correlation</span>
+<p class="text-xs italic text-zinc-600">Cross-referencing Documentation ID: FW-772-B (Infrastructure Integrity Standards).</p>
+</div>
+</div>
+</div>
+<div class="flex gap-4 items-center pl-6">
+<span class="text-[10px] font-label uppercase tracking-widest text-zinc-400">SUSI • 14:02</span>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="material-symbols-outlined text-xs text-zinc-400 hover:text-primary transition-colors" data-icon="content_copy">content_copy</button>
+<button class="material-symbols-outlined text-xs text-zinc-400 hover:text-primary transition-colors" data-icon="thumb_up">thumb_up</button>
+<button class="material-symbols-outlined text-xs text-zinc-400 hover:text-primary transition-colors" data-icon="refresh">refresh</button>
+</div>
+</div>
+</div>
+<!-- User Message 2 -->
+<div class="flex flex-col items-end gap-3">
+<div class="bg-surface-container-highest px-6 py-4 rounded-xl max-w-[80%] text-on-surface text-sm leading-relaxed">
+                            Generate a draft implementation plan for these shifts within the existing Tailwind config.
+                        </div>
+<span class="text-[10px] font-label uppercase tracking-widest text-zinc-400">User • 14:05</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Chat Input Bar -->
+<footer class="fixed bottom-0 right-0 w-full md:w-[calc(100%-16rem)] bg-white/80 backdrop-blur-xl border-t border-[#eeeeee] p-6 z-40">
+<div class="max-w-4xl mx-auto relative group">
+<div class="absolute left-4 top-1/2 -translate-y-1/2 flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-lg text-zinc-400 transition-colors">
+<span class="material-symbols-outlined" data-icon="attach_file">attach_file</span>
+</button>
+</div>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-4 pl-14 pr-32 text-sm focus:ring-2 focus:ring-primary/20 placeholder-zinc-400 font-body" placeholder="Send a message to SUSI..." type="text"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+<div class="flex items-center gap-1 bg-surface-container-highest px-3 py-1.5 rounded-lg text-[10px] font-bold text-zinc-500 uppercase tracking-tight">
+<span class="material-symbols-outlined text-xs" data-icon="auto_awesome">auto_awesome</span>
+                        Technical Mode
+                    </div>
+<button class="bg-primary text-white p-2 rounded-lg hover:bg-primary-container transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" data-icon="arrow_upward">arrow_upward</span>
+</button>
+</div>
+</div>
+<div class="max-w-4xl mx-auto flex justify-between items-center mt-3 px-2">
+<p class="text-[10px] text-zinc-400 uppercase tracking-widest">© 2024 SUSI Smart Universal Service Interface. Technical Precision.</p>
+<div class="flex gap-4">
+<a class="text-[10px] text-zinc-400 hover:text-primary uppercase tracking-widest transition-colors" href="#">Privacy Policy</a>
+<a class="text-[10px] text-zinc-400 hover:text-primary uppercase tracking-widest transition-colors" href="#">Regulatory Compliance</a>
+</div>
+</div>
+</footer>
+</main>
+<!-- Right Side: Technical Meta Panel (Asymmetrical design) -->
+<aside class="hidden xl:flex flex-col w-80 bg-surface-container-low border-l border-[#e2e2e2] p-8 overflow-y-auto">
+<h3 class="font-headline text-xs font-bold text-primary uppercase tracking-[0.2em] mb-8">Metadata Console</h3>
+<div class="space-y-8">
+<!-- Data Module 1 -->
+<div class="bg-white p-6 rounded-lg border border-white flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-bold text-zinc-400 uppercase">Context tokens</span>
+<span class="text-xs font-bold text-primary">12.4k / 128k</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[10%]"></div>
+</div>
+</div>
+<!-- Data Module 2 (Bento card style) -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white p-4 rounded-lg flex flex-col gap-2">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="bolt">bolt</span>
+<span class="text-[10px] font-bold text-zinc-400 uppercase">Speed</span>
+<p class="text-sm font-bold">140 t/s</p>
+</div>
+<div class="bg-white p-4 rounded-lg flex flex-col gap-2">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="verified_user">verified_user</span>
+<span class="text-[10px] font-bold text-zinc-400 uppercase">Security</span>
+<p class="text-sm font-bold">L4 Sovereign</p>
+</div>
+</div>
+<!-- Document Reference -->
+<div class="flex flex-col gap-3">
+<h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Active Sources</h4>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-3 p-3 bg-white/50 rounded-lg group hover:bg-white cursor-pointer transition-all">
+<span class="material-symbols-outlined text-zinc-400" data-icon="description">description</span>
+<div class="flex flex-col">
+<span class="text-xs font-medium truncate">arch_v2_final.pdf</span>
+<span class="text-[10px] text-zinc-400">PDF • 2.4MB</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-white/50 rounded-lg group hover:bg-white cursor-pointer transition-all">
+<span class="material-symbols-outlined text-zinc-400" data-icon="code">code</span>
+<div class="flex flex-col">
+<span class="text-xs font-medium truncate">tailwind.config.js</span>
+<span class="text-[10px] text-zinc-400">JS • 12KB</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Asset Example -->
+<div class="rounded-xl overflow-hidden mt-4">
+<img class="w-full h-48 object-cover grayscale hover:grayscale-0 transition-all duration-700 cursor-crosshair" data-alt="abstract digital visualization of a neural network with glowing magenta lines against a deep charcoal background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtNpza-0WOCLCt0pyJnsaf5dhuU9LxKUrdNB0I1j3b5_9ZtrNP-tdvWcdK4t3bRKd-RzscnNGcjnDrOLMXO5hBSJhmfohnYSZyXRwVP0dwqXDKVmj76omh7L-qBd-FnIILjNeOUZAYZmMQnXY286ICg2uAotPnSolIH6IPaaBwxSoNy50axLRWQ3QCLdxATEdwa7F3Jx9qkhXKEeDuKDybx8nocvFI2Fk8e7s3Z1bzMQj047tyZc99twTXAp8j9dicGzhRBDwz308A"/>
+<div class="p-4 bg-primary text-[10px] text-white uppercase tracking-widest font-bold">
+                    Visualization Core 01-A
+                </div>
+</div>
+</div>
+</aside>
+</body></html>
