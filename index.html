@@ -266,12 +266,17 @@
       font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.04em;
       color: var(--fw-muted);
-      padding: 0.7rem 0.45rem;
+      padding: 0.6rem 0.35rem;
       border-bottom: 1px solid var(--fw-border);
       background: var(--fw-bg-soft);
-      white-space: nowrap;
+      white-space: normal;
+      line-height: 1.2;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      hyphens: auto;
+      vertical-align: bottom;
     }
 
     thead th.num    { text-align: right; }
@@ -1735,14 +1740,14 @@
             <th class="col-pos center">Pos.</th>
             <th class="col-desc">Bezeichnung</th>
             <th class="col-kstr">Kostenstruktur</th>
-            <th class="col-num num">Eigenmaterial&nbsp;€</th>
-            <th class="col-num num">Fremdmaterial&nbsp;€</th>
-            <th class="col-num num">Fremdleistung&nbsp;€</th>
-            <th class="col-num num">Sonderkosten&nbsp;€</th>
+            <th class="col-num num">Eigenmaterial €</th>
+            <th class="col-num num">Fremdmaterial €</th>
+            <th class="col-num num">Fremdleistung €</th>
+            <th class="col-num num">Sonderkosten €</th>
             <th class="col-std num">Std./Menge</th>
             <th class="col-stk num">Stück</th>
             <th class="col-calc num">HK Einzel</th>
-            <th class="col-deckung num">Deckung&nbsp;%</th>
+            <th class="col-deckung num">Deckung %</th>
             <th class="col-calc num">VP Einzel</th>
             <th class="col-calc num">HK Gesamt</th>
             <th class="col-calc num">VP Gesamt</th>
