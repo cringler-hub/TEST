@@ -3830,6 +3830,8 @@ table.hide-vpg .col-vpg{display:none}
     <div class="totals" id="ceoTotals">${totals}</div>
     <div class="actions">
       <button onclick="window.print()">Drucken / PDF</button>
+      <button onclick="exportCeoExcel()">Excel-Export</button>
+      <button onclick="exportCeoWord()">Word-Export</button>
       <button class="secondary" onclick="window.close()">Schließen</button>
     </div>
   </div>
@@ -3837,6 +3839,9 @@ table.hide-vpg .col-vpg{display:none}
 <div class="sync-badge" id="syncBadge">Aktualisiert</div>
 <script>
 (function(){
+  var EXPORT_BASENAME = ${JSON.stringify((d.angebotNr || d.titel || 'CEO').replace(/[^\w\-]+/g, '_').slice(0,60) || 'CEO')};
+  var EXPORT_TITLE    = ${JSON.stringify(d.titel || '')};
+  var EXPORT_META     = ${JSON.stringify('Angebot ' + (d.angebotNr || '–') + ' · Kunde: ' + (d.kunde || '–') + ' · Datum: ' + (d.datum || '–'))};
   var collapsedGroups = new Set();
   window.toggleCeoGroup = function(gid) {
     if (collapsedGroups.has(gid)) collapsedGroups.delete(gid);
@@ -3877,6 +3882,145 @@ table.hide-vpg .col-vpg{display:none}
       if (b) { b.classList.add('show'); setTimeout(function(){ b.classList.remove('show'); }, 1200); }
     }
   });
+
+  // --- Excel / Word Export (Variante A: nur sichtbare Spalten + ausgeklappte Gruppen) ---
+  var COLS = [
+    { key: 'pos',  label: 'Pos.',        align: 'left',  always: true },
+    { key: 'desc', label: 'Bezeichnung', align: 'left',  always: true },
+    { key: 'stk',  label: 'Stk.',        align: 'right' },
+    { key: 'hke',  label: 'HK Einzel',   align: 'right', num: true },
+    { key: 'vpe',  label: 'VP Einzel',   align: 'right', num: true },
+    { key: 'hkg',  label: 'HK Gesamt',   align: 'right', num: true },
+    { key: 'dk',   label: 'Deckung',     align: 'right' },
+    { key: 'vpg',  label: 'VP Gesamt',   align: 'right', num: true }
+  ];
+  var CELL_INDEX = { pos:1, desc:2, stk:3, hke:4, vpe:5, hkg:6, dk:7, vpg:8 };
+
+  function getVisibleCols() {
+    var vis = { pos: true, desc: true };
+    document.querySelectorAll('.toolbar input[type=checkbox]').forEach(function(cb){
+      vis[cb.dataset.col] = cb.checked;
+    });
+    return vis;
+  }
+
+  function parseDeNum(s) {
+    var t = String(s || '').replace(/[^\d,\-]/g, '').replace(/\./g, '').replace(',', '.');
+    var n = parseFloat(t);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function fmtDeNum(v, suffix) {
+    return (v || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (suffix || '');
+  }
+
+  function cellValue(tr, key, stripSuffix) {
+    var td = tr.querySelectorAll('td')[CELL_INDEX[key]];
+    if (!td) return '';
+    var txt = td.textContent.trim();
+    if (stripSuffix) txt = txt.replace(/\s*€$/, '').replace(/\s*%$/, '');
+    return txt;
+  }
+
+  function buildExportRows(forExcel) {
+    var vis = getVisibleCols();
+    var cols = COLS.filter(function(c){ return c.always || vis[c.key]; });
+    var tot = { hke: 0, vpe: 0, hkg: 0, vpg: 0 };
+    var trCls = function(cls){ return cls ? ' class="' + cls + '"' : ''; };
+    var tdCls = function(col){ return col.align === 'right' ? ' class="num"' : ''; };
+
+    var html = '<table><thead><tr>';
+    cols.forEach(function(c){ html += '<th' + tdCls(c) + '>' + c.label + '</th>'; });
+    html += '</tr></thead><tbody>';
+
+    document.querySelectorAll('#ceoTableBody tr.grp-row').forEach(function(gr){
+      var gid = gr.dataset.gid;
+      var isCollapsed = gr.classList.contains('collapsed');
+      tot.hke += parseDeNum(cellValue(gr, 'hke'));
+      tot.vpe += parseDeNum(cellValue(gr, 'vpe'));
+      tot.hkg += parseDeNum(cellValue(gr, 'hkg'));
+      tot.vpg += parseDeNum(cellValue(gr, 'vpg'));
+      html += '<tr class="grp">';
+      cols.forEach(function(c){
+        html += '<td' + tdCls(c) + '>' + cellValue(gr, c.key, forExcel && c.num) + '</td>';
+      });
+      html += '</tr>';
+      if (!isCollapsed) {
+        document.querySelectorAll('#ceoTableBody tr.item-row[data-gid="' + gid + '"]').forEach(function(ir){
+          html += '<tr>';
+          cols.forEach(function(c){
+            html += '<td' + tdCls(c) + '>' + cellValue(ir, c.key, forExcel && c.num) + '</td>';
+          });
+          html += '</tr>';
+        });
+      }
+    });
+
+    // Summenzeile
+    var dk = tot.vpg > 0 ? ((tot.vpg - tot.hkg) / tot.vpg) * 100 : 0;
+    var values = {
+      pos: '', desc: 'Gesamt', stk: '',
+      hke: fmtDeNum(tot.hke, forExcel ? '' : ' €'),
+      vpe: fmtDeNum(tot.vpe, forExcel ? '' : ' €'),
+      hkg: fmtDeNum(tot.hkg, forExcel ? '' : ' €'),
+      dk:  fmtDeNum(dk,      forExcel ? '' : ' %'),
+      vpg: fmtDeNum(tot.vpg, forExcel ? '' : ' €')
+    };
+    html += '<tr class="sum">';
+    cols.forEach(function(c){ html += '<td' + tdCls(c) + '>' + values[c.key] + '</td>'; });
+    html += '</tr></tbody></table>';
+    return html;
+  }
+
+  function downloadBlob(content, mime, filename) {
+    var blob = new Blob(['\ufeff' + content], { type: mime + ';charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 0);
+  }
+
+  window.exportCeoExcel = function() {
+    var body = buildExportRows(true);
+    var html =
+'<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' +
+'<head><meta charset="UTF-8">' +
+'<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>' +
+'<x:Name>CEO-Ansicht</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
+'</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' +
+'<style>table{border-collapse:collapse}th,td{border:1px solid #999;padding:4px 8px;font-family:Calibri,sans-serif;font-size:10pt}' +
+'th{background:#f4f3f3;font-weight:bold;text-align:left}.num{text-align:right;mso-number-format:"#,##0.00"}' +
+'tr.grp td{background:#fdf2f4;color:#540025;font-weight:bold}' +
+'tr.sum td{background:#1a1c1c;color:#fff;font-weight:bold}</style></head><body>' +
+'<h2 style="font-family:Calibri,sans-serif;color:#540025;margin:0 0 4pt">' + escapeX(EXPORT_TITLE) + '</h2>' +
+'<div style="font-family:Calibri,sans-serif;font-size:9pt;color:#6b7a87;margin:0 0 10pt">' + escapeX(EXPORT_META) + '</div>' +
+body + '</body></html>';
+    downloadBlob(html, 'application/vnd.ms-excel', EXPORT_BASENAME + '.xls');
+  };
+
+  window.exportCeoWord = function() {
+    var body = buildExportRows(false);
+    var html =
+'<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+'<head><meta charset="UTF-8"><title>' + escapeX(EXPORT_TITLE) + '</title>' +
+'<style>body{font-family:Calibri,sans-serif;color:#1a1c1c}' +
+'h1{color:#540025;font-size:16pt;margin:0 0 4pt}.sub{color:#6b7a87;font-size:9pt;margin-bottom:14pt}' +
+'table{border-collapse:collapse;width:100%;font-size:10pt}th,td{border:1px solid #999;padding:4pt 6pt}' +
+'th{background:#f4f3f3;font-weight:bold;text-align:left}.num{text-align:right}' +
+'tr.grp td{background:#fdf2f4;color:#540025;font-weight:bold}' +
+'tr.sum td{background:#1a1c1c;color:#fff;font-weight:bold}</style></head><body>' +
+'<h1>CEO-Ansicht — ' + escapeX(EXPORT_TITLE) + '</h1>' +
+'<div class="sub">' + escapeX(EXPORT_META) + '</div>' +
+body + '</body></html>';
+    downloadBlob(html, 'application/msword', EXPORT_BASENAME + '.doc');
+  };
+
+  function escapeX(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
 })();
 <\/script>
 </body></html>`;
