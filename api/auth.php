@@ -54,6 +54,32 @@ switch ($action) {
         ]);
         break;
 
+    case 'changeOwnPassword':
+        $user = requireAuth();
+        $input = json_decode(file_get_contents('php://input'), true);
+        $oldPass = $input['oldPassword'] ?? '';
+        $newPass = $input['newPassword'] ?? '';
+
+        if (!$oldPass || !$newPass) {
+            jsonResponse(['error' => 'Altes und neues Passwort erforderlich'], 400);
+        }
+        if (strlen($newPass) < 6) {
+            jsonResponse(['error' => 'Neues Passwort muss mindestens 6 Zeichen lang sein'], 400);
+        }
+
+        $db = getDB();
+        $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
+        $stmt->execute([$user['id']]);
+        $row = $stmt->fetch();
+        if (!$row || !password_verify($oldPass, $row['password_hash'])) {
+            jsonResponse(['error' => 'Aktuelles Passwort ist falsch'], 401);
+        }
+
+        $hash = password_hash($newPass, PASSWORD_BCRYPT);
+        $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([$hash, $user['id']]);
+        jsonResponse(['ok' => true]);
+        break;
+
     default:
         jsonResponse(['error' => 'Unbekannte Aktion'], 400);
 }

@@ -1440,6 +1440,7 @@
     </div>
     <div class="topbar-actions">
       <span>Angemeldet als <strong id="startUser" style="color:var(--fw-dark);"></strong></span>
+      <a href="#" onclick="openPasswordModal();return false">Passwort ändern</a>
       <a href="#" onclick="doLogout();return false">Abmelden</a>
     </div>
   </nav>
@@ -1496,6 +1497,7 @@
     </div>
     <div class="topbar-actions">
       <a href="#" onclick="showView('viewStart');return false">Startseite</a>
+      <a href="#" onclick="openPasswordModal();return false">Passwort ändern</a>
       <a href="#" onclick="doLogout();return false">Abmelden</a>
     </div>
   </nav>
@@ -1583,6 +1585,7 @@
     </div>
     <div class="topbar-actions">
       <a href="#" onclick="showView('viewStart');return false">Startseite</a>
+      <a href="#" onclick="openPasswordModal();return false">Passwort ändern</a>
       <a href="#" onclick="doLogout();return false">Abmelden</a>
     </div>
   </nav>
@@ -1840,6 +1843,38 @@
 </div>
 </div><!-- /viewCalc -->
 
+<!-- Passwort ändern -->
+<div class="modal-overlay" id="pwdModal">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <h3 style="margin:0;font-size:1rem;">Passwort ändern</h3>
+      <button class="modal-close" onclick="closePasswordModal()">&times;</button>
+    </div>
+    <div style="padding:1.1rem 1.5rem 1.3rem;display:flex;flex-direction:column;gap:0.7rem;">
+      <label style="font-size:0.82rem;color:var(--fw-muted);">
+        Aktuelles Passwort
+        <input type="password" id="pwdOld" autocomplete="current-password"
+               style="margin-top:0.25rem;width:100%;padding:0.55rem 0.75rem;border:1px solid var(--fw-border);border-radius:6px;font-size:0.9rem;font-family:inherit;" />
+      </label>
+      <label style="font-size:0.82rem;color:var(--fw-muted);">
+        Neues Passwort (min. 6 Zeichen)
+        <input type="password" id="pwdNew1" autocomplete="new-password"
+               style="margin-top:0.25rem;width:100%;padding:0.55rem 0.75rem;border:1px solid var(--fw-border);border-radius:6px;font-size:0.9rem;font-family:inherit;" />
+      </label>
+      <label style="font-size:0.82rem;color:var(--fw-muted);">
+        Neues Passwort (Wiederholung)
+        <input type="password" id="pwdNew2" autocomplete="new-password"
+               style="margin-top:0.25rem;width:100%;padding:0.55rem 0.75rem;border:1px solid var(--fw-border);border-radius:6px;font-size:0.9rem;font-family:inherit;" />
+      </label>
+      <div id="pwdMsg" style="font-size:0.82rem;min-height:1.2em;color:var(--fw-primary);"></div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.4rem;">
+        <button class="btn-secondary" onclick="closePasswordModal()" style="padding:0.5rem 1rem;">Abbrechen</button>
+        <button class="btn-primary" onclick="submitPasswordChange()" style="padding:0.5rem 1rem;">Speichern</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1891,6 +1926,45 @@
     document.getElementById('loginUser').value = '';
     document.getElementById('loginPass').value = '';
     showView('viewLogin');
+  }
+
+  function openPasswordModal() {
+    document.getElementById('pwdOld').value = '';
+    document.getElementById('pwdNew1').value = '';
+    document.getElementById('pwdNew2').value = '';
+    const msg = document.getElementById('pwdMsg');
+    msg.textContent = '';
+    msg.style.color = 'var(--fw-primary)';
+    document.getElementById('pwdModal').classList.add('open');
+    setTimeout(() => document.getElementById('pwdOld').focus(), 50);
+  }
+
+  function closePasswordModal() {
+    document.getElementById('pwdModal').classList.remove('open');
+  }
+
+  async function submitPasswordChange() {
+    const oldPass = document.getElementById('pwdOld').value;
+    const new1    = document.getElementById('pwdNew1').value;
+    const new2    = document.getElementById('pwdNew2').value;
+    const msg     = document.getElementById('pwdMsg');
+    msg.style.color = 'var(--fw-primary)';
+
+    if (!oldPass || !new1 || !new2) { msg.textContent = 'Bitte alle Felder ausfüllen.'; return; }
+    if (new1 !== new2)              { msg.textContent = 'Die neuen Passwörter stimmen nicht überein.'; return; }
+    if (new1.length < 6)            { msg.textContent = 'Neues Passwort muss mindestens 6 Zeichen lang sein.'; return; }
+    if (oldPass === new1)           { msg.textContent = 'Neues Passwort muss sich vom alten unterscheiden.'; return; }
+
+    try {
+      await api('auth.php?action=changeOwnPassword', {
+        method: 'POST',
+        body: { oldPassword: oldPass, newPassword: new1 }
+      });
+      closePasswordModal();
+      showToast('Passwort erfolgreich geändert');
+    } catch (e) {
+      msg.textContent = e.message || 'Fehler beim Ändern des Passworts.';
+    }
   }
 
   async function checkSession() {
