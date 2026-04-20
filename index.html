@@ -1818,6 +1818,8 @@
       document.getElementById('loginError').textContent = '';
       document.getElementById('startUser').textContent = res.username;
       document.getElementById('btnAdmin').style.display = res.role === 'admin' ? '' : 'none';
+      await loadTemplatesFromServer();
+      await loadCatalogFromServer();
       showView('viewStart');
     } catch (e) {
       document.getElementById('loginError').textContent = e.message || 'Anmeldung fehlgeschlagen.';
@@ -1840,6 +1842,8 @@
         currentUser = { username: res.username, role: res.role };
         document.getElementById('startUser').textContent = res.username;
         document.getElementById('btnAdmin').style.display = res.role === 'admin' ? '' : 'none';
+        await loadTemplatesFromServer();
+        await loadCatalogFromServer();
         showView('viewStart');
       }
     } catch(e) {}
@@ -4027,12 +4031,8 @@ input.cfg-pct:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(
     syncCeoExtView();
   };
 
-  // Vorlagen + Katalog vom Server laden, dann Session prüfen
-  (async function init() {
-    await loadTemplatesFromServer();
-    await loadCatalogFromServer();
-    await checkSession();
-  })();
+  // Session prüfen (Templates + Katalog werden nach Login geladen)
+  checkSession();
 </script>
 </body>
 </html>
