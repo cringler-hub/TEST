@@ -620,6 +620,26 @@
 
     .btn-del:hover { color: var(--fw-primary); background: #fdf2f4; }
 
+    /* Zwischensummen-Zeile */
+    tr.subtotal-row {
+      background: linear-gradient(90deg, #fdf2f4 0%, #faf0f2 100%) !important;
+      border-top: 2px solid var(--fw-primary) !important;
+      border-bottom: 2px solid #f0c4cc !important;
+    }
+    tr.subtotal-row td { padding: 0.5rem 0.45rem; }
+    tr.subtotal-row .st-val {
+      font-weight: 700;
+      color: var(--fw-primary);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.85rem;
+    }
+    tr.subtotal-row input[data-f="st-label"] {
+      width: 100%; border: none; background: transparent;
+      font-weight: 700; color: var(--fw-primary);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.88rem; cursor: pointer; outline: none;
+    }
+
     /* Zeile hinzufügen */
     .btn-add {
       margin-top: 1rem;
@@ -1723,6 +1743,13 @@
         </svg>
         Überschrift hinzufügen
       </button>
+      <button class="btn-add" onclick="addSubtotal()" style="border-color:var(--fw-primary);color:var(--fw-primary);">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 5h12M2 8h8M2 11h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M12 9v4M10 11h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Zwischensumme einfügen
+      </button>
       <span style="color:var(--fw-muted);font-size:0.82rem;">oder Vorlage:</span>
       <select id="templateSelect" style="padding:0.5rem 0.7rem;border:1px solid var(--fw-border);border-radius:6px;font-size:0.82rem;background:var(--fw-white);color:var(--fw-dark);font-weight:600;cursor:pointer;font-family:inherit;">
         <option value="">— Vorlage wählen —</option>
@@ -1898,6 +1925,10 @@
         r.posEdited = posInput && posInput.dataset.edited === '1';
         delete r.id; delete r.gid;
         current.positionen.push(r);
+      } else if (tr.dataset.type === 'subtotal') {
+        const label = (tr.querySelector('[data-f="st-label"]') || {}).value || 'Zwischensumme';
+        gruppen.push({ type: 'subtotal', label });
+        current = null;
       }
     });
     return {
@@ -2699,6 +2730,81 @@
     return gid;
   }
 
+  function addSubtotal(label) {
+    label = label || 'Zwischensumme';
+    const stid = 'st' + (++rowCounter);
+    const tbody = document.getElementById('quoteBody');
+    const tr = document.createElement('tr');
+    tr.className = 'subtotal-row';
+    tr.dataset.type = 'subtotal';
+    tr.dataset.stid = stid;
+    tr.innerHTML = `
+      <td class="col-pos" style="text-align:center;color:var(--fw-primary);font-weight:700;font-size:1rem;">∑</td>
+      <td class="col-desc">
+        <input type="text" data-f="st-label" value="${escapeHtml(label)}" oninput="syncCeoBoth()" />
+      </td>
+      <td class="col-kstr"></td>
+      <td class="col-num num st-val" id="st-ht-${stid}">–</td>
+      <td class="col-num num st-val" id="st-kt-${stid}">–</td>
+      <td class="col-num num st-val" id="st-fr-${stid}">–</td>
+      <td class="col-num num st-val" id="st-so-${stid}">–</td>
+      <td class="col-std"></td>
+      <td class="col-stk"></td>
+      <td class="col-calc num"></td>
+      <td class="col-deckung num st-val" id="st-dk-${stid}"></td>
+      <td class="col-calc num"></td>
+      <td class="col-calc num st-val" id="st-hkg-${stid}">–</td>
+      <td class="col-calc num st-val" id="st-vpg-${stid}">–</td>
+      <td class="col-del"><div class="row-actions">
+        <button class="btn-move" title="Nach oben" onclick="moveSubtotalUp(this)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M4 7l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-move" title="Nach unten" onclick="moveSubtotalDown(this)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 9l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-del" title="Löschen" onclick="this.closest('tr').remove();recalcTotal();syncCeoBoth();">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div></td>
+    `;
+    tbody.appendChild(tr);
+    recalcTotal();
+    return stid;
+  }
+
+  function moveSubtotalUp(btn) {
+    const stRow = btn.closest('tr');
+    const rows = Array.from(stRow.parentElement.children);
+    const idx = rows.indexOf(stRow);
+    let headingIdx = -1;
+    for (let i = idx - 1; i >= 0; i--) {
+      if (rows[i].dataset.type === 'heading') { headingIdx = i; break; }
+    }
+    if (headingIdx < 0) return;
+    stRow.parentElement.insertBefore(stRow, rows[headingIdx]);
+    recalcTotal();
+  }
+
+  function moveSubtotalDown(btn) {
+    const stRow = btn.closest('tr');
+    const rows = Array.from(stRow.parentElement.children);
+    const idx = rows.indexOf(stRow);
+    let nextHeadingIdx = -1;
+    for (let i = idx + 1; i < rows.length; i++) {
+      if (rows[i].dataset.type === 'heading') { nextHeadingIdx = i; break; }
+    }
+    if (nextHeadingIdx < 0) return;
+    const gid = rows[nextHeadingIdx].dataset.gid;
+    let groupEndIdx = nextHeadingIdx;
+    for (let i = nextHeadingIdx + 1; i < rows.length; i++) {
+      if (rows[i].dataset.gid === gid) groupEndIdx = i;
+      else break;
+    }
+    const after = groupEndIdx + 1 < rows.length ? rows[groupEndIdx + 1] : null;
+    stRow.parentElement.insertBefore(stRow, after);
+    recalcTotal();
+  }
+
   function toggleGroup(gid) {
     const htr = document.querySelector(`#quoteBody tr.heading-row[data-gid="${gid}"]`);
     const isCollapsed = htr.classList.toggle('group-collapsed');
@@ -3110,9 +3216,13 @@
       const r = readRow(parseInt(tr.dataset.id, 10));
       if (!r) return;
       const c = computeRow(r);
-      if (!grpSums[r.gid]) grpSums[r.gid] = { hk: 0, vp: 0 };
-      grpSums[r.gid].hk += c.hkGesamt;
-      grpSums[r.gid].vp += c.vpGesamt;
+      if (!grpSums[r.gid]) grpSums[r.gid] = { hk: 0, vp: 0, hausteil: 0, kaufteil: 0, fremd: 0, sonder: 0 };
+      grpSums[r.gid].hk       += c.hkGesamt;
+      grpSums[r.gid].vp       += c.vpGesamt;
+      grpSums[r.gid].hausteil += r.hausteil * r.stueck;
+      grpSums[r.gid].kaufteil += r.kaufteil * r.stueck;
+      grpSums[r.gid].fremd    += r.fremd    * r.stueck;
+      grpSums[r.gid].sonder   += r.sonder   * r.stueck;
     });
 
     // Second pass: apply group Stück multiplier to heading subtotals and all summaries
@@ -3155,6 +3265,34 @@
         kstrSums[r.kstr].std += r.std * mul;
         totalStd += r.std * mul;
       });
+    });
+
+    // Third pass: compute subtotal rows (accumulate groups since last subtotal)
+    let stAcc = { hausteil: 0, kaufteil: 0, fremd: 0, sonder: 0, hk: 0, vp: 0 };
+    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+      if (tr.dataset.type === 'heading') {
+        const gid = tr.dataset.gid;
+        const s = grpSums[gid] || {};
+        const grpStk = Math.max(1, parseInt((tr.querySelector('[data-f="grp-stk"]') || {}).value || 1) || 1);
+        stAcc.hk       += (s.hk       || 0) * grpStk;
+        stAcc.vp       += (s.vp       || 0) * grpStk;
+        stAcc.hausteil += (s.hausteil || 0) * grpStk;
+        stAcc.kaufteil += (s.kaufteil || 0) * grpStk;
+        stAcc.fremd    += (s.fremd    || 0) * grpStk;
+        stAcc.sonder   += (s.sonder   || 0) * grpStk;
+      } else if (tr.dataset.type === 'subtotal') {
+        const stid = tr.dataset.stid;
+        const dk = stAcc.vp > 0 ? ((stAcc.vp - stAcc.hk) / stAcc.vp) * 100 : 0;
+        const se = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        se('st-ht-'  + stid, formatEUR(stAcc.hausteil));
+        se('st-kt-'  + stid, formatEUR(stAcc.kaufteil));
+        se('st-fr-'  + stid, formatEUR(stAcc.fremd));
+        se('st-so-'  + stid, formatEUR(stAcc.sonder));
+        se('st-dk-'  + stid, formatPct(dk));
+        se('st-hkg-' + stid, formatEUR(stAcc.hk));
+        se('st-vpg-' + stid, formatEUR(stAcc.vp));
+        stAcc = { hausteil: 0, kaufteil: 0, fremd: 0, sonder: 0, hk: 0, vp: 0 };
+      }
     });
 
     // Kostenart-Box
@@ -3275,6 +3413,7 @@
     // Rebuild groups
     if (data.gruppen && data.gruppen.length > 0) {
       data.gruppen.forEach(g => {
+        if (g.type === 'subtotal') { addSubtotal(g.label || 'Zwischensumme'); return; }
         const gid = addHeading(g.titel || '');
         // Set heading pos number
         const htr = document.querySelector(`#quoteBody tr.heading-row[data-gid="${gid}"]`);
@@ -3377,12 +3516,16 @@
         });
         currentGrp.hk += c.hkGesamt;
         currentGrp.vp += c.vpGesamt;
+      } else if (tr.dataset.type === 'subtotal') {
+        const label = (tr.querySelector('[data-f="st-label"]') || {}).value || 'Zwischensumme';
+        gruppen.push({ type: 'subtotal', label });
+        currentGrp = null;
       }
     });
-    // Apply group Stück
-    gruppen.forEach(g => { g.hkTotal = g.hk * g.stk; g.vpTotal = g.vp * g.stk; });
-    const totalHK = gruppen.reduce((s,g) => s + g.hkTotal, 0);
-    const totalVP = gruppen.reduce((s,g) => s + g.vpTotal, 0);
+    // Apply group Stück (skip subtotals)
+    gruppen.forEach(g => { if (g.type === 'subtotal') return; g.hkTotal = g.hk * g.stk; g.vpTotal = g.vp * g.stk; });
+    const totalHK = gruppen.reduce((s,g) => g.type === 'subtotal' ? s : s + g.hkTotal, 0);
+    const totalVP = gruppen.reduce((s,g) => g.type === 'subtotal' ? s : s + g.vpTotal, 0);
     const deckungVP = totalVP > 0 ? ((totalVP - totalHK) / totalVP) * 100 : 0;
     const nachlass = getPreisnachlass();
     const endpreis = totalVP * (1 - nachlass / 100);
@@ -3402,12 +3545,31 @@
     const pct = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' %';
     let rows = '';
     let totalHkE = 0, totalVpE = 0;
+    let stAcc = { hk: 0, vp: 0 };
     d.gruppen.forEach(g => {
+      if (g.type === 'subtotal') {
+        const dk = stAcc.vp > 0 ? ((stAcc.vp - stAcc.hk) / stAcc.vp) * 100 : 0;
+        rows += `<tr class="subtotal-ceo-row">
+          <td></td>
+          <td></td>
+          <td class="title">${escapeForHtml(g.label || 'Zwischensumme')}</td>
+          <td class="num col-stk"></td>
+          <td class="num col-hke"></td>
+          <td class="num col-vpe"></td>
+          <td class="num col-hkg">${f(stAcc.hk)}</td>
+          <td class="num col-dk pct">${pct(dk)}</td>
+          <td class="num col-vpg vp">${f(stAcc.vp)}</td>
+        </tr>`;
+        stAcc = { hk: 0, vp: 0 };
+        return;
+      }
       const gDeck = g.vpTotal > 0 ? ((g.vpTotal - g.hkTotal) / g.vpTotal) * 100 : 0;
       const hkeSum = g.items.reduce((s, it) => s + (it.hkEinzel || 0), 0);
       const vpeSum = g.items.reduce((s, it) => s + (it.vpEinzel || 0), 0);
       totalHkE += hkeSum * g.stk;
       totalVpE += vpeSum * g.stk;
+      stAcc.hk += g.hkTotal;
+      stAcc.vp += g.vpTotal;
       rows += `<tr class="grp-row" data-gid="${g.gid}">
         <td class="grp-toggle"><button class="toggle-btn" onclick="toggleCeoGroup('${g.gid}')" title="Ein-/Ausklappen">▾</button></td>
         <td class="pos">${g.posNr}</td>
@@ -3518,6 +3680,10 @@ td.pct{color:#6b7a87}
 .sum-row .title{font-family:'Space Grotesk',sans-serif;color:#fff;text-transform:uppercase;letter-spacing:.05em;font-size:0.78rem}
 .sum-row td.vp{color:#ffb1c4}
 .sum-row td.pct{color:#e2e2e2}
+.subtotal-ceo-row{background:linear-gradient(90deg,#fdf2f4 0%,#faf0f2 100%);border-top:2px solid #540025}
+.subtotal-ceo-row td{padding:0.55rem 0.7rem;border-bottom:2px solid #f0c4cc;font-weight:700;color:#540025}
+.subtotal-ceo-row .title{font-family:'Space Grotesk',sans-serif;font-size:0.83rem;letter-spacing:.03em}
+.subtotal-ceo-row td.vp{color:#721a3b}
 table.hide-stk .col-stk{display:none}
 table.hide-hke .col-hke{display:none}
 table.hide-vpe .col-vpe{display:none}
