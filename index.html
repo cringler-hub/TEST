@@ -1688,10 +1688,10 @@
             <th class="col-pos center">Pos.</th>
             <th class="col-desc">Bezeichnung</th>
             <th class="col-kstr">Kostenstruktur</th>
-            <th class="col-num num">Hausteil&nbsp;€</th>
-            <th class="col-num num">Kaufteil&nbsp;€</th>
-            <th class="col-num num">Fremd&nbsp;UA&nbsp;€</th>
-            <th class="col-num num">Sonder&nbsp;€</th>
+            <th class="col-num num">Eigenmaterial&nbsp;€</th>
+            <th class="col-num num">Fremdmaterial&nbsp;€</th>
+            <th class="col-num num">Fremdleistung&nbsp;€</th>
+            <th class="col-num num">Sonderkosten&nbsp;€</th>
             <th class="col-std num">Std./Menge</th>
             <th class="col-stk num">Stück</th>
             <th class="col-calc num">HK Einzel</th>
@@ -3149,9 +3149,9 @@
 
     // Kostenart-Box
     document.getElementById('sumKostenarten').innerHTML = `
-      <div class="summary-line"><span>Hausteil</span><span class="val">${formatEUR(kostenart.hausteil)}</span></div>
-      <div class="summary-line"><span>Kaufteil / Vorratsmaterial</span><span class="val">${formatEUR(kostenart.kaufteil)}</span></div>
-      <div class="summary-line"><span>Fremdleistung UA</span><span class="val">${formatEUR(kostenart.fremd)}</span></div>
+      <div class="summary-line"><span>Eigenmaterial</span><span class="val">${formatEUR(kostenart.hausteil)}</span></div>
+      <div class="summary-line"><span>Fremdmaterial</span><span class="val">${formatEUR(kostenart.kaufteil)}</span></div>
+      <div class="summary-line"><span>Fremdleistung</span><span class="val">${formatEUR(kostenart.fremd)}</span></div>
       <div class="summary-line"><span>Sonderkosten</span><span class="val">${formatEUR(kostenart.sonder)}</span></div>
       <div class="summary-line"><span>Personalstunden</span><span class="val">${kostenart.std.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})} Std.</span></div>
     `;
@@ -3644,19 +3644,19 @@ table.hide-vpg .col-vpg{display:none}
   let ceoExtWin = null;
 
   function buildCeoExtData() {
-    // Material kategorien
-    let hausteile = 0, vorratsmaterial = 0, bestimmungsmaterial = 0, unterauftraege = 0;
-    // Leistungen
-    let eigenleistungen = 0, fremdleistungenKapa = 0;
+    // Material kategorien (Rohwerte ohne MGK)
+    let hausteile = 0, fremdmaterial = 0, fremdleistung = 0;
+    // Leistungen (Rohwerte ohne FGK)
+    let eigenleistungen = 0;
+    // Gemeinkosten-Anteile (separat ausgewiesen)
+    let mgkWert = 0, fgkWert = 0;
     // Sonstige
     let sonstige = 0;
-    // Stundenaufwände gesamt (für GK1 Personal)
-    let personalkosten = 0;
-    // Fremdanteil (Material und Leistungen, die extern eingekauft werden)
+    // Fremdanteil (für Prozentanzeige)
     let fremdAnteil = 0;
     // Umsatz nach Kategorie (VP)
     let umsatzLieferungen = 0, umsatzLeistungen = 0, umsatzSonstiges = 0;
-    let totalHK = 0, totalVP = 0;
+    let totalVP = 0;
 
     const mgk = getMGK();
     const fgk = getFGK();
@@ -3673,44 +3673,33 @@ table.hide-vpg .col-vpg{display:none}
       if (!r) return;
       const c = computeRow(r);
       const grpStk = grpStkMap[r.gid] || 1;
-      const mul = r.stueck * grpStk;        // pro-Stück Mengen
-      const factor = grpStk;                  // bereits durch hkGesamt × stueck multipliziert
+      const mul = r.stueck * grpStk;
+      const factor = grpStk;
 
-      totalHK += c.hkGesamt * factor;
       totalVP += c.vpGesamt * factor;
 
-      // Material-Aufschlüsselung (mit Multiplikator)
+      // Material: Rohwerte ohne MGK
       hausteile += r.hausteil * mul;
-      // Kaufteil → je nach Kostenstruktur
-      if (r.kstr === 'fremd') {
-        unterauftraege += r.kaufteil * mgk * mul;
-      } else if (r.kstr === 'material') {
-        vorratsmaterial += r.kaufteil * mgk * mul;
-      } else {
-        // bei anderen Strukturen (z.B. PM mit Material) als Kaufteil → Vorratsmaterial
-        vorratsmaterial += r.kaufteil * mgk * mul;
-      }
-      // Fremd UA-Spalte → immer Unteraufträge
-      unterauftraege += r.fremd * mgk * mul;
+      fremdmaterial += r.kaufteil * mul;
+      fremdleistung += r.fremd * mul;
+      // MGK-Anteil separat ausweisen
+      mgkWert += (r.kaufteil + r.fremd) * (mgk - 1) * mul;
       // Sonderkosten
       sonstige += r.sonder * mul;
-      // Personalkosten (Std × Rate, ggf. mit FGK)
+      // Eigenleistungen: Rohwerte ohne FGK
       const rate = getRate(r.kstr);
       if (rate > 0 && r.kstr !== 'km' && r.kstr !== 'swlizenz') {
-        let std = r.std * rate;
-        if (r.kstr === 'fertigung') std *= fgk;
-        eigenleistungen += std * mul;
-        personalkosten += std * mul;
+        const stdRaw = r.std * rate;
+        eigenleistungen += stdRaw * mul;
+        if (r.kstr === 'fertigung') {
+          fgkWert += stdRaw * (fgk - 1) * mul;
+        }
       }
-      // Sonderfälle
       if (r.kstr === 'km') {
         sonstige += r.stueck * rate * grpStk;
       }
-      // SW-Lizenzen: HK = 0, läuft nur in Umsatz
-      // Fremdanteil-Bestandteile
-      fremdAnteil += (r.kaufteil * mgk + r.fremd * mgk) * mul;
+      fremdAnteil += (r.kaufteil + r.fremd) * mgk * mul;
 
-      // Umsatz-Zuordnung (nach VP, gesamt)
       if (r.kstr === 'material' || r.kstr === 'fremd' || r.kstr === 'swlizenz') {
         umsatzLieferungen += c.vpGesamt * factor;
       } else if (rate > 0 && r.kstr !== 'km') {
@@ -3720,37 +3709,26 @@ table.hide-vpg .col-vpg{display:none}
       }
     });
 
-    const materialHK = hausteile + vorratsmaterial + bestimmungsmaterial + unterauftraege;
-    const leistungenHK = eigenleistungen + fremdleistungenKapa;
+    const materialHK = hausteile + fremdmaterial + fremdleistung;
+    const leistungenHK = eigenleistungen;
     const sonstigeHK = sonstige;
-    const hkSum = materialHK + leistungenHK + sonstigeHK;
+    // hkSum = Rohkosten + MGK + FGK
+    const hkSum = materialHK + leistungenHK + sonstigeHK + mgkWert + fgkWert;
 
     const fremdAnteilPct = hkSum > 0 ? (fremdAnteil / hkSum) * 100 : 0;
 
-    // Umsatz = totalVP (vor Preisnachlass — wie in CSV)
     const umsatz = totalVP;
-    const db1 = umsatz - hkSum;
-    const db1Pct = umsatz > 0 ? (db1 / umsatz) * 100 : 0;
 
-    // GK 1
-    const gk1MaterialPct = getGK1Material();
-    const gk1PersonalPct = getGK1Personal();
-    const gk1Material = materialHK * gk1MaterialPct;
-    const gk1Personal = personalkosten * gk1PersonalPct;
-    const gk1Sum = gk1Material + gk1Personal;
-
-    const hkInklGK = hkSum + gk1Sum;
-
-    // GK 2 (auf HK inkl. GK)
+    // Gemeinkosten (auf Herstellkosten)
     const gk2VerwPct = getGK2Verwaltung();
     const gk2VertrPct = getGK2Vertrieb();
     const gk2EntwPct = getGK2Entwicklung();
-    const gk2Verw = hkInklGK * gk2VerwPct;
-    const gk2Vertr = hkInklGK * gk2VertrPct;
-    const gk2Entw = hkInklGK * gk2EntwPct;
+    const gk2Verw = hkSum * gk2VerwPct;
+    const gk2Vertr = hkSum * gk2VertrPct;
+    const gk2Entw = hkSum * gk2EntwPct;
     const gk2Sum = gk2Verw + gk2Vertr + gk2Entw;
 
-    const selbstkosten = hkInklGK + gk2Sum;
+    const selbstkosten = hkSum + gk2Sum;
     const dbFITK = umsatz - selbstkosten;
     const dbFITKPct = umsatz > 0 ? (dbFITK / umsatz) * 100 : 0;
 
@@ -3770,12 +3748,11 @@ table.hide-vpg .col-vpg{display:none}
       freigabe: document.getElementById('cfgFreigabe').value,
       umsatz, umsatzLieferungen, umsatzLeistungen, umsatzSonstiges,
       hkSum, materialHK, leistungenHK, sonstigeHK,
-      hausteile, vorratsmaterial, bestimmungsmaterial, unterauftraege,
-      eigenleistungen, fremdleistungenKapa, sonstige,
+      hausteile, fremdmaterial, fremdleistung,
+      eigenleistungen, sonstige,
+      mgkWert, fgkWert,
       fremdAnteilPct,
-      db1, db1Pct,
-      gk1Material, gk1Personal, gk1Sum, gk1MaterialPct, gk1PersonalPct,
-      hkInklGK,
+      db: umsatz - hkSum, dbPct: umsatz > 0 ? ((umsatz - hkSum) / umsatz) * 100 : 0,
       gk2Verw, gk2Vertr, gk2Entw, gk2Sum, gk2VerwPct, gk2VertrPct, gk2EntwPct,
       selbstkosten,
       dbFITK, dbFITKPct,
@@ -3802,19 +3779,15 @@ table.hide-vpg .col-vpg{display:none}
       'c-fremdAnteil': pct(d.fremdAnteilPct),
       'c-materialHK': f(d.materialHK),
       'c-hausteile': f(d.hausteile),
-      'c-vorratsmaterial': f(d.vorratsmaterial),
-      'c-bestimmungsmaterial': f(d.bestimmungsmaterial),
-      'c-unterauftraege': f(d.unterauftraege),
+      'c-fremdmaterial': f(d.fremdmaterial),
+      'c-fremdleistung': f(d.fremdleistung),
       'c-leistungenHK': f(d.leistungenHK),
       'c-eigenleistungen': f(d.eigenleistungen),
-      'c-fremdleistungenKapa': f(d.fremdleistungenKapa),
       'c-sonstigeHK': f(d.sonstigeHK),
-      'c-db1': f(d.db1),
-      'c-db1Pct': pct(d.db1Pct),
-      'c-gk1Sum': f(d.gk1Sum),
-      'c-gk1Material': f(d.gk1Material),
-      'c-gk1Personal': f(d.gk1Personal),
-      'c-hkInklGK': f(d.hkInklGK),
+      'c-mgkWert': f(d.mgkWert),
+      'c-fgkWert': f(d.fgkWert),
+      'c-db': f(d.db),
+      'c-dbPct': pct(d.dbPct),
       'c-gk2Sum': f(d.gk2Sum),
       'c-gk2Verw': f(d.gk2Verw),
       'c-gk2Vertr': f(d.gk2Vertr),
@@ -3853,26 +3826,21 @@ table.hide-vpg .col-vpg{display:none}
           <tr class="section hk"><td>HERSTELLKOSTEN</td><td></td><td class="num strong" id="c-hkSum">${f(d.hkSum)}</td><td class="num small"><span id="c-fremdAnteil">${pct(d.fremdAnteilPct)}</span> <span class="lbl">FREMDANTEIL</span></td></tr>
 
           <tr class="sub"><td></td><td>MATERIAL</td><td class="num" id="c-materialHK">${f(d.materialHK)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Eigenmaterial – Hausteile</td><td class="num" id="c-hausteile">${f(d.hausteile)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Vorratsmaterial</td><td class="num" id="c-vorratsmaterial">${f(d.vorratsmaterial)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Bestimmungsmaterial</td><td class="num" id="c-bestimmungsmaterial">${f(d.bestimmungsmaterial)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Unteraufträge / Fremd UA</td><td class="num" id="c-unterauftraege">${f(d.unterauftraege)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Eigenmaterial</td><td class="num" id="c-hausteile">${f(d.hausteile)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Fremdmaterial</td><td class="num" id="c-fremdmaterial">${f(d.fremdmaterial)}</td><td></td></tr>
+          <tr><td></td><td class="ind">Fremdleistung</td><td class="num" id="c-fremdleistung">${f(d.fremdleistung)}</td><td></td></tr>
 
           <tr class="sub"><td></td><td>LEISTUNGEN</td><td class="num" id="c-leistungenHK">${f(d.leistungenHK)}</td><td></td></tr>
           <tr><td></td><td class="ind">Eigenleistungen (Personal)</td><td class="num" id="c-eigenleistungen">${f(d.eigenleistungen)}</td><td></td></tr>
-          <tr><td></td><td class="ind">Fremdleistungen (Kapa-Engpass)</td><td class="num" id="c-fremdleistungenKapa">${f(d.fremdleistungenKapa)}</td><td></td></tr>
 
           <tr class="sub"><td></td><td>SONSTIGE</td><td class="num" id="c-sonstigeHK">${f(d.sonstigeHK)}</td><td></td></tr>
 
-          <tr class="section db"><td>DECKUNGSBEITRAG 1</td><td></td><td class="num strong" id="c-db1">${f(d.db1)}</td><td class="num small" id="c-db1Pct">${pct(d.db1Pct)}</td></tr>
+          <tr><td></td><td>Materialgemeinkosten</td><td class="num" id="c-mgkWert">${f(d.mgkWert)}</td><td></td></tr>
+          <tr><td></td><td>Fertigungsgemeinkosten</td><td class="num" id="c-fgkWert">${f(d.fgkWert)}</td><td></td></tr>
 
-          <tr class="section gk"><td>GEMEINKOSTEN 1</td><td></td><td class="num strong" id="c-gk1Sum">${f(d.gk1Sum)}</td><td></td></tr>
-          <tr><td></td><td>Material (auf Material-HK)</td><td class="num" id="c-gk1Material">${f(d.gk1Material)}</td><td class="num small">${pctIn('cfgGK1Material', d.gk1MaterialPct)}</td></tr>
-          <tr><td></td><td>Personal (auf Personalkosten)</td><td class="num" id="c-gk1Personal">${f(d.gk1Personal)}</td><td class="num small">${pctIn('cfgGK1Personal', d.gk1PersonalPct)}</td></tr>
+          <tr class="section db"><td>DECKUNGSBEITRAG</td><td></td><td class="num strong" id="c-db">${f(d.db)}</td><td class="num small" id="c-dbPct">${pct(d.dbPct)}</td></tr>
 
-          <tr class="section sub-total"><td>HERSTELLKOSTEN INKL. GK</td><td></td><td class="num strong" id="c-hkInklGK">${f(d.hkInklGK)}</td><td></td></tr>
-
-          <tr class="section gk"><td>GEMEINKOSTEN 2</td><td></td><td class="num strong" id="c-gk2Sum">${f(d.gk2Sum)}</td><td></td></tr>
+          <tr class="section gk"><td>GEMEINKOSTEN</td><td></td><td class="num strong" id="c-gk2Sum">${f(d.gk2Sum)}</td><td></td></tr>
           <tr><td></td><td>Verwaltung</td><td class="num" id="c-gk2Verw">${f(d.gk2Verw)}</td><td class="num small">${pctIn('cfgGK2Verwaltung', d.gk2VerwPct)}</td></tr>
           <tr><td></td><td>Vertrieb</td><td class="num" id="c-gk2Vertr">${f(d.gk2Vertr)}</td><td class="num small">${pctIn('cfgGK2Vertrieb', d.gk2VertrPct)}</td></tr>
           <tr><td></td><td>Entwicklung</td><td class="num" id="c-gk2Entw">${f(d.gk2Entw)}</td><td class="num small">${pctIn('cfgGK2Entwicklung', d.gk2EntwPct)}</td></tr>
