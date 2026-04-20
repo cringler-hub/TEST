@@ -4739,29 +4739,24 @@ input.cfg-pct:focus{outline:none;border-color:#540025;box-shadow:0 0 0 2px rgba(
     subtotalCounter = 0;
     currentQuoteId = null;
 
-    // Group by titel preserving first-seen order
-    const order = [];
-    const groups = new Map();
+    // Each selected GAEB position becomes its own Überschrift (heading)
+    // with an auto-created default Unterposition (Kostenstruktur: Material).
     selected.forEach(it => {
-      const key = it.titel || 'Ohne Gruppe';
-      if (!groups.has(key)) { groups.set(key, []); order.push(key); }
-      groups.get(key).push(it);
-    });
+      const headingTitle = (it.kurztext || it.titel || 'Position') + (it.einheit ? ' [' + it.einheit + ']' : '');
+      const gid = addHeading(headingTitle);
 
-    order.forEach(titel => {
-      const gid = addHeading(titel);
-      const defaultItem = document.querySelector(`#quoteBody tr.item-row[data-gid="${gid}"]`);
-      if (defaultItem) defaultItem.remove();
-      groups.get(titel).forEach(it => {
-        const desc = (it.kurztext || '') + (it.einheit ? ' [' + it.einheit + ']' : '');
-        addItem(gid, { desc, kstr: 'fremd', stueck: it.menge > 0 ? it.menge : 1 });
-        const rows = document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`);
-        const last = rows[rows.length - 1];
-        if (last && it.oz) {
-          const posInput = last.querySelector('[data-f="pos"]');
-          if (posInput) { posInput.value = it.oz; posInput.dataset.edited = '1'; }
-        }
-      });
+      // Set OZ as heading pos number
+      const htr = document.querySelector(`#quoteBody tr.heading-row[data-gid="${gid}"]`);
+      if (htr && it.oz) {
+        const hposInput = htr.querySelector('[data-f="hpos"]');
+        if (hposInput) { hposInput.value = it.oz; hposInput.dataset.edited = '1'; }
+      }
+      // Set Menge as group Stück multiplier
+      if (htr && it.menge > 0) {
+        const stkInput = htr.querySelector('[data-f="grp-stk"]');
+        if (stkInput) stkInput.value = it.menge;
+      }
+      // Default item already added by addHeading() with kstr='material' — nothing else to do.
     });
 
     renumberAll();
