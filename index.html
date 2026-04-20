@@ -3845,9 +3845,9 @@ table.hide-vpg .col-vpg{display:none}
           <tr><td></td><td>Vertrieb</td><td class="num" id="c-gk2Vertr">${f(d.gk2Vertr)}</td><td class="num small">${pctIn('cfgGK2Vertrieb', d.gk2VertrPct)}</td></tr>
           <tr><td></td><td>Entwicklung</td><td class="num" id="c-gk2Entw">${f(d.gk2Entw)}</td><td class="num small">${pctIn('cfgGK2Entwicklung', d.gk2EntwPct)}</td></tr>
 
-          <tr class="section sub-total"><td>SELBSTKOSTEN</td><td></td><td class="num strong" id="c-selbstkosten">${f(d.selbstkosten)}</td><td></td></tr>
+          <tr class="section sub-total"><td>SELBSTKOSTEN (HERSTELLKOSTEN + GEMEINKOSTEN)</td><td></td><td class="num strong" id="c-selbstkosten">${f(d.selbstkosten)}</td><td></td></tr>
 
-          <tr class="section db"><td>DECKUNGSBEITRAG FITK <span class="hint">(Umsatz − Selbstkosten)</span></td><td></td><td class="num strong" id="c-dbFITK">${f(d.dbFITK)}</td><td class="num small" id="c-dbFITKPct">${pct(d.dbFITKPct)}</td></tr>
+          <tr class="section db"><td>DECKUNGSBEITRAG FUNKWERK</td><td></td><td class="num strong" id="c-dbFITK">${f(d.dbFITK)}</td><td class="num small" id="c-dbFITKPct">${pct(d.dbFITKPct)}</td></tr>
 
           <tr class="section gk"><td>GARANTIEKOSTEN <span class="hint">(auf Herstellkosten)</span></td><td></td><td class="num strong" id="c-garantie">${f(d.garantie)}</td><td class="num small">${pctIn('cfgGarantie', d.garantiePct)}</td></tr>
           <tr class="section gk"><td>SICHERHEIT <span class="hint">(auf Herstellkosten)</span></td><td></td><td class="num strong" id="c-sicherheit">${f(d.sicherheit)}</td><td class="num small">${pctIn('cfgSicherheit', d.sicherheitPct)}</td></tr>
