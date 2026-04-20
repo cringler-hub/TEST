@@ -573,6 +573,43 @@
       color: var(--fw-dark);
     }
 
+    /* Zwischensummen-Rows */
+    tr.subtotal-row {
+      background: #eef2ff !important;
+      border-top: 2px solid #c7d2fe !important;
+      border-bottom: 2px solid #c7d2fe !important;
+    }
+    tr.subtotal-row td { padding: 0.65rem 0.55rem; }
+    tr.subtotal-row .s-title-cell input {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border: 1.5px solid transparent;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: transparent;
+      color: #3730a3;
+      font-family: inherit;
+      letter-spacing: -0.01em;
+    }
+    tr.subtotal-row .s-title-cell input:focus {
+      outline: none;
+      border-color: #4338ca;
+      background: var(--fw-white);
+      box-shadow: 0 0 0 2px rgba(67,56,202,0.12);
+    }
+    tr.subtotal-row .s-val {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: #3730a3;
+    }
+    tr.subtotal-row .s-val-main {
+      color: #1e1b4b;
+      font-size: 0.9rem;
+    }
+
     /* Sub-item add button inside table */
     tr.add-sub-row {
       border-bottom: 1px solid var(--fw-border) !important;
@@ -1723,6 +1760,12 @@
         </svg>
         Überschrift hinzufügen
       </button>
+      <button class="btn-add" onclick="addSubtotal()" style="border-color:#4338ca;color:#4338ca;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 5h10M3 9h10M5 13h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Zwischensumme einfügen
+      </button>
       <span style="color:var(--fw-muted);font-size:0.82rem;">oder Vorlage:</span>
       <select id="templateSelect" style="padding:0.5rem 0.7rem;border:1px solid var(--fw-border);border-radius:6px;font-size:0.82rem;background:var(--fw-white);color:var(--fw-dark);font-weight:600;cursor:pointer;font-family:inherit;">
         <option value="">— Vorlage wählen —</option>
@@ -1878,6 +1921,7 @@
   // ----- Angebote auf Server speichern/laden/auflisten -----
   function buildQuoteData() {
     const gruppen = [];
+    const zwischensummen = [];
     let current = null;
     document.querySelectorAll('#quoteBody tr').forEach(tr => {
       if (tr.dataset.type === 'heading') {
@@ -1898,6 +1942,12 @@
         r.posEdited = posInput && posInput.dataset.edited === '1';
         delete r.id; delete r.gid;
         current.positionen.push(r);
+      } else if (tr.dataset.type === 'subtotal') {
+        const titleInput = tr.querySelector('[data-f="stitle"]');
+        zwischensummen.push({
+          afterIndex: gruppen.length,
+          titel: titleInput ? titleInput.value : ''
+        });
       }
     });
     return {
@@ -1923,7 +1973,8 @@
         freigabe:       document.getElementById('cfgFreigabe').value,
         stundensaetze: Object.fromEntries(KOSTENSTRUKTUREN.filter(k => k.unit).map(k => [k.key, getRate(k.key)]))
       },
-      gruppen
+      gruppen,
+      zwischensummen
     };
   }
 
@@ -2517,6 +2568,7 @@
 
   let rowCounter = 0;
   let groupCounter = 0;
+  let subtotalCounter = 0;
 
   // --- Vorlagen für Überschriften mit vordefinierten Unterpositionen ---
   // Vorlagen-Cache (geladen vom Server)
@@ -2715,6 +2767,81 @@
     if (itemCount > 0 && !confirm(`Überschrift mit ${itemCount} Unterposition(en) löschen?`)) return;
     rows.forEach(r => r.remove());
     renumberAll();
+    recalcTotal();
+  }
+
+  // --- Zwischensumme (Subtotal across multiple headings) ---
+  function addSubtotal(title = 'Zwischensumme') {
+    const sid = 's' + (++subtotalCounter);
+    const tbody = document.getElementById('quoteBody');
+    const tr = document.createElement('tr');
+    tr.className = 'subtotal-row';
+    tr.dataset.type = 'subtotal';
+    tr.dataset.sid = sid;
+    tr.innerHTML = `
+      <td></td>
+      <td class="s-title-cell" colspan="2">
+        <input type="text" placeholder="Zwischensumme…" value="${escapeHtml(title)}" data-f="stitle" />
+      </td>
+      <td class="s-val" id="sub-haus-${sid}">0,00 €</td>
+      <td class="s-val" id="sub-kauf-${sid}">0,00 €</td>
+      <td class="s-val" id="sub-fremd-${sid}">0,00 €</td>
+      <td class="s-val" id="sub-sonder-${sid}">0,00 €</td>
+      <td class="s-val" id="sub-std-${sid}">0,00</td>
+      <td></td>
+      <td></td>
+      <td class="s-val" id="sub-dk-${sid}"></td>
+      <td></td>
+      <td class="s-val s-val-main" id="sub-hkg-${sid}">0,00 €</td>
+      <td class="s-val s-val-main" id="sub-vpg-${sid}">0,00 €</td>
+      <td class="col-del"><div class="row-actions">
+        <button class="btn-move" title="Nach oben" onclick="moveSubtotal('${sid}',-1)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M4 7l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-move" title="Nach unten" onclick="moveSubtotal('${sid}',1)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M4 9l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-del" title="Löschen" onclick="removeSubtotal('${sid}')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div></td>
+    `;
+    tbody.appendChild(tr);
+    recalcTotal();
+    return sid;
+  }
+
+  function removeSubtotal(sid) {
+    const tr = document.querySelector(`#quoteBody tr.subtotal-row[data-sid="${sid}"]`);
+    if (tr) tr.remove();
+    recalcTotal();
+  }
+
+  function moveSubtotal(sid, dir) {
+    const tr = document.querySelector(`#quoteBody tr.subtotal-row[data-sid="${sid}"]`);
+    if (!tr) return;
+    const parent = tr.parentNode;
+    if (dir < 0) {
+      const prev = tr.previousElementSibling;
+      if (!prev) return;
+      if (prev.dataset.type === 'subtotal') {
+        parent.insertBefore(tr, prev);
+      } else if (prev.dataset.type === 'item' || prev.dataset.type === 'addsub') {
+        const heading = document.querySelector(`#quoteBody tr.heading-row[data-gid="${prev.dataset.gid}"]`);
+        if (heading) parent.insertBefore(tr, heading);
+      } else if (prev.dataset.type === 'heading') {
+        parent.insertBefore(tr, prev);
+      }
+    } else {
+      const next = tr.nextElementSibling;
+      if (!next) return;
+      if (next.dataset.type === 'subtotal') {
+        parent.insertBefore(tr, next.nextElementSibling);
+      } else if (next.dataset.type === 'heading') {
+        const addsub = document.querySelector(`#quoteBody tr.add-sub-row[data-gid="${next.dataset.gid}"]`);
+        if (addsub) parent.insertBefore(tr, addsub.nextElementSibling);
+      }
+    }
     recalcTotal();
   }
 
@@ -3103,6 +3230,7 @@
     const kostenart = { hausteil: 0, kaufteil: 0, fremd: 0, sonder: 0, std: 0 };
     const kstrSums = Object.fromEntries(KOSTENSTRUKTUREN.map(k => [k.key, { hk: 0, vp: 0, std: 0 }]));
     const grpSums = {};
+    const grpKostenart = {};
     let totalHK = 0, totalVP = 0, totalStd = 0;
 
     // First pass: accumulate per-group HK/VP subtotals (without grpStk)
@@ -3139,6 +3267,8 @@
       totalHK += grpHK;
       totalVP += grpVP;
 
+      const gk = { hausteil: 0, kaufteil: 0, fremd: 0, sonder: 0, std: 0, hk: grpHK, vp: grpVP };
+
       // Accumulate kostenart, kstrSums, and hours WITH grpStk
       document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`).forEach(itr => {
         const r = readRow(parseInt(itr.dataset.id, 10));
@@ -3150,11 +3280,48 @@
         kostenart.fremd    += r.fremd * mul;
         kostenart.sonder   += r.sonder * mul;
         kostenart.std      += r.std * mul;
+        gk.hausteil += r.hausteil * mul;
+        gk.kaufteil += r.kaufteil * mul;
+        gk.fremd    += r.fremd * mul;
+        gk.sonder   += r.sonder * mul;
+        gk.std      += r.std * mul;
         kstrSums[r.kstr].hk  += c.hkGesamt * grpStk;
         kstrSums[r.kstr].vp  += c.vpGesamt * grpStk;
         kstrSums[r.kstr].std += r.std * mul;
         totalStd += r.std * mul;
       });
+
+      grpKostenart[gid] = gk;
+    });
+
+    // Third pass: Zwischensummen — accumulate across groups since previous subtotal
+    const acc = { hausteil: 0, kaufteil: 0, fremd: 0, sonder: 0, std: 0, hk: 0, vp: 0 };
+    const fmtStdSub = v => v.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Std.';
+    document.querySelectorAll('#quoteBody tr').forEach(tr => {
+      if (tr.dataset.type === 'heading') {
+        const g = grpKostenart[tr.dataset.gid];
+        if (!g) return;
+        acc.hausteil += g.hausteil;
+        acc.kaufteil += g.kaufteil;
+        acc.fremd    += g.fremd;
+        acc.sonder   += g.sonder;
+        acc.std      += g.std;
+        acc.hk       += g.hk;
+        acc.vp       += g.vp;
+      } else if (tr.dataset.type === 'subtotal') {
+        const sid = tr.dataset.sid;
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        set(`sub-haus-${sid}`,   formatEUR(acc.hausteil));
+        set(`sub-kauf-${sid}`,   formatEUR(acc.kaufteil));
+        set(`sub-fremd-${sid}`,  formatEUR(acc.fremd));
+        set(`sub-sonder-${sid}`, formatEUR(acc.sonder));
+        set(`sub-std-${sid}`,    fmtStdSub(acc.std));
+        set(`sub-hkg-${sid}`,    formatEUR(acc.hk));
+        set(`sub-vpg-${sid}`,    formatEUR(acc.vp));
+        const dk = acc.vp > 0 ? ((acc.vp - acc.hk) / acc.vp) * 100 : 0;
+        set(`sub-dk-${sid}`, formatPct(dk));
+        Object.keys(acc).forEach(k => { acc[k] = 0; });
+      }
     });
 
     // Kostenart-Box
@@ -3195,6 +3362,7 @@
     document.getElementById('quoteBody').innerHTML = '';
     rowCounter = 0;
     groupCounter = 0;
+    subtotalCounter = 0;
     addHeading('Position 1');
     showToast('Tabelle zurückgesetzt');
   }
@@ -3271,10 +3439,19 @@
     document.getElementById('quoteBody').innerHTML = '';
     rowCounter = 0;
     groupCounter = 0;
+    subtotalCounter = 0;
+
+    const subsByIndex = {};
+    (data.zwischensummen || []).forEach(z => {
+      const idx = z.afterIndex || 0;
+      if (!subsByIndex[idx]) subsByIndex[idx] = [];
+      subsByIndex[idx].push(z);
+    });
 
     // Rebuild groups
     if (data.gruppen && data.gruppen.length > 0) {
-      data.gruppen.forEach(g => {
+      (subsByIndex[0] || []).forEach(z => addSubtotal(z.titel || 'Zwischensumme'));
+      data.gruppen.forEach((g, gi) => {
         const gid = addHeading(g.titel || '');
         // Set heading pos number
         const htr = document.querySelector(`#quoteBody tr.heading-row[data-gid="${gid}"]`);
@@ -3315,6 +3492,7 @@
             }
           });
         }
+        (subsByIndex[gi + 1] || []).forEach(z => addSubtotal(z.titel || 'Zwischensumme'));
       });
     } else {
       addHeading('Position 1');
