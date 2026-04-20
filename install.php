@@ -78,6 +78,7 @@ try {
     $db->exec("
         CREATE TABLE IF NOT EXISTS catalog (
             id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            materialnr   VARCHAR(100) NOT NULL DEFAULT '',
             beschreibung VARCHAR(500) NOT NULL,
             hk_preis     DECIMAL(12,2) NOT NULL DEFAULT 0,
             vk_preis     DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -85,6 +86,30 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ");
     echo "<p style='color:green'>✓ Tabelle <code>catalog</code></p>";
+
+    // Migration: materialnr column for existing installs
+    try {
+        $db->exec("ALTER TABLE catalog ADD COLUMN materialnr VARCHAR(100) NOT NULL DEFAULT '' AFTER id");
+        echo "<p style='color:green'>✓ Spalte <code>materialnr</code> ergänzt</p>";
+    } catch (Exception $e) {
+        if (stripos($e->getMessage(), 'Duplicate') !== false) {
+            echo "<p style='color:green'>✓ Spalte <code>materialnr</code> vorhanden</p>";
+        } else {
+            echo "<p style='color:orange'>Info: " . htmlspecialchars($e->getMessage()) . "</p>";
+        }
+    }
+
+    // Migration: Kategorie „Hardware" → „Displays"
+    try {
+        $n = $db->exec("UPDATE catalog SET kategorie = 'Displays' WHERE kategorie = 'Hardware'");
+        if ($n > 0) {
+            echo "<p style='color:green'>✓ Kategorie umbenannt: Hardware → Displays ($n Einträge)</p>";
+        } else {
+            echo "<p style='color:green'>✓ Keine Hardware-Einträge zu migrieren</p>";
+        }
+    } catch (Exception $e) {
+        echo "<p style='color:orange'>Info: " . htmlspecialchars($e->getMessage()) . "</p>";
+    }
 
 } catch (Exception $e) {
     echo "<p style='color:red'>✗ Fehler bei Tabellenerstellung: <b>" . htmlspecialchars($e->getMessage()) . "</b></p>";

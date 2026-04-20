@@ -9,7 +9,7 @@ $db     = getDB();
 switch ($action) {
 
     case 'list':
-        $rows = $db->query('SELECT id, beschreibung, hk_preis, vk_preis, kategorie FROM catalog ORDER BY kategorie, beschreibung')->fetchAll();
+        $rows = $db->query('SELECT id, materialnr, beschreibung, hk_preis, vk_preis, kategorie FROM catalog ORDER BY kategorie, beschreibung')->fetchAll();
         jsonResponse(['products' => $rows]);
         break;
 
@@ -17,6 +17,7 @@ switch ($action) {
         requireAdmin();
         $input = json_decode(file_get_contents('php://input'), true);
         $id          = (int)($input['id'] ?? 0);
+        $materialnr  = trim($input['materialnr'] ?? '');
         $beschreibung = trim($input['beschreibung'] ?? '');
         $hkPreis     = (float)($input['hk_preis'] ?? 0);
         $vkPreis     = (float)($input['vk_preis'] ?? 0);
@@ -25,12 +26,12 @@ switch ($action) {
         if (!$beschreibung) jsonResponse(['error' => 'Beschreibung erforderlich'], 400);
 
         if ($id > 0) {
-            $db->prepare('UPDATE catalog SET beschreibung = ?, hk_preis = ?, vk_preis = ?, kategorie = ? WHERE id = ?')
-               ->execute([$beschreibung, $hkPreis, $vkPreis, $kategorie, $id]);
+            $db->prepare('UPDATE catalog SET materialnr = ?, beschreibung = ?, hk_preis = ?, vk_preis = ?, kategorie = ? WHERE id = ?')
+               ->execute([$materialnr, $beschreibung, $hkPreis, $vkPreis, $kategorie, $id]);
             jsonResponse(['ok' => true, 'id' => $id]);
         } else {
-            $db->prepare('INSERT INTO catalog (beschreibung, hk_preis, vk_preis, kategorie) VALUES (?, ?, ?, ?)')
-               ->execute([$beschreibung, $hkPreis, $vkPreis, $kategorie]);
+            $db->prepare('INSERT INTO catalog (materialnr, beschreibung, hk_preis, vk_preis, kategorie) VALUES (?, ?, ?, ?, ?)')
+               ->execute([$materialnr, $beschreibung, $hkPreis, $vkPreis, $kategorie]);
             jsonResponse(['ok' => true, 'id' => (int)$db->lastInsertId()]);
         }
         break;
@@ -41,10 +42,11 @@ switch ($action) {
         $products = $input['products'] ?? [];
         if (empty($products)) jsonResponse(['error' => 'Keine Produkte'], 400);
 
-        $stmt = $db->prepare('INSERT INTO catalog (beschreibung, hk_preis, vk_preis, kategorie) VALUES (?, ?, ?, ?)');
+        $stmt = $db->prepare('INSERT INTO catalog (materialnr, beschreibung, hk_preis, vk_preis, kategorie) VALUES (?, ?, ?, ?, ?)');
         $count = 0;
         foreach ($products as $p) {
             $stmt->execute([
+                trim($p['materialnr'] ?? ''),
                 trim($p['beschreibung'] ?? ''),
                 (float)($p['hk_preis'] ?? 0),
                 (float)($p['vk_preis'] ?? 0),
