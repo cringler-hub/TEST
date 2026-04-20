@@ -4314,7 +4314,28 @@ input.cfg-pct{width:60px;padding:3px 6px;border:1px solid #e2e2e2;border-radius:
 input.cfg-pct:focus{outline:none;border-color:#540025;box-shadow:0 0 0 2px rgba(84,0,37,.15)}
 .sync-badge{position:fixed;top:1rem;right:1rem;background:#22c55e;color:#fff;padding:0.35rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:600;opacity:0;transition:opacity .3s}
 .sync-badge.show{opacity:1}
-@media print{body{padding:0;background:#fff}.container{max-width:100%}header{border-radius:0}.actions,.sync-badge{display:none}input.cfg-pct{border:0;padding:0;background:transparent}table.ext tr td{-webkit-print-color-adjust:exact}}
+@media print{
+  @page{size:A4 portrait;margin:10mm}
+  html,body{background:#fff !important;padding:0 !important;margin:0 !important;font-size:9pt;color:#000}
+  .container{max-width:100% !important;margin:0 !important;padding:0 !important}
+  header{border-radius:0 !important;padding:4mm 6mm !important;gap:3mm !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  header h1{font-size:12pt !important;letter-spacing:0 !important}
+  header .sub{font-size:7pt !important;margin-top:1mm !important}
+  .brand{font-size:6.5pt !important}
+  .card{border-radius:0 !important;box-shadow:none !important;padding:3mm 6mm 2mm !important}
+  .actions,.sync-badge{display:none !important}
+  table.ext{font-size:8.5pt !important}
+  table.ext tr{page-break-inside:avoid !important}
+  table.ext td{padding:0.8mm 2mm !important;border-bottom:0.3pt solid #e2e2e2 !important;vertical-align:middle !important}
+  table.ext tr.section td{padding:1.4mm 2mm !important;font-size:7.5pt !important;border-top:0.8pt solid #999 !important;border-bottom:0.3pt solid #999 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  table.ext tr.umsatz td,table.ext tr.hk td,table.ext tr.db td,table.ext tr.gk td,table.ext tr.sub-total td,table.ext tr.gewinn td,table.ext tr.sub td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  table.ext tr.gewinn td{font-size:9pt !important;padding:1.8mm 2mm !important}
+  table.ext .num.small{font-size:7pt !important}
+  table.ext .ind{padding-left:4mm !important}
+  table.ext .hint{font-size:7pt !important}
+  table.ext .lbl{font-size:6pt !important}
+  input.cfg-pct{border:0 !important;padding:0 !important;background:transparent !important;color:inherit !important;width:auto !important;font-size:inherit !important}
+}
 </style></head><body>
 <div class="container">
   <header>
