@@ -1249,6 +1249,7 @@
     .start-btn.green  .icon-wrap { background: #e6f7ee; color: #047857; }
     .start-btn.purple .icon-wrap { background: #e8eafb; color: #4338ca; }
     .start-btn.orange .icon-wrap { background: #fef3e6; color: #b45309; }
+    .start-btn.teal   .icon-wrap { background: #e0f7fa; color: #0e7490; }
     .start-btn .btn-title {
       font-size: 1rem;
       font-weight: 700;
@@ -1627,6 +1628,28 @@
     .share-indicator.shared-out { background: #e0f2fe; color: #075985; }
     .share-indicator.shared-in  { background: #ecfdf5; color: #047857; }
 
+    /* Doku-Viewer (Markdown gerendert) */
+    .docs-body { font-size: 0.92rem; line-height: 1.55; color: var(--fw-dark); }
+    .docs-body h1 { font-size: 1.5rem; margin: 0.4em 0 0.5em; letter-spacing: -0.01em; color: var(--fw-dark); border-bottom: 2px solid var(--fw-border); padding-bottom: 0.3em; }
+    .docs-body h2 { font-size: 1.2rem; margin: 1.5em 0 0.4em; color: var(--fw-primary); border-bottom: 1px solid var(--fw-border-s); padding-bottom: 0.2em; }
+    .docs-body h3 { font-size: 1.02rem; margin: 1.2em 0 0.3em; color: var(--fw-dark); }
+    .docs-body h4 { font-size: 0.95rem; margin: 1em 0 0.3em; color: #4338ca; font-weight: 700; }
+    .docs-body p { margin: 0.5em 0; }
+    .docs-body ul, .docs-body ol { margin: 0.4em 0 0.6em 1.4em; padding: 0; }
+    .docs-body li { margin: 0.2em 0; }
+    .docs-body strong { font-weight: 700; }
+    .docs-body em { font-style: italic; }
+    .docs-body code { background: var(--fw-bg-soft); padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.88em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--fw-primary); }
+    .docs-body a { color: var(--fw-primary); text-decoration: none; border-bottom: 1px dashed var(--fw-primary); }
+    .docs-body a:hover { border-bottom-style: solid; }
+    .docs-body hr { margin: 1.5em 0; border: 0; border-top: 1px solid var(--fw-border); }
+    .docs-body blockquote { margin: 0.8em 0; padding: 0.5em 1em; background: var(--fw-bg-soft); border-left: 3px solid var(--fw-primary); color: var(--fw-text); border-radius: 0 6px 6px 0; }
+    .docs-body table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 0.88em; }
+    .docs-body th, .docs-body td { padding: 0.45rem 0.7rem; border: 1px solid var(--fw-border); text-align: left; vertical-align: top; }
+    .docs-body th { background: var(--fw-bg-soft); font-weight: 700; }
+    .docs-body .docs-empty, .docs-body .docs-error { padding: 1.5rem; text-align: center; color: var(--fw-muted); font-size: 0.9rem; }
+    .docs-body .docs-error { color: #dc2626; }
+
     /* Versionsliste-Modal */
     .rev-list { padding: 0.5rem 0; }
     .rev-list .rev-row {
@@ -1744,6 +1767,15 @@
           <div class="btn-sub">X83-Datei importieren und übernehmen</div>
         </div>
       </button>
+      <button class="start-btn teal" onclick="openDocsModal('BENUTZERHANDBUCH.md', 'Benutzerhandbuch')">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9H3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 2v3h3M5 7h6M5 9.5h6M5 12h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="btn-title">Benutzerhandbuch</div>
+          <div class="btn-sub">Anleitung &amp; Tipps zum Tool</div>
+        </div>
+      </button>
       <button class="start-btn purple" id="btnAdmin" onclick="showView('viewAdmin')" style="display:none;">
         <div class="icon-wrap">
           <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M8 2a2.5 2.5 0 010 5 2.5 2.5 0 010-5zM4 14v-1a4 4 0 018 0v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -1802,6 +1834,13 @@
           <button class="btn-primary" onclick="addUser()" style="padding:0.55rem 1.1rem;">Anlegen</button>
         </div>
         <div id="adminMsg" style="margin-top:0.85rem;font-size:0.85rem;min-height:1.2em;color:var(--fw-primary);"></div>
+
+        <h3 style="margin-top:2rem;">Dokumentation</h3>
+        <p style="font-size:0.82rem;color:var(--fw-muted);margin:0 0 0.8rem;">Aktuelle Release Notes und das Benutzerhandbuch lassen sich direkt aus dem Tool öffnen.</p>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.85rem;">
+          <button class="btn-secondary" onclick="openDocsModal('RELEASE_NOTES.md','Release Notes')" style="padding:0.55rem 1rem;">Release Notes öffnen</button>
+          <button class="btn-secondary" onclick="openDocsModal('BENUTZERHANDBUCH.md','Benutzerhandbuch')" style="padding:0.55rem 1rem;">Benutzerhandbuch öffnen</button>
+        </div>
 
         <h3 style="margin-top:2rem;">Vorlagen verwalten</h3>
         <p style="font-size:0.82rem;color:var(--fw-muted);margin:0 0 0.8rem;">Vorlagen werden in der Angebotskalkulation als Schnellauswahl angeboten.</p>
@@ -2238,6 +2277,17 @@
         <button class="btn-primary" onclick="leaveCalcWithSaving()" style="padding:0.5rem 1rem;background:#047857;">Speichern und verlassen</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Doku-Viewer (Handbuch / Release Notes) -->
+<div class="modal-overlay" id="docsModal">
+  <div class="modal-box" style="max-width:880px;max-height:90vh;">
+    <div class="modal-header">
+      <h3 id="docsTitle" style="margin:0;font-size:1rem;">Dokumentation</h3>
+      <button class="modal-close" onclick="closeDocsModal()">&times;</button>
+    </div>
+    <div id="docsBody" class="docs-body" style="padding:1rem 1.5rem 1.5rem;overflow-y:auto;flex:1;"></div>
   </div>
 </div>
 
@@ -2978,6 +3028,128 @@
     } catch (e) {
       alert('Fehler: ' + e.message);
     }
+  }
+
+  // ===== Doku-Viewer (Markdown → HTML) =====
+  async function openDocsModal(filename, title) {
+    document.getElementById('docsTitle').textContent = title || 'Dokumentation';
+    const body = document.getElementById('docsBody');
+    body.innerHTML = '<div class="docs-empty">Lade …</div>';
+    document.getElementById('docsModal').classList.add('open');
+    try {
+      const resp = await fetch(filename + '?v=' + Date.now(), { credentials: 'same-origin' });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const md = await resp.text();
+      body.innerHTML = renderMarkdown(md);
+      body.scrollTop = 0;
+    } catch (e) {
+      body.innerHTML = '<div class="docs-error">Dokument konnte nicht geladen werden: ' + escapeHtml(e.message)
+        + '<br><br>Prüfe, ob „' + escapeHtml(filename) + '" auf dem Server liegt (Datei wird automatisch deployed).</div>';
+    }
+  }
+  function closeDocsModal() {
+    document.getElementById('docsModal').classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    const m = document.getElementById('docsModal');
+    if (m && e.target === m) closeDocsModal();
+  });
+
+  // Sehr leichter Markdown → HTML Konverter — abgestimmt auf die Doku-Dateien dieses Projekts.
+  function renderMarkdown(md) {
+    const lines = md.replace(/\r\n/g, '\n').split('\n');
+    let html = '', i = 0;
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    function inline(s) {
+      let out = esc(s);
+      // Code (vor anderen, damit ** etc. drin nicht greift)
+      out = out.replace(/`([^`]+)`/g, (_, t) => '<code>' + t + '</code>');
+      // Links [text](url)
+      out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      // Inline-Anker [text](#id) → einfach Text
+      out = out.replace(/\[([^\]]+)\]\(#[^)]+\)/g, '$1');
+      // Bold + Italic
+      out = out.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+      out = out.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+      // „doppelte Anführungszeichen" hervorheben? - lassen wie sie sind
+      return out;
+    }
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      // Horizontal rule
+      if (/^---+$/.test(line.trim())) { html += '<hr>'; i++; continue; }
+
+      // Headings
+      const h = line.match(/^(#{1,4})\s+(.+)$/);
+      if (h) { html += '<h' + h[1].length + '>' + inline(h[2]) + '</h' + h[1].length + '>'; i++; continue; }
+
+      // Blockquote (mehrere Zeilen mit > Prefix)
+      if (/^>\s?/.test(line)) {
+        let bq = '';
+        while (i < lines.length && /^>\s?/.test(lines[i])) {
+          bq += inline(lines[i].replace(/^>\s?/, '')) + '<br>';
+          i++;
+        }
+        html += '<blockquote>' + bq.replace(/<br>$/, '') + '</blockquote>';
+        continue;
+      }
+
+      // Tables: erste Zeile beginnt mit | und enthält Pipes, zweite Zeile ist die Trennlinie
+      if (/^\|.*\|$/.test(line) && i + 1 < lines.length && /^\|[\s:|\-]+\|$/.test(lines[i + 1].trim())) {
+        const headers = line.slice(1, -1).split('|').map(s => s.trim());
+        i += 2;
+        const rows = [];
+        while (i < lines.length && /^\|.*\|$/.test(lines[i])) {
+          rows.push(lines[i].slice(1, -1).split('|').map(s => s.trim()));
+          i++;
+        }
+        html += '<table><thead><tr>' + headers.map(h => '<th>' + inline(h) + '</th>').join('') + '</tr></thead><tbody>';
+        rows.forEach(r => {
+          html += '<tr>' + r.map(c => '<td>' + inline(c) + '</td>').join('') + '</tr>';
+        });
+        html += '</tbody></table>';
+        continue;
+      }
+
+      // Unordered list
+      if (/^[-*]\s+/.test(line)) {
+        let listHtml = '';
+        while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
+          listHtml += '<li>' + inline(lines[i].replace(/^[-*]\s+/, '')) + '</li>';
+          i++;
+        }
+        html += '<ul>' + listHtml + '</ul>';
+        continue;
+      }
+
+      // Ordered list
+      if (/^\d+\.\s+/.test(line)) {
+        let listHtml = '';
+        while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
+          listHtml += '<li>' + inline(lines[i].replace(/^\d+\.\s+/, '')) + '</li>';
+          i++;
+        }
+        html += '<ol>' + listHtml + '</ol>';
+        continue;
+      }
+
+      // Leerzeile
+      if (line.trim() === '') { i++; continue; }
+
+      // Paragraph (akkumuliert bis Leerzeile/Block)
+      let para = inline(line);
+      i++;
+      while (i < lines.length && lines[i].trim() !== '' && !/^(#{1,4}\s|---+$|>\s|[-*]\s|\d+\.\s|\|.*\|$)/.test(lines[i])) {
+        para += ' ' + inline(lines[i]);
+        i++;
+      }
+      html += '<p>' + para + '</p>';
+    }
+
+    return html;
   }
 
   // ===== Freigaben (Share) =====

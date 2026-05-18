@@ -1,7 +1,7 @@
 # Benutzerhandbuch — Angebotskalkulator
 
-> Anleitung für Vertriebsmitarbeiter · Funkwerk Mobility Solutions
-> Stand: Version 1 — _Platzhalter für Screenshots, werden später ergänzt_
+> Anleitung für Vertriebsmitarbeiter · Funkwerk Mobility Solutions GmbH
+> Stand: Version 1.0 (Launch 01.06.2026)
 
 ---
 
@@ -12,17 +12,20 @@
 3. [Angebot anlegen & kalkulieren](#3-angebot-anlegen--kalkulieren)
 4. [Produktkatalog nutzen](#4-produktkatalog-nutzen)
 5. [GAEB-LV einlesen (X83-Import)](#5-gaeb-lv-einlesen-x83-import)
-6. [Speichern, Laden, Importieren, Exportieren](#6-speichern-laden-importieren-exportieren)
-7. [CEO-Ansichten & Export](#7-ceo-ansichten--export)
-8. [Drucken / PDF](#8-drucken--pdf)
-9. [Admin-Bereich](#9-admin-bereich)
-10. [Tipps & häufige Fragen](#10-tipps--häufige-fragen)
+6. [Versionen einfrieren & einsehen](#6-versionen-einfrieren--einsehen)
+7. [Status & Ordner-/Filteransicht](#7-status--ordner-filteransicht)
+8. [Angebote freigeben](#8-angebote-freigeben)
+9. [Speichern, Laden, Importieren, Exportieren](#9-speichern-laden-importieren-exportieren)
+10. [CEO-Ansichten & Export](#10-ceo-ansichten--export)
+11. [Drucken / PDF](#11-drucken--pdf)
+12. [Admin-Bereich](#12-admin-bereich)
+13. [Tipps & häufige Fragen](#13-tipps--häufige-fragen)
 
 ---
 
 ## 1. Überblick
 
-Der Angebotskalkulator hilft Dir, Angebote nach Funkwerk-Standard zu erstellen. Du trägst Material-, Fremd- und Personalkosten pro Position ein und erhältst automatisch Herstellkosten (HK), Verkaufspreise (VP) und Deckungsbeiträge. Angebote können gespeichert, als JSON importiert/exportiert, gedruckt oder als Excel/Word heruntergeladen werden. GAEB-LVs (X83) lassen sich direkt als Grundlage einlesen.
+Der Angebotskalkulator hilft Dir, Angebote nach Funkwerk-Standard zu erstellen. Du trägst Material-, Fremd- und Personalkosten pro Position ein und erhältst automatisch Herstellkosten (HK), Verkaufspreise (VP) und Deckungsbeiträge. Angebote können gespeichert, versioniert, an Kollegen freigegeben, ausgedruckt oder als Excel/Word/JSON exportiert werden. GAEB-LVs (X83) lassen sich direkt als Grundlage einlesen.
 
 ---
 
@@ -34,12 +37,7 @@ Der Angebotskalkulator hilft Dir, Angebote nach Funkwerk-Standard zu erstellen. 
 
 ### 2.2 Passwort ändern
 
-In jeder Ansicht findest Du oben rechts den Link **„Passwort ändern"**.
-Darüber kannst Du Dein Passwort jederzeit selbst ändern:
-
-- Aktuelles Passwort eingeben
-- Neues Passwort zweimal eingeben (mindestens 6 Zeichen)
-- **Speichern**
+In jeder Ansicht findest Du oben rechts den Link **„Passwort ändern"**. Aktuelles Passwort eingeben, neues Passwort zweimal eingeben (mindestens 6 Zeichen), Speichern.
 
 ### 2.3 Die Startseite
 
@@ -47,125 +45,115 @@ Nach dem Anmelden siehst Du drei Kacheln:
 
 - **Neues Angebot** – öffnet eine leere Kalkulation.
 - **GAEB-LV einlesen** – importiert eine X83-Datei und übernimmt sie als Angebotsgerüst.
-- **Admin Portal** – nur für Admins sichtbar (Benutzer, Vorlagen, Produktkatalog).
+- **Admin Portal** – nur für Admins sichtbar.
 
-Unterhalb der Kacheln findest Du die Liste der **gespeicherten Angebote** — klicke auf „Öffnen", um ein Angebot weiterzubearbeiten.
+Unterhalb der Kacheln findest Du die Liste der **gespeicherten Angebote**, gruppiert nach Status.
 
 ---
 
 ## 3. Angebot anlegen & kalkulieren
 
-Klicke auf der Startseite auf **Neues Angebot**. Du landest direkt in der Kalkulationsansicht.
+Klicke auf der Startseite auf **Neues Angebot**. Du landest in der Kalkulationsansicht.
 
 ### 3.1 Angaben zum Angebot (Kopfbereich)
 
-Im oberen Block trägst Du ein:
-
 - **Angebots-Titel** – Projektname
 - **Kunde**
-- **Angebots-Nr.** – wird automatisch vorbelegt, kann überschrieben werden
+- **Angebots-Nr.** – wird automatisch vorbelegt
 - **Datum** und **Gültig bis** – vorbelegt mit heute bzw. heute + 30 Tage
+- **Status** – Entwurf (Default) / Eingereicht / Beauftragt / Verloren / Archiviert
 
-### 3.2 Konfiguration aufklappen
+### 3.2 Konfiguration
 
-Über **„Konfiguration (Stundensätze, MGK, Deckung)"** klappt der Kalkulations-Parameterblock auf:
+Über **„Konfiguration (Stundensätze, MGK, Deckung)"** klappt der Parameterblock auf:
 
-- **MGK** (Materialgemeinkosten-Faktor) und **FGK** (Fertigungsgemeinkosten-Faktor)
-- **Deckungs-Default** in %
-- **Preisnachlass** in % (wird am Ende auf den Gesamtpreis angewendet)
-- **Stundensätze** pro Abteilung (z. B. Konstruktion, HW-Design, Fertigung …)
-- GK-Zuschläge (GK1 Material/Personal, GK2 Verwaltung/Vertrieb/Entwicklung), Garantie, Sicherheit
+- **MGK** und **FGK**, **Deckungs-Default**, **Preisnachlass**
+- **Stundensätze** pro Abteilung
+- GK-Zuschläge, Garantie, Sicherheit
 - **Bearbeiter** und **Freigabe**
 
-Diese Werte fließen in alle Berechnungen ein.
+> Der **Bearbeiter** wird beim Anlegen und beim Öffnen eines Angebots automatisch mit Deinem Login-Namen vorbelegt — überschreibbar.
 
-### 3.3 Überschriften (Hauptpositionen) anlegen
-
-Eine Kalkulation gliedert sich in **Überschriften** (Hauptpositionen). Jede Überschrift kann mehrere **Unterpositionen** enthalten.
+### 3.3 Überschriften (Hauptpositionen)
 
 - **Überschrift hinzufügen** – legt eine neue Hauptposition an, inklusive einer leeren Unterposition.
-- **Vorlage einfügen** – fügt eine Hauptposition mit vorgegebenen Unterpositionen aus einer Vorlage ein (z. B. „Anzeiger").
-- Pro Überschrift gibt es eine **Stückzahl (Stk.)**, mit der alle Unterpositionen multipliziert werden (z. B. Anzahl identischer Baugruppen).
+- **Vorlage einfügen** – fügt eine Hauptposition mit vorgegebenen Unterpositionen ein.
+- Pro Überschrift gibt es eine **Stückzahl (Stk.)**, die alle Unterpositionen multipliziert.
 
-**Aktionen pro Überschrift** (rechts in der Zeile):
-
-- ↑ / ↓ — verschieben
-- Kopieren / Einfügen — Überschrift duplizieren
-- 🗑 — löschen (mit Rückfrage, wenn Unterpositionen vorhanden sind)
-- Der kleine Pfeil am Anfang der Zeile klappt die Unterpositionen ein/aus.
+**Aktionen pro Überschrift**: ↑/↓, Kopieren, Einfügen, Löschen, Ein-/Ausklappen.
 
 ### 3.4 Unterpositionen
 
-Jede Überschrift enthält eine Tabelle mit Unterpositionen. Pro Zeile trägst Du ein:
+Pro Zeile trägst Du ein:
 
 | Feld | Bedeutung |
 |---|---|
-| **Pos.** | Wird automatisch gesetzt (1.1, 1.2, …); kannst Du bei Bedarf manuell überschreiben. |
+| **Pos.** | Automatisch (1.1, 1.2, …); manuell überschreibbar |
 | **Bezeichnung** | Leistung / Produkt |
-| **Kostenstruktur** | Welcher Abteilung / welchem Kostentyp ordnest Du das zu (siehe 3.5) |
-| **Eigenmaterial €** | Eigenfertigungs-Material pro Stück |
+| **Kostenstruktur** | Welche Abteilung / welcher Kostentyp |
+| **Eigenmaterial €** | Eigenfertigungs-Material |
 | **Fremdmaterial €** | Zugekauftes Material (mit MGK belegt) |
-| **Fremdleistung €** | Dienstleistungen extern (mit MGK belegt) |
-| **Sonderkosten €** | Werden 1:1 übernommen |
-| **Std./Menge** | Stunden (bei Personal-Kostenstrukturen) oder Menge (bei km) |
-| **Stück** | Anzahl dieser Unterposition innerhalb der Gruppe |
+| **Fremdleistung €** | Externe Dienstleistung (mit MGK belegt) |
+| **Sonderkosten €** | 1:1 übernommen |
+| **Std./Menge** | Stunden oder km |
+| **Stück** | Anzahl in der Gruppe |
 | **HK Einzel** | Automatisch berechnet |
 | **Deckung %** | Frei einstellbar, Default aus Konfiguration |
-| **VP Einzel** | Ergibt sich aus HK und Deckung |
+| **VP Einzel** | **NEU: manuell editierbar** — Deckung wird automatisch nachgezogen |
 | **HK Gesamt / VP Gesamt** | × Stück × Gruppen-Stück |
 
-**Aktionen pro Unterposition**: ↑ / ↓, Kopieren, Einfügen, Löschen.
+**Aktionen pro Unterposition**: ↑/↓, Kopieren, Einfügen, **Langtext-Toggle** 📝, Löschen.
 
-### 3.5 Kostenstrukturen verstehen
+### 3.5 VP Einzel manuell anpassen
 
-Die **Kostenstruktur** bestimmt, wie die Kosten berechnet werden:
+- Klick in das Feld **VP Einzel** und Wert ändern → die **Deckung wird automatisch neu berechnet** (Formel: `Deckung = (VP − HK) / VP × 100`).
+- Tippst Du danach in ein Materialfeld, wird VP wieder aus HK und Deckung neu berechnet.
+- Für SW-Lizenzen wirkt eine VP-Eingabe direkt auf den Kaufpreis (Feld „Fremdmaterial").
 
-- **Material**, **Konstruktion**, **HW-Design**, **SW-Entwicklung**, **Test**, **Fertigung**, **Projektmanagement**, **Service**, … → Stundenbasiert (Std. × Stundensatz, ggf. FGK-Aufschlag bei Fertigung)
-- **Sonderkosten** → werden ohne Aufschlag übernommen
-- **Km (Reisekosten)** → Menge × Km-Satz
-- **SW-Lizenzen** → Sonderfall: Kein HK-Aufschlag, VP = Kaufpreis; Deckung per Definition 100 %
+### 3.6 Langtext pro Position
 
-### 3.6 Zwischensummen einfügen
+Pro Unterposition kannst Du detaillierte Beschreibungen hinterlegen:
 
-Für lange Angebote kannst Du **Zwischensummen** zwischen Überschriften einfügen:
+1. Klicke auf das **📝-Icon** in der Aktionsleiste der Position.
+2. Eine Textarea klappt unterhalb auf — beliebig viel Text eintragen.
+3. Erneuter Klick → klappt wieder ein. Das Icon leuchtet lila, sobald Text drinsteht.
+4. Langtext wird **mit Kopieren, Verschieben, Speichern** mitgeführt.
+5. Im **Druck/PDF**, in der **CEO-Ansicht** und beim **GAEB-Import** wird er sichtbar.
 
-1. Unterhalb der Tabelle: **„Zwischensumme einfügen"**
-2. Es wird eine neue Zeile am Ende angelegt.
-3. Titel der Zwischensumme (z. B. „Zwischensumme Mechanik") eingeben.
-4. Mit ↑ / ↓ an die richtige Stelle verschieben.
+### 3.7 Zwischensummen
 
-Die Zwischensumme summiert **alle Überschriften seit der vorherigen Zwischensumme** — je Kostenart (Eigenmaterial, Fremdmaterial, Fremdleistung, Sonderkosten, Stunden) sowie HK Gesamt, VP Gesamt und Deckung %.
+- Unterhalb der Tabelle: **„Zwischensumme einfügen"** legt eine neue Zwischensummen-Zeile an.
+- Titel eingeben (z. B. „Zwischensumme Mechanik").
+- Mit ↑/↓ verschieben.
+- Summiert alle Überschriften seit der vorherigen Zwischensumme je Kostenart sowie HK Gesamt, VP Gesamt und Deckung %.
 
-### 3.7 Gesamtsummen & Endpreis
+### 3.8 Gesamtsummen & Endpreis
 
-Ganz unten findest Du die fett hervorgehobene Totals-Leiste:
+Unten findest Du fett: Gesamt HK, Gesamt VP, Deckung, Endpreis (nach Nachlass), Deckung (nach Nachlass).
 
-- **Gesamt Herstellkosten**
-- **Gesamt Verkaufspreis**
-- **Deckung (bei VP)**
-- **Endpreis (nach Nachlass)**
-- **Deckung (nach Nachlass)**
+### 3.9 Status setzen
 
-Der **Preisnachlass** (Kopfkonfiguration) wirkt nur auf den Endpreis, nicht auf die einzelnen Positionen.
+Im Angebotskopf gibt es das Dropdown **Status**:
 
-### 3.8 Kopieren & Einfügen
+- **Entwurf** – frühe Bearbeitungsphase
+- **Eingereicht** – an Kunde gesendet
+- **Beauftragt** – Auftrag erhalten
+- **Verloren** – nicht beauftragt
+- **Archiviert** – ältere/abgeschlossene Angebote
 
-Jede Überschrift und jede Unterposition hat einen **Kopieren**-Button. Danach kannst Du den **Einfügen**-Button an einer anderen Stelle klicken, um das kopierte Element dort einzufügen.
+Der Status kann jederzeit gewechselt werden — auch direkt aus der Startseite-Liste.
 
 ---
 
 ## 4. Produktkatalog nutzen
 
-Der Produktkatalog enthält häufig verwendete Produkte (z. B. Displays, SW-Lizenzen, Beschallungskomponenten) mit hinterlegten HK- und VK-Preisen. Er wird von Admins gepflegt.
+Der Produktkatalog enthält häufig verwendete Produkte (Displays, SW-Lizenzen, Beschallung, Sonstiges) mit hinterlegten HK- und VK-Preisen plus Materialnummer.
 
 **So fügst Du ein Produkt aus dem Katalog ein:**
 
 1. In einer Überschrift unten auf **„Aus Katalog"** klicken.
-2. Es öffnet sich ein Auswahl-Fenster mit Suchfeld und Kategorien-Reiter (SW-Lizenzen, Displays, Beschallung, Sonstiges).
-3. Produkt anklicken — es wird automatisch als Unterposition eingefügt, mit der richtigen Kostenstruktur und den Preisen:
-   - **Displays / Beschallung** → Kostenstruktur „Material", HK-Preis ins Feld Fremdmaterial, Deckung aus HK/VK.
-   - **SW-Lizenzen** → Kostenstruktur „SW-Lizenzen", VP = Kaufpreis.
-4. Du kannst danach Stückzahl und weitere Felder anpassen.
+2. Auswahl-Fenster mit Suchfeld und Kategorien-Reitern öffnet sich.
+3. Produkt anklicken → wird mit Materialnr., Bezeichnung, Preisen und passender Kostenstruktur eingefügt.
 
 ---
 
@@ -173,152 +161,218 @@ Der Produktkatalog enthält häufig verwendete Produkte (z. B. Displays, SW-Lize
 
 Wenn ein Kunde ein Leistungsverzeichnis als GAEB-XML (`.X83`) schickt, kannst Du es als Angebotsgerüst importieren.
 
-1. Startseite → **„GAEB-LV einlesen"** klicken.
-2. **„X83-Datei auswählen"** — Datei hochladen.
-3. Es öffnet sich eine Vorschau-Tabelle mit allen erkannten Positionen:
-   - OZ (Ordnungszahl), Titel/Gruppe, Kurztext, Menge, Einheit.
-4. **Auswahl steuern:**
-   - ☐ pro Zeile zum Aus-/Einschließen.
-   - **Alle auswählen** / **Alle abwählen** für Bulk-Aktionen.
-   - ↑ / ↓ zum Umsortieren einzelner Zeilen.
-5. **„In Kalkulation übernehmen"** — erstellt ein neues Angebot:
-   - **Jede GAEB-Position wird eine Überschrift** (Titel = Kurztext [Einheit], OZ als Pos.-Nr., Menge als Gruppen-Stück).
-   - Darunter wird automatisch **eine Default-Unterposition mit Kostenstruktur „Material"** angelegt — hier kannst Du Unterprojekte oder weitere Positionen ergänzen.
+1. Startseite → **„GAEB-LV einlesen"**.
+2. **„X83-Datei auswählen"** und hochladen.
+3. Vorschau-Tabelle erscheint mit OZ, Titel/Gruppe, Kurztext, Menge, Einheit.
+4. **Auswahl** per Checkbox; **„Alle auswählen"/„Alle abwählen"**; **↑/↓** zum Umsortieren.
+5. **„In Kalkulation übernehmen"** → erstellt ein neues Angebot. Jede GAEB-Position wird zu einer **Überschrift** (OZ = Pos.-Nr., Menge = Gruppen-Stück, Kurztext + Einheit als Titel). Darunter wird automatisch eine **Default-Unterposition mit Kostenstruktur „Material"** angelegt.
+6. Wenn die GAEB-Datei einen `DetailTxt` enthält, wird er als **Langtext** automatisch in die Default-Unterposition übernommen — Du siehst den Originaltext direkt unter der Position.
 
-> **Hinweis:** Aktuell nur `.X83` (GAEB XML). Das alte Flat-File-Format `.D83` sowie der D.84-Rückexport sind geplant (Phase 2).
+> Aktuell nur `.X83` (GAEB XML 3.x). Das alte Flat-File `.D83` sowie der D.84-Rückexport sind in Phase 2 geplant.
 
 ---
 
-## 6. Speichern, Laden, Importieren, Exportieren
+## 6. Versionen einfrieren & einsehen
 
-### 6.1 Speichern auf dem Server
+Damit Du den Bearbeitungsstand eines Angebots sauber dokumentieren kannst, gibt es ein Versions-System:
 
-In der Kalkulation unten: **„Angebot speichern"**. Das Angebot erscheint danach in der Angebotsliste auf der Startseite.
+### 6.1 Version einfrieren
 
-### 6.2 Angebot laden
+1. Im Kalkulator unten auf **„Version einfrieren"** (lila).
+2. Optionalen **Kommentar** eintragen (z. B. „nach Verhandlung mit Kunde XYZ").
+3. **„Einfrieren"** → Snapshot wird unter `V1`, `V2`, `V3` … angelegt.
+4. Du arbeitest danach normal weiter; weitere Änderungen landen erst beim nächsten Einfrieren in einer neuen Version.
 
-Auf der Startseite unter „Gespeicherte Angebote" auf **Öffnen** klicken.
+### 6.2 Versionen einsehen
 
-### 6.3 Angebot löschen
+- Button **„Versionen"** öffnet die Liste aller eingefrorenen Versionen.
+- **Anzeigen** öffnet eine alte Version im **Read-Only-Modus** (gelbes Banner oben, alle Inputs gesperrt). Drucken, Export und CEO-Ansicht funktionieren weiter.
+- **„Schließen"** kehrt zum lebenden Entwurf zurück.
 
-In der Angebotsliste auf das 🗑 -Symbol. Bei Admins zusätzlich sichtbar: der Ersteller.
+### 6.3 Auf eine Version zurücksetzen
 
-### 6.4 JSON-Export / -Import
+- In der Versions-Liste auf **„Zurücksetzen"** klicken.
+- Sicherheitsabfrage bestätigt, dass der aktuelle Entwurf überschrieben wird.
+- Der gewählte Snapshot wird zum neuen Entwurf, kann normal weiterbearbeitet werden.
 
-- **„Als JSON exportieren"** — lädt das komplette Angebot als `.json` herunter (Backup, Weitergabe).
+### 6.4 Revisions-Banner
+
+Im Kalkulator zeigt das Banner oben:
+
+- **Aktueller Status** (Entwurf / Eingereicht / …)
+- **Letzte eingefrorene Version** mit Datum, Bearbeiter und Kommentar (falls vorhanden)
+
+---
+
+## 7. Status & Ordner-/Filteransicht
+
+Auf der Startseite werden Angebote nach Status gruppiert in **einklappbaren Sektionen** angezeigt:
+
+- Standard offen: **Entwurf** und **Eingereicht**
+- Standard eingeklappt: **Beauftragt**, **Verloren**, **Archiviert**
+
+Jede Sektion zeigt einen **Zähler**. Direkt in der Zeile lässt sich der Status per Dropdown wechseln — keine Notwendigkeit, das Angebot zu öffnen.
+
+**Admins** sehen zusätzlich oben rechts einen **Benutzer-Filter** zur Auswahl eines bestimmten Erstellers.
+
+---
+
+## 8. Angebote freigeben
+
+Du kannst Angebote für andere Benutzer **zum Lesen** freigeben.
+
+### 8.1 Freigeben
+
+1. Angebot öffnen, **„Angebot speichern"** falls neu.
+2. Button **„Freigeben"** klicken.
+3. Im Dropdown den Benutzer auswählen, **„Hinzufügen"**.
+4. Liste der aktuellen Empfänger erscheint darunter, jeder kann per **„Entfernen"** wieder rausgenommen werden.
+
+### 8.2 Was sieht der Empfänger?
+
+- Auf seiner Startseite erscheint das Angebot in der Liste mit dem Badge **📥 Freigegeben** — neben den eigenen Angeboten.
+- Beim Öffnen ist es **read-only**: gelbes Banner „Freigegeben von … am …".
+- Der Empfänger kann:
+  - Drucken / PDF
+  - CEO-Ansichten + Excel/Word-Export
+  - Versionsliste einsehen und alte Versionen anzeigen
+  - JSON exportieren
+- Der Empfänger kann **nicht**:
+  - Werte ändern
+  - Speichern
+  - Einfrieren
+  - Status ändern
+  - Löschen
+  - weiter freigeben
+
+### 8.3 Bei eigenen Angeboten
+
+Beim Ersteller erscheint in der Liste das Badge **👥 N** mit der Anzahl der Empfänger.
+
+---
+
+## 9. Speichern, Laden, Importieren, Exportieren
+
+### 9.1 Speichern auf dem Server
+
+In der Kalkulation unten: **„Angebot speichern"**.
+
+### 9.2 Speichern-Erinnerung
+
+Beim Klick auf **„Startseite"** oder **„Abmelden"** im Kalkulator-Topbar erscheint ein Modal, wenn ungespeicherte Änderungen vorliegen:
+
+- **Abbrechen** — bleibt im Kalkulator
+- **Ohne Speichern verlassen** — geht ohne Speichern
+- **Speichern und verlassen** — speichert dann navigiert
+
+Beim Schließen des Browser-Tabs / Reload zeigt der Browser zusätzlich seine **eigene native Warnung**.
+
+### 9.3 Angebot laden
+
+Auf der Startseite unter „Gespeicherte Angebote" auf **„Öffnen"**.
+
+### 9.4 JSON-Export / -Import
+
+- **„Als JSON exportieren"** — Download des kompletten Angebots als `.json`.
 - **„JSON importieren"** — liest eine zuvor exportierte JSON-Datei ein.
 
-### 6.5 Zurücksetzen
+### 9.5 Zurücksetzen
 
-**„Zurücksetzen"** löscht die aktuelle Kalkulation und beginnt frisch.
+**„Zurücksetzen"** löscht die aktuelle Kalkulation.
 
 ---
 
-## 7. CEO-Ansichten & Export
+## 10. CEO-Ansichten & Export
 
-Für die Präsentation an Entscheider oder zur weiteren Analyse gibt es zwei kompakte Sichten.
+### 10.1 CEO-Ansicht (tabellarisch)
 
-### 7.1 CEO-Ansicht (tabellarisch)
-
-Öffnet ein separates Fenster mit Positionsliste und Gesamtsummen.
+Öffnet ein separates Fenster mit Positionsliste, Gesamtsummen und Header inklusive **Bearbeiter** und **Datum** (DD.MM.YYYY).
 
 **Steuerung:**
 
-- **Spalten-Toolbar** oben: Einzelne Spalten (Stk., HK Einzel, VP Einzel, HK Gesamt, Deckung, VP Gesamt) per Checkbox ein-/ausblenden.
-- **Alle einklappen / Alle ausklappen** blendet die Unterpositionen ein/aus — so siehst Du nur die Überschriften mit ihren Summen.
-- Ein Klick auf den Pfeil einer einzelnen Überschrift klappt nur diese Gruppe.
+- **Spalten-Toolbar** oben: Spalten per Checkbox ein-/ausblenden.
+- **Alle einklappen / Alle ausklappen** zeigt nur Überschriften oder alle Positionen.
+- Klick auf den Pfeil einer einzelnen Überschrift klappt nur diese Gruppe.
 
-**Exporte unten:**
+**Exporte:**
 
-- **Drucken / PDF** — Druckdialog des Browsers.
-- **Excel-Export** — lädt eine `.xls`-Datei herunter. **Es werden nur sichtbare Spalten und ausgeklappte Gruppen exportiert.**
-- **Word-Export** — analog als `.doc`-Datei.
+- **Drucken / PDF**
+- **Excel-Export** (`.xls`, HTML-Blob) — nur sichtbare Spalten + ausgeklappte Gruppen
+- **Word-Export** (`.doc`, HTML-Blob)
 
-Änderst Du in der Kalkulation Werte, aktualisiert sich die CEO-Ansicht automatisch.
+Langtexte erscheinen als graue Detailzeile direkt unter der Position.
 
-### 7.2 Erweiterte CEO-Ansicht (Deckungsbeitrag)
+### 10.2 Erweiterte CEO-Ansicht
 
-Öffnet eine Kalkulationsübersicht im Deckungsbeitrag-Format mit Umsatz → HK → Deckungsbeitrag → Gemeinkosten → Selbstkosten → Garantie/Sicherheit → Gewinn.
+Deckungsbeitrag-Format mit Umsatz → HK → DB → Gemeinkosten → Selbstkosten → Garantie/Sicherheit → Gewinn.
 
-- GK-Prozentsätze sind **direkt im Popup editierbar** — Änderungen werden in die Kalkulation zurückgespielt.
-- Das Layout ist auf **eine A4-Seite (hoch)** optimiert: **„Drucken / PDF"** erzeugt ein fertig verwendbares PDF.
-
----
-
-## 8. Drucken / PDF
-
-### 8.1 Ganzes Angebot
-
-In der Kalkulation unten: **„Drucken / als PDF"**. Nutzt den Browser-Druckdialog; Ziel „Als PDF speichern" wählen.
-
-### 8.2 CEO-Ansichten
-
-In der CEO-Ansicht auf **„Drucken / PDF"** (siehe 7.1 / 7.2). Die erweiterte CEO-Ansicht ist auf 1 Seite A4 optimiert.
+- GK-Prozentsätze direkt im Popup editierbar — wirken zurück in die Kalkulation.
+- Layout auf **eine A4-Seite (hoch)** optimiert: **„Drucken / PDF"** erzeugt ein fertig verwendbares Dokument.
+- Datum + Bearbeiter werden zusätzlich als eigene Zeilen im Projekt-Block angezeigt.
 
 ---
 
-## 9. Admin-Bereich
+## 11. Drucken / PDF
 
-> Nur sichtbar für Benutzer mit Rolle **Admin**.
+In der Kalkulation: **„Drucken / als PDF"**. Beim Druck werden **alle Langtext-Zeilen mit Inhalt automatisch eingeblendet**, die Eingabefelder erscheinen als plain Text. Nach dem Druck wird der vorherige Klappzustand wiederhergestellt.
 
-Auf der Startseite **„Admin Portal"** → es öffnen sich drei einklappbare Bereiche.
+---
 
-### 9.1 Benutzerverwaltung
+## 12. Admin-Bereich
+
+Nur sichtbar für Benutzer mit Rolle **Admin**. Auf der Startseite **„Admin Portal"** öffnen.
+
+### 12.1 Benutzerverwaltung
 
 - Liste aller Benutzer mit Rolle.
-- **Neuen Benutzer anlegen**: Benutzername, Passwort, Rolle (user/admin).
-- Ein Benutzer kann sein Passwort jederzeit selbst über „Passwort ändern" tauschen. Ein Admin kann hier ein Passwort zurücksetzen.
-- Der Admin-Account kann nicht gelöscht werden.
+- Neue Benutzer anlegen (Benutzername, Passwort, Rolle).
+- Passwort für Andere zurücksetzen.
+- Admin-Account kann nicht gelöscht werden.
 
-### 9.2 Vorlagen verwalten
+### 12.2 Vorlagen verwalten
 
-Vorlagen sind vordefinierte Listen von Unterpositionen (z. B. „Anzeiger"), die im Kalkulator unter „Vorlage einfügen" angeboten werden. Hier legst Du sie an, ergänzt Zeilen und editierst Kostenstrukturen.
+Vordefinierte Positionslisten (z. B. „Anzeiger"), die im Kalkulator unter „Vorlage einfügen" angeboten werden.
 
-### 9.3 Produktkatalog (einklappbar)
+### 12.3 Produktkatalog (einklappbar)
 
-Tabelle aller Produkte mit Spalten:
+- Spalten: **Materialnr.**, Beschreibung, HK Preis, VK Preis, Kategorie
+- Neue Produkte über Formular hinzufügen
+- **CSV-Import**: Format `Materialnr;Beschreibung;HK;VK;Kategorie`. Bestehende Einträge bleiben erhalten — der Import **ergänzt** nur.
 
-- **Materialnr.** (optional, freier Text)
-- **Beschreibung**
-- **HK Preis** / **VK Preis**
-- **Kategorie** (SW-Lizenzen, Displays, Beschallung, Sonstiges)
+### 12.4 Release Notes
 
-**Produkt anlegen**: Formular unterhalb der Tabelle — Materialnr, Beschreibung, Preise, Kategorie → **Hinzufügen**.
-
-**CSV-Import** (Bulk):
-
-- Datei per Drag & Drop oder Klick in die Dropzone.
-- Format: `Materialnr;Beschreibung;HK;VK;Kategorie` (Semikolon-getrennt, Materialnr und Kategorie optional).
-- Ist ein Header vorhanden (enthält „Material", „Beschreibung", …), wird er automatisch erkannt.
-- **Der Import ergänzt bestehende Einträge — bereits vorhandene Produkte bleiben erhalten**.
+Über den Link **„Release Notes"** im Admin Portal lassen sich alle Versionsstände und Änderungen direkt im Tool nachlesen.
 
 ---
 
-## 10. Tipps & häufige Fragen
+## 13. Tipps & häufige Fragen
 
 **Wie wird der Verkaufspreis berechnet?**
 > VP = HK ÷ (1 − Deckung). Beispiel: HK = 1.000 €, Deckung = 25 % → VP = 1.333,33 €.
 
+**Was passiert, wenn ich den VP manuell ändere?**
+> Die Deckung wird automatisch neu berechnet, sodass die Beziehung stimmt. Tippst Du danach in ein HK-Feld, gilt die alte Berechnung (VP folgt aus HK und Deckung) wieder.
+
 **Warum zeigt eine Unterposition HK = 0?**
-> Bei Kostenstruktur „SW-Lizenzen" ist das normal: HK = 0, VP = eingetragener Kaufpreis (Feld Fremdmaterial), Deckung 100 %.
+> Bei Kostenstruktur „SW-Lizenzen" ist das Standard: HK = 0, VP = Kaufpreis (Feld Fremdmaterial), Deckung 100 %.
 
 **Wie multipliziert sich die Stückzahl einer Überschrift?**
-> Jede Unterposition in der Gruppe × Gruppen-Stück. Beispiel: Unterposition mit Stück = 2 in einer Überschrift mit Gruppen-Stück = 5 → tatsächliche Menge = 10.
+> Jede Unterposition × Gruppen-Stück. Beispiel: Unterposition mit Stück 2 in einer Überschrift mit Gruppen-Stück 5 → tatsächliche Menge = 10.
 
-**Was passiert, wenn ich eine Überschrift lösche, die Unterpositionen enthält?**
-> Du wirst vorher gefragt. Nach Bestätigung werden Überschrift und alle Unterpositionen gelöscht.
+**Kann ich eine eingefrorene Version weiterbearbeiten?**
+> Direkt nein — eine Version ist immer read-only. Aber Du kannst sie über „Versionen → Zurücksetzen" als neuen Entwurf übernehmen und dann bearbeiten.
 
-**Kann ich die Pos.-Nr. anpassen?**
-> Ja. Sobald Du sie einmal überschreibst, bleibt sie erhalten — die automatische Nummerierung übergeht manuell geänderte Pos.-Nummern.
+**Kann ich ein freigegebenes Angebot bearbeiten?**
+> Als Empfänger nein, nur lesen. Frage den Ersteller, ob er die Änderung vornimmt. Direktes Bearbeiten ist nur dem Ersteller (und Admins) erlaubt.
 
-**Ich habe ein GAEB-LV importiert, aber die Default-Unterposition ist leer — warum?**
-> Gewollt. Jede GAEB-Position wird eine Überschrift, darunter eine leere Material-Unterposition als Starthilfe. Fülle sie mit den tatsächlichen Kostenbestandteilen oder ersetze sie durch mehrere eigene Unterpositionen.
-
-**Kann ich im Excel-/Word-Export auch Details mitnehmen, die in der CEO-Ansicht ausgeblendet sind?**
-> Nein — der Export bildet 1:1 die aktuelle Sicht ab (sichtbare Spalten + ausgeklappte Gruppen). Sichtbarkeit vorher entsprechend einstellen.
+**Was passiert, wenn ich beim Verlassen des Kalkulators „Ohne Speichern" wähle?**
+> Alle Änderungen seit dem letzten Speichern gehen verloren. Bereits eingefrorene Versionen bleiben unverändert.
 
 **Was, wenn ich mein Passwort vergessen habe?**
 > Ein Admin muss es für Dich zurücksetzen (Admin-Bereich → Benutzerverwaltung).
+
+**Wo finde ich den Anwender-Stand (Versionsnummer) des Tools?**
+> Unten am Login-Bildschirm sowie in jeder Topbar als kleine Zeile unterhalb von „Funkwerk Mobility Solutions GmbH". Aktuell: **V1.0 · 01.06.2026**.
 
 ---
 

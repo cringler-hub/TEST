@@ -22,8 +22,6 @@ jobs:
             --exclude='node_modules' \
             --exclude='_deploy' \
             --exclude='install.php' \
-            --exclude='BENUTZERHANDBUCH.md' \
-            --exclude='RELEASE_NOTES.md' \
             --exclude='DEPLOY_IONOS.md' \
             --exclude='*.log' \
             --exclude='.env*' \
