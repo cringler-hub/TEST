@@ -2,6 +2,22 @@
 require_once __DIR__ . '/config.php';
 header('Content-Type: application/json; charset=utf-8');
 
+// Debug: PHP-Fehler als JSON-Antwort statt 500-Crash zurückliefern
+set_error_handler(function ($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) return false;
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+set_exception_handler(function ($e) {
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'error' => 'PHP-Fehler: ' . $e->getMessage(),
+        'file'  => basename($e->getFile()),
+        'line'  => $e->getLine()
+    ]);
+    exit;
+});
+
 $action = $_GET['action'] ?? '';
 $user   = requireAuth();
 
