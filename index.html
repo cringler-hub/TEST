@@ -916,6 +916,26 @@
       .btn-copy, .btn-paste, .clipboard-bar,
       .fw-topbar, .toast { display: none !important; }
 
+      /* Langtext-Zeilen im Druck: zurückhaltend, ohne Textarea-Optik */
+      tr.langtext-row td {
+        background: #fff !important;
+        padding: 0 0.45rem 0.4rem 0.45rem !important;
+        border-bottom: 0 !important;
+      }
+      tr.langtext-row textarea {
+        border: 0 !important;
+        background: transparent !important;
+        padding: 0 0 0 1.2rem !important;
+        font-size: 8pt !important;
+        line-height: 1.35 !important;
+        color: #4b5563 !important;
+        resize: none !important;
+        overflow: hidden !important;
+        white-space: pre-wrap !important;
+        box-shadow: none !important;
+        font-family: inherit !important;
+      }
+
       details.config { display: none !important; }
       details.config.config-summary {
         display: block !important;
@@ -4359,6 +4379,35 @@
 
   function printQuote() { window.print(); }
 
+  // Langtext-Zeilen im Druck: nur Zeilen mit Inhalt einblenden, Textarea auf Inhaltshöhe ziehen.
+  window.addEventListener('beforeprint', function() {
+    document.querySelectorAll('tr.langtext-row').forEach(ltr => {
+      ltr.dataset.preprintDisplay = ltr.style.display || '';
+      const ta = ltr.querySelector('textarea');
+      if (ta && ta.value.trim()) {
+        ltr.style.display = '';
+        ta.dataset.preprintHeight = ta.style.height || '';
+        ta.style.height = 'auto';
+        ta.style.height = (ta.scrollHeight + 4) + 'px';
+      } else {
+        ltr.style.display = 'none';
+      }
+    });
+  });
+  window.addEventListener('afterprint', function() {
+    document.querySelectorAll('tr.langtext-row').forEach(ltr => {
+      if (ltr.dataset.preprintDisplay !== undefined) {
+        ltr.style.display = ltr.dataset.preprintDisplay;
+        delete ltr.dataset.preprintDisplay;
+      }
+      const ta = ltr.querySelector('textarea');
+      if (ta && ta.dataset.preprintHeight !== undefined) {
+        ta.style.height = ta.dataset.preprintHeight;
+        delete ta.dataset.preprintHeight;
+      }
+    });
+  });
+
   function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -4406,7 +4455,8 @@
           posNr, desc: r.desc, kstr: r.kstr,
           kstrName: KOSTENSTRUKTUREN.find(k => k.key === r.kstr)?.name || r.kstr,
           hkEinzel: c.hkEinzel, vpEinzel: c.vpEinzel,
-          hkGesamt: c.hkGesamt, vpGesamt: c.vpGesamt, stueck: r.stueck
+          hkGesamt: c.hkGesamt, vpGesamt: c.vpGesamt, stueck: r.stueck,
+          langtext: r.langtext || ''
         });
         currentGrp.hk += c.hkGesamt;
         currentGrp.vp += c.vpGesamt;
@@ -4472,6 +4522,12 @@
           <td class="num col-dk pct">${pct(iDeck)}</td>
           <td class="num col-vpg vp">${f(it.vpGesamt)}</td>
         </tr>`;
+        if (it.langtext && it.langtext.trim()) {
+          rows += `<tr class="lt-row" data-gid="${g.gid}">
+            <td></td>
+            <td colspan="8" class="ceo-langtext">${escapeForHtml(it.langtext).replace(/\n/g, '<br>')}</td>
+          </tr>`;
+        }
       });
     });
     const totalDeck = d.totalVP > 0 ? ((d.totalVP - d.totalHK) / d.totalVP) * 100 : 0;
@@ -4549,6 +4605,8 @@ tbody td{padding:0.5rem 0.7rem;border-bottom:1px solid #eeeeee}
 .item-row .pos{color:#6b7a87;padding-left:1.5rem}
 .item-row .title{padding-left:1.5rem;color:#6b7a87}
 .item-row.hidden{display:none}
+.lt-row.hidden{display:none}
+.lt-row td.ceo-langtext{padding:0.2rem 0.7rem 0.6rem 1.8rem;background:#fafafa;color:#4b5563;font-size:0.78rem;line-height:1.4;white-space:pre-wrap;border-bottom:1px solid #eeeeee}
 td.num{text-align:right;font-variant-numeric:tabular-nums}
 td.vp{color:#540025;font-weight:600}
 td.pct{color:#6b7a87}
@@ -4642,7 +4700,7 @@ table.hide-vpg .col-vpg{display:none}
     document.querySelectorAll('#ceoTableBody tr.grp-row').forEach(function(tr){
       tr.classList.toggle('collapsed', collapsedGroups.has(tr.dataset.gid));
     });
-    document.querySelectorAll('#ceoTableBody tr.item-row').forEach(function(tr){
+    document.querySelectorAll('#ceoTableBody tr.item-row, #ceoTableBody tr.lt-row').forEach(function(tr){
       tr.classList.toggle('hidden', collapsedGroups.has(tr.dataset.gid));
     });
   }
@@ -5320,12 +5378,24 @@ input.cfg-pct:focus{outline:none;border-color:#540025;box-shadow:0 0 0 2px rgba(
       }
       if (!kurztext) kurztext = firstText(itemEl, 'OutlTxt') || firstText(itemEl, 'ShortText');
 
+      // Langtext aus DetailTxt — Paragraphenstruktur (p-Tags) als Zeilenumbruch erhalten
+      let langtext = '';
+      const detailEl = (descEl ? byLocal(descEl, 'DetailTxt')[0] : null) || byLocal(itemEl, 'DetailTxt')[0];
+      if (detailEl) {
+        const ps = byLocal(detailEl, 'p');
+        if (ps.length) {
+          langtext = ps.map(p => p.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n');
+        } else {
+          langtext = detailEl.textContent.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+        }
+      }
+
       // Qty / QU
       const qtyTxt = firstText(itemEl, 'Qty');
       const menge = qtyTxt ? parseFloat(qtyTxt.replace(',', '.')) || 0 : 0;
       const einheit = firstText(itemEl, 'QU');
 
-      items.push({ oz, titel, kurztext, menge, einheit });
+      items.push({ oz, titel, kurztext, menge, einheit, langtext });
     });
 
     return { items, project };
@@ -5411,7 +5481,22 @@ input.cfg-pct:focus{outline:none;border-color:#540025;box-shadow:0 0 0 2px rgba(
         const stkInput = htr.querySelector('[data-f="grp-stk"]');
         if (stkInput) stkInput.value = it.menge;
       }
-      // Default item already added by addHeading() with kstr='material' — nothing else to do.
+      // Default item: addHeading() hat eine leere Position mit kstr='material' angelegt.
+      // GAEB-Langtext (DetailTxt) wird dort als Langtext gesetzt — der Bearbeiter sieht den
+      // Originaltext direkt unter der Position.
+      if (it.langtext) {
+        const defaultItem = document.querySelector(`#quoteBody tr.item-row[data-gid="${gid}"]`);
+        if (defaultItem) {
+          const itemId = defaultItem.dataset.id;
+          const ltEl = document.getElementById(`langtext-${itemId}`);
+          const ltr  = document.getElementById(`langtext-row-${itemId}`);
+          if (ltEl) {
+            ltEl.value = it.langtext;
+            if (typeof onLangtextInput === 'function') onLangtextInput(parseInt(itemId, 10));
+          }
+          if (ltr) ltr.style.display = '';
+        }
+      }
     });
 
     renumberAll();
