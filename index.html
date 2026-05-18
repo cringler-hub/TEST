@@ -1091,6 +1091,32 @@
     .q-btn.del { color: var(--fw-muted); }
     .q-btn.del:hover { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
     .q-empty { padding: 1.5rem; text-align: center; color: var(--fw-muted); font-size: 0.88rem; }
+
+    /* Status-Gruppen in der Angebotsliste */
+    details.q-group { margin-bottom: 0.6rem; border: 1px solid var(--fw-border); border-radius: 8px; background: var(--fw-white); overflow: hidden; }
+    details.q-group > summary {
+      list-style: none; cursor: pointer; padding: 0.65rem 1rem;
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.85rem; font-weight: 600; color: var(--fw-dark);
+      background: var(--fw-bg-soft); border-bottom: 1px solid transparent;
+    }
+    details.q-group[open] > summary { border-bottom-color: var(--fw-border-s); }
+    details.q-group > summary::before {
+      content: '\25B8'; transition: transform .15s; color: var(--fw-muted); font-size: 0.7rem;
+    }
+    details.q-group[open] > summary::before { transform: rotate(90deg); }
+    details.q-group .q-group-count {
+      margin-left: auto; font-size: 0.72rem; padding: 0.15rem 0.55rem;
+      border-radius: 10px; background: var(--fw-white); border: 1px solid var(--fw-border);
+      font-weight: 700; color: var(--fw-dark);
+    }
+    details.q-group .q-rows { padding: 0.2rem 0.8rem 0.5rem; }
+    .q-status-select {
+      padding: 0.25rem 0.5rem; border: 1px solid var(--fw-border); border-radius: 5px;
+      font-size: 0.75rem; font-family: inherit; background: var(--fw-white);
+      color: var(--fw-dark); cursor: pointer; font-weight: 600;
+    }
+    .q-status-select:focus { outline: none; border-color: var(--fw-primary); }
     .start-btn {
       padding: 1.75rem 1.5rem;
       border-radius: 10px;
@@ -1606,15 +1632,10 @@
     <div class="quote-list-section" id="quoteListSection">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;padding-bottom:0.45rem;border-bottom:1px solid var(--fw-border);gap:0.8rem;flex-wrap:wrap;">
         <h2 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fw-muted);font-weight:700;margin:0;">Gespeicherte Angebote</h2>
-        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;color:var(--fw-muted);">
-          <label for="quoteListFilter">Status:</label>
-          <select id="quoteListFilter" onchange="loadQuoteList()" style="padding:0.3rem 0.6rem;border:1px solid var(--fw-border);border-radius:5px;font-size:0.82rem;font-family:inherit;background:var(--fw-white);color:var(--fw-dark);">
+        <div id="quoteListAdminFilter" style="display:none;align-items:center;gap:0.4rem;font-size:0.82rem;color:var(--fw-muted);">
+          <label for="quoteListUserFilter">Benutzer:</label>
+          <select id="quoteListUserFilter" onchange="loadQuoteList()" style="padding:0.3rem 0.6rem;border:1px solid var(--fw-border);border-radius:5px;font-size:0.82rem;font-family:inherit;background:var(--fw-white);color:var(--fw-dark);">
             <option value="Alle">Alle</option>
-            <option value="Entwurf">Entwurf</option>
-            <option value="Eingereicht">Eingereicht</option>
-            <option value="Beauftragt">Beauftragt</option>
-            <option value="Verloren">Verloren</option>
-            <option value="Archiviert">Archiviert</option>
           </select>
         </div>
       </div>
@@ -2347,46 +2368,98 @@
     }
   }
 
+  const STATUS_ORDER = ['Entwurf', 'Eingereicht', 'Beauftragt', 'Verloren', 'Archiviert'];
+  const STATUS_DEFAULT_OPEN = { 'Entwurf': true, 'Eingereicht': true, 'Beauftragt': false, 'Verloren': false, 'Archiviert': false };
+
   async function loadQuoteList() {
     const host = document.getElementById('quoteList');
     if (!host) return;
     try {
       const res = await api('quotes.php?action=list');
       const quotes = res.quotes || [];
-      if (quotes.length === 0) {
-        host.innerHTML = '<div class="q-empty">Noch keine gespeicherten Angebote.</div>';
-        return;
+
+      // Admin-Filter: Benutzer-Dropdown befüllen, falls Admin
+      const adminFilterEl = document.getElementById('quoteListAdminFilter');
+      const userFilterEl  = document.getElementById('quoteListUserFilter');
+      let userFilter = 'Alle';
+      if (currentUser?.role === 'admin' && adminFilterEl && userFilterEl) {
+        const prev = userFilterEl.value || 'Alle';
+        const users = [...new Set(quotes.map(q => q.ersteller).filter(Boolean))].sort();
+        userFilterEl.innerHTML = '<option value="Alle">Alle</option>' +
+          users.map(u => `<option value="${escapeHtml(u)}" ${u === prev ? 'selected' : ''}>${escapeHtml(u)}</option>`).join('');
+        adminFilterEl.style.display = 'flex';
+        userFilter = userFilterEl.value;
+      } else if (adminFilterEl) {
+        adminFilterEl.style.display = 'none';
       }
-      // Status-Filter
-      const filterEl = document.getElementById('quoteListFilter');
-      const filter = filterEl ? filterEl.value : 'Alle';
-      const visible = filter === 'Alle' ? quotes : quotes.filter(q => (q.status || 'Entwurf') === filter);
-      if (visible.length === 0) {
+
+      const filtered = userFilter === 'Alle' ? quotes : quotes.filter(q => q.ersteller === userFilter);
+      if (filtered.length === 0) {
         host.innerHTML = '<div class="q-empty">Keine Angebote in dieser Auswahl.</div>';
         return;
       }
-      host.innerHTML = visible.map(q => {
-        const status = q.status || 'Entwurf';
+
+      // Nach Status gruppieren
+      const groups = {};
+      STATUS_ORDER.forEach(s => { groups[s] = []; });
+      filtered.forEach(q => {
+        const s = STATUS_ORDER.includes(q.status) ? q.status : 'Entwurf';
+        groups[s].push(q);
+      });
+
+      host.innerHTML = STATUS_ORDER.map(status => {
+        const list = groups[status];
+        if (!list.length) return '';
         const cls = STATUS_CLASS[status] || '';
-        const ver = q.current_version ? ' · V' + q.current_version : '';
-        return `
-        <div class="q-row">
-          <div>
-            <div class="q-title">${escapeHtml(q.titel || 'Ohne Titel')}</div>
-            <div class="q-meta">
-              ${escapeHtml(q.angebot_nr || '')} · ${escapeHtml(q.kunde || '–')} · ${(q.updated_at || '').slice(0, 10)}${ver}
-            </div>
-          </div>
-          <span class="status-badge ${cls}">${escapeHtml(status)}</span>
-          ${currentUser?.role === 'admin' ? '<span class="q-user">' + escapeHtml(q.ersteller) + '</span>' : ''}
-          <button class="q-btn" onclick="openQuote(${q.id})">Öffnen</button>
-          <button class="q-btn del" onclick="deleteQuote(${q.id}, '${escapeHtml(q.titel || '')}')">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>`;
-      }).join('');
+        const open = STATUS_DEFAULT_OPEN[status] ? ' open' : '';
+        const rows = list.map(q => renderQuoteRow(q)).join('');
+        return `<details class="q-group"${open}>
+          <summary>
+            <span class="status-badge ${cls}">${escapeHtml(status)}</span>
+            <span class="q-group-count">${list.length}</span>
+          </summary>
+          <div class="q-rows">${rows}</div>
+        </details>`;
+      }).join('') || '<div class="q-empty">Noch keine gespeicherten Angebote.</div>';
     } catch (e) {
       host.innerHTML = '<div class="q-empty">Fehler beim Laden: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
+  function renderQuoteRow(q) {
+    const status = q.status || 'Entwurf';
+    const ver = q.current_version ? ' · V' + q.current_version : '';
+    const statusOptions = STATUS_ORDER.map(s => `<option value="${s}" ${s === status ? 'selected' : ''}>${s}</option>`).join('');
+    return `
+      <div class="q-row">
+        <div>
+          <div class="q-title">${escapeHtml(q.titel || 'Ohne Titel')}</div>
+          <div class="q-meta">
+            ${escapeHtml(q.angebot_nr || '')} · ${escapeHtml(q.kunde || '–')} · ${(q.updated_at || '').slice(0, 10)}${ver}
+          </div>
+        </div>
+        <select class="q-status-select" onchange="setQuoteStatusFromList(${q.id}, this.value)" onclick="event.stopPropagation()">${statusOptions}</select>
+        ${currentUser?.role === 'admin' ? '<span class="q-user">' + escapeHtml(q.ersteller) + '</span>' : ''}
+        <button class="q-btn" onclick="openQuote(${q.id})">Öffnen</button>
+        <button class="q-btn del" onclick="deleteQuote(${q.id}, '${escapeHtml(q.titel || '')}')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>`;
+  }
+
+  async function setQuoteStatusFromList(id, status) {
+    try {
+      await api('quotes.php?action=setStatus', { method: 'POST', body: { id, status } });
+      // Wenn das gerade geöffnete Angebot der gleichen ID entspricht, lokal nachziehen
+      if (currentQuoteId === id) {
+        currentQuoteStatus = status;
+        if (typeof applyStatusToUI === 'function') applyStatusToUI();
+        if (typeof renderRevisionBanner === 'function') renderRevisionBanner();
+      }
+      loadQuoteList();
+      showToast('Status: ' + status);
+    } catch (e) {
+      alert('Fehler beim Status-Update: ' + e.message);
     }
   }
 
