@@ -2386,6 +2386,7 @@
     addHeading('Position 1');
     if (typeof applyStatusToUI === 'function') applyStatusToUI();
     if (typeof renderRevisionBanner === 'function') renderRevisionBanner();
+    if (typeof clearCalcDirty === 'function') clearCalcDirty();
     showView('viewCalc');
   }
 
@@ -2463,6 +2464,7 @@
         }
       });
       currentQuoteId = res.id;
+      if (typeof clearCalcDirty === 'function') clearCalcDirty();
       showToast('Angebot gespeichert' + (qd.angebotNr ? ': ' + qd.angebotNr : ''));
     } catch (e) {
       alert('Fehler beim Speichern: ' + e.message);
@@ -2471,19 +2473,28 @@
 
   // --- Speichern-Erinnerung beim Verlassen des Kalkulators ---
   let pendingLeaveAction = null; // 'viewStart' | 'logout' (oder ein anderer View-Name)
+  let calcDirty = false;         // wird true, sobald der Nutzer im Kalkulator tippt
 
-  function hasQuoteContent() {
-    // Read-Only-Modus zählt nicht als Bearbeitung
-    if (readOnlyMode) return false;
-    const titel = (document.getElementById('angebotTitel')?.value || '').trim();
-    const kunde = (document.getElementById('kundeName')?.value || '').trim();
-    // Items > 0 oder Titel/Kunde gefüllt → es ist etwas zu speichern
-    const items = document.querySelectorAll('#quoteBody tr.item-row').length;
-    return items > 0 || titel || kunde;
-  }
+  function markCalcDirty() { calcDirty = true; }
+  function clearCalcDirty() { calcDirty = false; }
+  function isCalcDirty()    { return calcDirty && !readOnlyMode; }
+
+  // Input/Change-Events im Kalkulator als Dirty markieren — Delegation am View
+  document.addEventListener('DOMContentLoaded', function() {}); // (placeholder, hooks below)
+  (function initDirtyTracking() {
+    const view = document.getElementById('viewCalc');
+    if (!view) return;
+    const handler = function(e) {
+      // Nur „echte" Nutzer-Eingaben (programmatische .value = ... feuern kein input-Event)
+      if (readOnlyMode) return;
+      markCalcDirty();
+    };
+    view.addEventListener('input', handler, true);
+    view.addEventListener('change', handler, true);
+  })();
 
   function confirmLeaveCalc(target) {
-    if (!hasQuoteContent()) {
+    if (!isCalcDirty()) {
       executeLeaveAction(target);
       return;
     }
@@ -2520,6 +2531,18 @@
       showView(target || 'viewStart');
     }
   }
+
+  // Browser-Warnung beim Schließen des Tabs/Fensters oder Neuladen, wenn ungespeicherte
+  // Änderungen im Kalkulator vorliegen. Moderne Browser zeigen ihre eigene Standard-Meldung
+  // (Custom-Text wird aus Sicherheitsgründen ignoriert).
+  window.addEventListener('beforeunload', function(e) {
+    const calcView = document.getElementById('viewCalc');
+    if (!calcView || !calcView.classList.contains('active')) return;
+    if (!isCalcDirty()) return;
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  });
 
   const STATUS_ORDER = ['Entwurf', 'Eingereicht', 'Beauftragt', 'Verloren', 'Archiviert'];
   const STATUS_DEFAULT_OPEN = { 'Entwurf': true, 'Eingereicht': true, 'Beauftragt': false, 'Verloren': false, 'Archiviert': false };
@@ -2627,6 +2650,7 @@
       loadFromData(res.quote.json_data);
       applyStatusToUI();
       renderRevisionBanner();
+      if (typeof clearCalcDirty === 'function') clearCalcDirty();
       showView('viewCalc');
       showToast('Angebot geladen: ' + (res.quote.angebot_nr || res.quote.titel));
     } catch (e) {
@@ -4305,6 +4329,7 @@
     groupCounter = 0;
     subtotalCounter = 0;
     addHeading('Position 1');
+    if (typeof clearCalcDirty === 'function') clearCalcDirty();
     showToast('Tabelle zurückgesetzt');
   }
 
@@ -4448,6 +4473,7 @@
 
     renumberAll();
     recalcAll();
+    if (typeof clearCalcDirty === 'function') clearCalcDirty();
   }
 
   function printQuote() { window.print(); }
@@ -5574,6 +5600,7 @@ input.cfg-pct:focus{outline:none;border-color:#540025;box-shadow:0 0 0 2px rgba(
 
     renumberAll();
     recalcAll();
+    if (typeof clearCalcDirty === 'function') clearCalcDirty();
     showView('viewCalc');
     showToast('GAEB-LV übernommen: ' + selected.length + ' Positionen');
   }
