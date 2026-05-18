@@ -1250,6 +1250,7 @@
     .start-btn.purple .icon-wrap { background: #e8eafb; color: #4338ca; }
     .start-btn.orange .icon-wrap { background: #fef3e6; color: #b45309; }
     .start-btn.teal   .icon-wrap { background: #e0f7fa; color: #0e7490; }
+    .start-btn.pink   .icon-wrap { background: #fdf2f8; color: #be185d; }
     .start-btn .btn-title {
       font-size: 1rem;
       font-weight: 700;
@@ -1651,10 +1652,9 @@
     .docs-body .docs-error { color: #dc2626; }
 
     /* Admin-Dashboard */
-    .dashboard-section { margin-top: 2rem; }
-    .db-header { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 0.45rem; border-bottom: 1px solid var(--fw-border); margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
-    .db-header h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--fw-muted); font-weight: 700; margin: 0; }
-    .db-meta { font-size: 0.78rem; color: var(--fw-muted); }
+    .dashboard-wrap { max-width: 1200px; margin: 2.5rem auto; padding: 0 2rem; }
+    .db-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.9rem; border-bottom: 1px solid var(--fw-border); margin-bottom: 1.3rem; gap: 1rem; flex-wrap: wrap; }
+    .db-meta { font-size: 0.82rem; color: var(--fw-muted); }
     .db-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem; margin-bottom: 1.2rem; }
     .db-kpi {
       background: var(--fw-white); border: 1px solid var(--fw-border); border-radius: 10px;
@@ -1670,16 +1670,32 @@
     .db-kpi.k-info    .k-value   { color: #4338ca; }
     .db-kpi.k-danger  .k-value   { color: #b91c1c; }
 
-    .db-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem; margin-bottom: 1.2rem; }
+    .db-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.85rem; margin-bottom: 1.2rem; }
+    .db-chart-row { display: grid; grid-template-columns: minmax(280px, 0.85fr) minmax(280px, 1.15fr); gap: 0.85rem; margin-bottom: 1.2rem; }
+    @media (max-width: 800px) { .db-chart-row { grid-template-columns: 1fr; } }
     .db-card { background: var(--fw-white); border: 1px solid var(--fw-border); border-radius: 10px; padding: 0.95rem 1.1rem; }
-    .db-card h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-muted); font-weight: 700; margin: 0 0 0.7rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--fw-border-s); }
+    .db-card h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-muted); font-weight: 700; margin: 0 0 0.85rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--fw-border-s); }
 
-    /* Status-Verteilung */
-    .db-status-row { display: grid; grid-template-columns: 110px 1fr 60px; gap: 0.5rem; align-items: center; padding: 0.3rem 0; }
-    .db-status-row .sr-label { font-size: 0.82rem; color: var(--fw-dark); display: flex; align-items: center; gap: 0.4rem; }
-    .db-status-row .sr-bar { background: var(--fw-bg-soft); height: 10px; border-radius: 5px; position: relative; overflow: hidden; }
-    .db-status-row .sr-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; transition: width .3s; }
-    .db-status-row .sr-count { font-size: 0.82rem; color: var(--fw-dark); font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+    /* Donut */
+    .db-donut-wrap { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
+    .db-donut-wrap svg { flex-shrink: 0; }
+    .db-donut-legend { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.82rem; flex: 1; min-width: 130px; }
+    .db-donut-legend .leg-row { display: grid; grid-template-columns: 14px 1fr auto auto; gap: 0.5rem; align-items: center; }
+    .db-donut-legend .leg-dot { width: 12px; height: 12px; border-radius: 3px; }
+    .db-donut-legend .leg-label { color: var(--fw-dark); }
+    .db-donut-legend .leg-value { color: var(--fw-dark); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .db-donut-legend .leg-pct { color: var(--fw-muted); font-size: 0.75rem; font-variant-numeric: tabular-nums; min-width: 45px; text-align: right; }
+    .db-donut-empty { padding: 1.2rem; text-align: center; color: var(--fw-muted); font-size: 0.85rem; }
+
+    /* Horizontale VP-Balken */
+    .hb-row { display: grid; grid-template-columns: 110px 1fr 100px; gap: 0.6rem; align-items: center; padding: 0.4rem 0; font-size: 0.82rem; }
+    .hb-row + .hb-row { border-top: 1px solid var(--fw-border-s); }
+    .hb-label { display: flex; align-items: center; gap: 0.4rem; }
+    .hb-label .hb-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .hb-label .hb-text { color: var(--fw-dark); font-weight: 600; }
+    .hb-track { background: var(--fw-bg-soft); height: 18px; border-radius: 5px; position: relative; overflow: hidden; }
+    .hb-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; transition: width .35s; }
+    .hb-value { font-weight: 700; color: var(--fw-primary); text-align: right; font-variant-numeric: tabular-nums; }
 
     /* Listen-Karten (Kunden, Bearbeiter, Aktivitäten) */
     .db-list-row { display: grid; grid-template-columns: 1fr auto; gap: 0.4rem; align-items: baseline; padding: 0.42rem 0; border-bottom: 1px solid var(--fw-border-s); font-size: 0.85rem; }
@@ -1829,6 +1845,15 @@
           <div class="btn-sub">Anleitung &amp; Tipps zum Tool</div>
         </div>
       </button>
+      <button class="start-btn pink" id="btnDashboard" onclick="showView('viewDashboard')" style="display:none;">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M2 9h3v5H2zM6.5 5h3v9h-3zM11 7h3v7h-3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="btn-title">Dashboard</div>
+          <div class="btn-sub">Vertriebs-KPIs &amp; Auswertungen</div>
+        </div>
+      </button>
       <button class="start-btn purple" id="btnAdmin" onclick="showView('viewAdmin')" style="display:none;">
         <div class="icon-wrap">
           <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M8 2a2.5 2.5 0 010 5 2.5 2.5 0 010-5zM4 14v-1a4 4 0 018 0v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -1838,33 +1863,6 @@
           <div class="btn-sub">Benutzer &amp; Rollen verwalten</div>
         </div>
       </button>
-    </div>
-
-    <!-- Admin-Dashboard (Widget) -->
-    <div class="dashboard-section" id="dashboardSection" style="display:none;">
-      <div class="db-header">
-        <h2>Dashboard</h2>
-        <div class="db-meta" id="dbScopeInfo"></div>
-      </div>
-      <div class="db-kpi-grid" id="dbKpiGrid"></div>
-      <div class="db-row">
-        <div class="db-card db-status-card">
-          <h3>Status-Verteilung</h3>
-          <div id="dbStatusBars"></div>
-        </div>
-        <div class="db-card">
-          <h3>Top 5 Kunden (nach VP)</h3>
-          <div id="dbTopCustomers"></div>
-        </div>
-        <div class="db-card db-users-card">
-          <h3>Top 5 Bearbeiter</h3>
-          <div id="dbTopUsers"></div>
-        </div>
-      </div>
-      <div class="db-card">
-        <h3>Letzte 10 Aktivitäten</h3>
-        <div id="dbRecent"></div>
-      </div>
     </div>
 
     <div class="quote-list-section" id="quoteListSection">
@@ -1881,6 +1879,67 @@
     </div>
   </div>
 </div>
+
+<!-- DASHBOARD -->
+<div class="view view-dashboard" id="viewDashboard">
+  <nav class="fw-topbar">
+    <div class="fw-brand">
+      <div class="logo-mark">FW</div>
+      <div>
+        Dashboard
+        <small>Funkwerk Mobility Solutions GmbH</small>
+        <span class="fw-version">V1.0 &middot; 01.06.2026</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a href="#" onclick="showView('viewStart');return false">Startseite</a>
+      <a href="#" onclick="openPasswordModal();return false">Passwort ändern</a>
+      <a href="#" onclick="doLogout();return false">Abmelden</a>
+    </div>
+  </nav>
+  <div class="dashboard-wrap">
+    <div class="db-header">
+      <div>
+        <h1 style="margin:0;font-size:1.4rem;letter-spacing:-0.01em;color:var(--fw-dark);">Vertriebs-Dashboard</h1>
+        <div class="db-meta" id="dbScopeInfo">Auswertung wird geladen …</div>
+      </div>
+      <button class="btn-secondary" onclick="loadDashboard()" style="padding:0.5rem 1rem;font-size:0.85rem;">Aktualisieren</button>
+    </div>
+
+    <div class="db-kpi-grid" id="dbKpiGrid"></div>
+
+    <div class="db-chart-row">
+      <div class="db-card">
+        <h3>Status-Verteilung (Anzahl)</h3>
+        <div class="db-donut-wrap">
+          <div id="dbDonut"></div>
+          <div class="db-donut-legend" id="dbDonutLegend"></div>
+        </div>
+      </div>
+      <div class="db-card">
+        <h3>Volumen je Status (VP)</h3>
+        <div id="dbVpBars"></div>
+      </div>
+    </div>
+
+    <div class="db-row">
+      <div class="db-card">
+        <h3>Top 5 Kunden (nach VP)</h3>
+        <div id="dbTopCustomers"></div>
+      </div>
+      <div class="db-card">
+        <h3>Top 5 Bearbeiter</h3>
+        <div id="dbTopUsers"></div>
+      </div>
+    </div>
+
+    <div class="db-card">
+      <h3>Letzte 10 Aktivitäten</h3>
+      <div id="dbRecent"></div>
+    </div>
+  </div>
+</div>
+
 <div class="view view-admin" id="viewAdmin">
   <nav class="fw-topbar">
     <div class="fw-brand">
@@ -2488,10 +2547,8 @@
   function showView(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    if (id === 'viewStart') {
-      loadQuoteList();
-      loadDashboard();
-    }
+    if (id === 'viewStart')     loadQuoteList();
+    if (id === 'viewDashboard') loadDashboard();
   }
 
   async function doLogin() {
@@ -2503,6 +2560,7 @@
       document.getElementById('loginError').textContent = '';
       document.getElementById('startUser').textContent = res.username;
       document.getElementById('btnAdmin').style.display = res.role === 'admin' ? '' : 'none';
+      document.getElementById('btnDashboard').style.display = res.role === 'admin' ? '' : 'none';
       await loadTemplatesFromServer();
       await loadCatalogFromServer();
       showView('viewStart');
@@ -2566,6 +2624,7 @@
         currentUser = { username: res.username, role: res.role };
         document.getElementById('startUser').textContent = res.username;
         document.getElementById('btnAdmin').style.display = res.role === 'admin' ? '' : 'none';
+      document.getElementById('btnDashboard').style.display = res.role === 'admin' ? '' : 'none';
         await loadTemplatesFromServer();
         await loadCatalogFromServer();
         showView('viewStart');
@@ -2848,21 +2907,23 @@
   }
 
   // ===== Dashboard =====
+  const DB_STATUS_ORDER = ['Entwurf', 'Eingereicht', 'Beauftragt', 'Verloren', 'Archiviert'];
+  const DB_STATUS_COLOR = {
+    'Entwurf':     '#9ca3af',
+    'Eingereicht': '#0284c7',
+    'Beauftragt':  '#16a34a',
+    'Verloren':    '#dc2626',
+    'Archiviert':  '#6b7280'
+  };
+
   async function loadDashboard() {
-    const section = document.getElementById('dashboardSection');
-    if (!section) return;
-    // Sichtbarkeit per Rolle (Phase 1: Admin); später per User-Freigabe ergänzbar.
-    if (currentUser?.role !== 'admin') {
-      section.style.display = 'none';
-      return;
-    }
-    section.style.display = 'block';
+    if (currentUser?.role !== 'admin') return;
     try {
       const res = await api('dashboard.php?action=stats&scope=all');
       renderDashboard(res);
     } catch (e) {
-      document.getElementById('dbKpiGrid').innerHTML =
-        '<div class="db-list-empty">Dashboard konnte nicht geladen werden: ' + escapeHtml(e.message) + '</div>';
+      const kpis = document.getElementById('dbKpiGrid');
+      if (kpis) kpis.innerHTML = '<div class="db-list-empty">Dashboard konnte nicht geladen werden: ' + escapeHtml(e.message) + '</div>';
     }
   }
 
@@ -2872,7 +2933,7 @@
 
     // Scope-Info
     const meta = document.getElementById('dbScopeInfo');
-    meta.textContent = 'Auswertung: alle Angebote · Stand: ' + new Date().toLocaleDateString('de-DE');
+    if (meta) meta.textContent = 'Auswertung: alle Angebote · Stand: ' + new Date().toLocaleDateString('de-DE');
 
     // KPI-Kacheln
     const won  = d.count_by_status?.Beauftragt || 0;
@@ -2899,26 +2960,11 @@
       </div>`
     ).join('');
 
-    // Status-Verteilung
-    const statusOrder = ['Entwurf', 'Eingereicht', 'Beauftragt', 'Verloren', 'Archiviert'];
-    const statusColor = {
-      'Entwurf':     '#9ca3af',
-      'Eingereicht': '#0284c7',
-      'Beauftragt':  '#16a34a',
-      'Verloren':    '#dc2626',
-      'Archiviert':  '#6b7280'
-    };
-    const max = Math.max(1, ...statusOrder.map(s => d.count_by_status?.[s] || 0));
-    document.getElementById('dbStatusBars').innerHTML = statusOrder.map(s => {
-      const c = d.count_by_status?.[s] || 0;
-      const vp = d.vp_by_status?.[s] || 0;
-      const pct = (c / max) * 100;
-      return `<div class="db-status-row" title="${escapeHtml(s)}: ${c} Angebote · ${fEUR(vp)}">
-        <span class="sr-label"><span class="status-badge ${STATUS_CLASS[s] || ''}">${escapeHtml(s)}</span></span>
-        <span class="sr-bar"><span class="sr-bar-fill" style="width:${pct}%;background:${statusColor[s]};"></span></span>
-        <span class="sr-count">${c}</span>
-      </div>`;
-    }).join('');
+    // Donut: Status-Verteilung (Anzahl)
+    renderStatusDonut(d.count_by_status || {});
+
+    // Horizontale Balken: VP je Status
+    renderVpBars(d.vp_by_status || {}, fEUR);
 
     // Top-Kunden
     const tc = d.top_customers || [];
@@ -2957,6 +3003,71 @@
       : '<div class="db-list-empty">Keine aktuellen Angebote.</div>';
   }
 
+  function renderStatusDonut(countByStatus) {
+    const host  = document.getElementById('dbDonut');
+    const legEl = document.getElementById('dbDonutLegend');
+    if (!host || !legEl) return;
+    const data = DB_STATUS_ORDER
+      .map(s => ({ label: s, value: countByStatus[s] || 0, color: DB_STATUS_COLOR[s] }))
+      .filter(d => d.value > 0);
+    const total = data.reduce((s, d) => s + d.value, 0);
+    if (total === 0) {
+      host.innerHTML = '<div class="db-donut-empty">Noch keine Angebote.</div>';
+      legEl.innerHTML = '';
+      return;
+    }
+    const cx = 75, cy = 75, r = 55, sw = 22;
+    const cir = 2 * Math.PI * r;
+    let offset = 0;
+    const segs = data.map(d => {
+      const len = (d.value / total) * cir;
+      const seg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="transparent"
+                            stroke="${d.color}" stroke-width="${sw}"
+                            stroke-dasharray="${len.toFixed(2)} ${(cir - len).toFixed(2)}"
+                            stroke-dashoffset="${(-offset).toFixed(2)}"
+                            transform="rotate(-90 ${cx} ${cy})"
+                            style="transition:stroke-dasharray .4s ease;" />`;
+      offset += len;
+      return seg;
+    }).join('');
+    host.innerHTML = `<svg width="150" height="150" viewBox="0 0 150 150" role="img" aria-label="Status-Verteilung Donut">
+      ${segs}
+      <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="24" font-weight="700" fill="#1a1c1c" font-family="inherit">${total}</text>
+      <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="9" letter-spacing="1" fill="#6b7a87" font-family="inherit">ANGEBOTE</text>
+    </svg>`;
+    legEl.innerHTML = data.map(d => {
+      const pct = (d.value / total) * 100;
+      return `<div class="leg-row">
+        <span class="leg-dot" style="background:${d.color};"></span>
+        <span class="leg-label">${escapeHtml(d.label)}</span>
+        <span class="leg-value">${d.value}</span>
+        <span class="leg-pct">${pct.toFixed(0)}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  function renderVpBars(vpByStatus, fEUR) {
+    const host = document.getElementById('dbVpBars');
+    if (!host) return;
+    const data = DB_STATUS_ORDER.map(s => ({ label: s, value: vpByStatus[s] || 0, color: DB_STATUS_COLOR[s] }));
+    const max = Math.max(1, ...data.map(d => d.value));
+    if (max <= 1 && data.every(d => d.value === 0)) {
+      host.innerHTML = '<div class="db-donut-empty">Noch keine Werte.</div>';
+      return;
+    }
+    host.innerHTML = data.map(d => {
+      const pct = (d.value / max) * 100;
+      return `<div class="hb-row">
+        <span class="hb-label">
+          <span class="hb-dot" style="background:${d.color};"></span>
+          <span class="hb-text">${escapeHtml(d.label)}</span>
+        </span>
+        <span class="hb-track"><span class="hb-fill" style="width:${pct}%;background:${d.color};"></span></span>
+        <span class="hb-value">${escapeHtml(fEUR(d.value))}</span>
+      </div>`;
+    }).join('');
+  }
+
   async function setQuoteStatusFromList(id, status) {
     try {
       await api('quotes.php?action=setStatus', { method: 'POST', body: { id, status } });
@@ -2967,7 +3078,6 @@
         if (typeof renderRevisionBanner === 'function') renderRevisionBanner();
       }
       loadQuoteList();
-      if (typeof loadDashboard === 'function') loadDashboard();
       showToast('Status: ' + status);
     } catch (e) {
       alert('Fehler beim Status-Update: ' + e.message);
