@@ -679,6 +679,49 @@
 
     .btn-del:hover { color: var(--fw-primary); background: #fdf2f4; }
 
+    /* Langtext-Button */
+    .btn-langtext {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #b9c2cc;
+      padding: 0.15rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, background 0.15s;
+    }
+    .btn-langtext:hover { background: #f3f4f6; color: var(--fw-dark); }
+    .btn-langtext.has-text { color: #4338ca; background: #eef2ff; }
+    .btn-langtext.has-text:hover { background: #c7d2fe; }
+
+    /* Langtext-Detail-Zeile */
+    tr.langtext-row td {
+      padding: 0.45rem 0.55rem 0.8rem;
+      background: #fafbfc;
+      border-bottom: 1px solid var(--fw-border-s) !important;
+    }
+    tr.langtext-row textarea {
+      width: 100%;
+      padding: 0.5rem 0.7rem;
+      border: 1px solid var(--fw-border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      resize: vertical;
+      background: var(--fw-white);
+      color: var(--fw-text);
+      min-height: 60px;
+      line-height: 1.4;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    tr.langtext-row textarea:focus {
+      outline: none;
+      border-color: var(--fw-primary);
+      box-shadow: 0 0 0 2px rgba(226,0,26,0.1);
+    }
+
     /* Zeile hinzufügen */
     .btn-add {
       margin-top: 1rem;
@@ -3461,7 +3504,7 @@
     const htr = document.querySelector(`#quoteBody tr.heading-row[data-gid="${gid}"]`);
     const isCollapsed = htr.classList.toggle('group-collapsed');
     document.querySelectorAll(`#quoteBody tr[data-gid="${gid}"]`).forEach(tr => {
-      if (tr.dataset.type === 'item' || tr.dataset.type === 'addsub') {
+      if (tr.dataset.type === 'item' || tr.dataset.type === 'addsub' || tr.dataset.type === 'langtext') {
         tr.classList.toggle('group-hidden', isCollapsed);
       }
     });
@@ -3554,7 +3597,7 @@
   // --- Item (Unterposition) ---
   function addItem(gid, data = {}) {
     const id = ++rowCounter;
-    const { desc='', kstr='material', hausteil=0, kaufteil=0, fremd=0, sonder=0, std=0, stueck=1, deckung=null } = data;
+    const { desc='', kstr='material', hausteil=0, kaufteil=0, fremd=0, sonder=0, std=0, stueck=1, deckung=null, langtext='' } = data;
     const deckungVal = deckung !== null ? deckung : getDefaultDeckung();
 
     const tr = document.createElement('tr');
@@ -3610,6 +3653,9 @@
         <button class="btn-paste inactive" title="Nach dieser Zeile einfügen" onclick="pasteOnItem(${id})" data-role="item-paste">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 3h6a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.5"/></svg>
         </button>
+        <button class="btn-langtext ${langtext ? 'has-text' : ''}" title="Langtext (Detailtext) ein-/ausblenden" onclick="toggleLangtext(${id})">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 7h10M3 10h7M3 13h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
         <button class="btn-del" title="Löschen" onclick="removeItem(${id})">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -3625,10 +3671,48 @@
     // Insert before the add-sub-row of this group
     const addSubRow = document.querySelector(`#quoteBody tr.add-sub-row[data-gid="${gid}"]`);
     document.getElementById('quoteBody').insertBefore(tr, addSubRow);
+
+    // Langtext-Zeile (versteckt, außer Langtext ist gefüllt)
+    const ltr = document.createElement('tr');
+    ltr.className = 'langtext-row';
+    ltr.id = `langtext-row-${id}`;
+    ltr.dataset.type = 'langtext';
+    ltr.dataset.gid = gid;
+    ltr.dataset.itemId = id;
+    ltr.style.display = langtext ? '' : 'none';
+    ltr.innerHTML = `
+      <td></td>
+      <td colspan="14">
+        <textarea id="langtext-${id}" placeholder="Langtext — Details zur Position (optional)" rows="3"
+                  oninput="onLangtextInput(${id})">${escapeHtml(langtext)}</textarea>
+      </td>
+    `;
+    document.getElementById('quoteBody').insertBefore(ltr, addSubRow);
+
     renumberAll();
     applyKstrLock(id);
     recalcRow(id);
     updateClipboardUI();
+  }
+
+  function toggleLangtext(id) {
+    const ltr = document.getElementById(`langtext-row-${id}`);
+    if (!ltr) return;
+    const isHidden = ltr.style.display === 'none';
+    ltr.style.display = isHidden ? '' : 'none';
+    if (isHidden) {
+      setTimeout(() => {
+        const ta = document.getElementById(`langtext-${id}`);
+        if (ta) ta.focus();
+      }, 30);
+    }
+  }
+
+  function onLangtextInput(id) {
+    const ta = document.getElementById(`langtext-${id}`);
+    const btn = document.querySelector(`#row-${id} .btn-langtext`);
+    if (btn) btn.classList.toggle('has-text', !!(ta && ta.value.trim()));
+    syncCeoBoth();
   }
 
   // Lock Deckung at 100% when SW-Lizenzen is selected
@@ -3658,13 +3742,18 @@
   function moveItem(id, dir) {
     const tr = document.getElementById(`row-${id}`);
     if (!tr) return;
+    const lt = document.getElementById(`langtext-row-${id}`);
     const gid = tr.dataset.gid;
     const items = [...document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`)];
     const idx = items.indexOf(tr);
     if (dir === -1 && idx > 0) {
       items[idx - 1].before(tr);
+      if (lt) tr.after(lt);
     } else if (dir === 1 && idx < items.length - 1) {
-      items[idx + 1].after(tr);
+      const next = items[idx + 1];
+      const nextLt = document.getElementById(`langtext-row-${next.dataset.id}`);
+      (nextLt || next).after(tr);
+      if (lt) tr.after(lt);
     }
     renumberAll();
     syncCeoBoth();
@@ -3700,7 +3789,9 @@
 
   function removeItem(id) {
     const tr = document.getElementById(`row-${id}`);
+    const lt = document.getElementById(`langtext-row-${id}`);
     if (tr) tr.remove();
+    if (lt) lt.remove();
     renumberAll();
     recalcTotal();
   }
@@ -3711,6 +3802,7 @@
   function readItemFromRow(tr) {
     const g = f => tr.querySelector(`[data-f="${f}"]`);
     const num = f => Math.max(0, parseFloat(g(f).value) || 0);
+    const ltEl = tr.dataset.id ? document.getElementById(`langtext-${tr.dataset.id}`) : null;
     return {
       desc:     g('desc').value,
       kstr:     g('kstr').value,
@@ -3721,6 +3813,7 @@
       std:      num('std'),
       stueck:   num('stueck') || 1,
       deckung:  Math.min(99, num('deckung')),
+      langtext: ltEl ? ltEl.value : ''
     };
   }
 
@@ -3825,10 +3918,12 @@
     if (!srcTr) return;
     const gid = srcTr.dataset.gid;
     addItem(gid, clipboard.data);
-    // addItem appends before the add-sub-row; move it right after srcTr
     const items = [...document.querySelectorAll(`#quoteBody tr.item-row[data-gid="${gid}"]`)];
     const newItem = items[items.length - 1];
-    srcTr.after(newItem);
+    const newLt = document.getElementById(`langtext-row-${newItem.dataset.id}`);
+    const srcLt = document.getElementById(`langtext-row-${id}`);
+    (srcLt || srcTr).after(newItem);
+    if (newLt) newItem.after(newLt);
     renumberAll();
     recalcTotal();
     showToast('Unterposition eingefügt');
@@ -3874,6 +3969,7 @@
     if (!tr) return null;
     const g = f => tr.querySelector(`[data-f="${f}"]`);
     const num = f => Math.max(0, parseFloat(g(f).value) || 0);
+    const ltEl = document.getElementById(`langtext-${id}`);
     return {
       id,
       gid:      tr.dataset.gid,
@@ -3885,7 +3981,8 @@
       sonder:   num('sonder'),
       std:      num('std'),
       stueck:   num('stueck'),
-      deckung:  Math.min(99, num('deckung'))
+      deckung:  Math.min(99, num('deckung')),
+      langtext: ltEl ? ltEl.value : ''
     };
   }
 
@@ -4236,7 +4333,8 @@
               sonder: p.sonder || 0,
               std: p.std || 0,
               stueck: p.stueck || 1,
-              deckung: p.deckung != null ? p.deckung : null
+              deckung: p.deckung != null ? p.deckung : null,
+              langtext: p.langtext || ''
             });
             // Set custom pos number
             if (p.posNr && p.posEdited) {
