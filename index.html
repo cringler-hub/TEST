@@ -3830,8 +3830,15 @@
       kunde: document.getElementById('kundeName').value,
       angebotNr: document.getElementById('angebotNr').value,
       datum: document.getElementById('angebotDatum').value,
+      bearbeiter: document.getElementById('cfgBearbeiter').value,
       gruppen, totalHK, totalVP, deckungVP, endpreis, deckungEnd, nachlass
     };
+  }
+
+  function formatDateDE(iso) {
+    if (!iso) return '–';
+    const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? `${m[3]}.${m[2]}.${m[1]}` : iso;
   }
 
   // Build the rows HTML for the CEO positions table
@@ -3905,7 +3912,7 @@
 
   function getCeoMetaCells(d) {
     return {
-      'ceo-meta-headerline': `${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${d.datum || '–'}`
+      'ceo-meta-headerline': `${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${formatDateDE(d.datum)} · Bearbeiter: ${d.bearbeiter || '–'}`
     };
   }
 
@@ -3977,7 +3984,7 @@ table.hide-vpg .col-vpg{display:none}
   <header>
     <div>
       <h1>CEO-Übersicht</h1>
-      <div class="sub" id="ceo-meta-headerline">${escapeForHtml(d.titel)} · Angebot ${escapeForHtml(d.angebotNr || '–')} · Kunde: ${escapeForHtml(d.kunde || '–')} · Datum: ${escapeForHtml(d.datum || '–')}</div>
+      <div class="sub" id="ceo-meta-headerline">${escapeForHtml(d.titel)} · Angebot ${escapeForHtml(d.angebotNr || '–')} · Kunde: ${escapeForHtml(d.kunde || '–')} · Datum: ${escapeForHtml(formatDateDE(d.datum))} · Bearbeiter: ${escapeForHtml(d.bearbeiter || '–')}</div>
     </div>
     <div class="brand">Funkwerk · CEO-Sicht</div>
   </header>
@@ -4395,8 +4402,9 @@ body + '</body></html>';
       'c-meta-angebotNr':   d.angebotNr || '–',
       'c-meta-titel':       d.titel,
       'c-meta-kunde':       d.kunde || '–',
-      'c-meta-datum':       'Datum: ' + (d.datum || '–'),
-      'c-meta-headerline':  `${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${d.datum || '–'}`
+      'c-meta-datum':       formatDateDE(d.datum),
+      'c-meta-bearbeiter':  d.bearbeiter || '–',
+      'c-meta-headerline':  `${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${formatDateDE(d.datum)} · Bearbeiter: ${d.bearbeiter || '–'}`
     };
   }
 
@@ -4410,6 +4418,8 @@ body + '</body></html>';
           <tr><td></td><td>Angebots-Nr.</td><td colspan="2" id="c-meta-angebotNr">${d.angebotNr || '–'}</td></tr>
           <tr><td></td><td>Angebots-Titel</td><td colspan="2" id="c-meta-titel">${d.titel}</td></tr>
           <tr><td></td><td>Kunde</td><td colspan="2" id="c-meta-kunde">${d.kunde || '–'}</td></tr>
+          <tr><td></td><td>Datum</td><td colspan="2" id="c-meta-datum">${formatDateDE(d.datum)}</td></tr>
+          <tr><td></td><td>Bearbeiter</td><td colspan="2" id="c-meta-bearbeiter">${d.bearbeiter || '–'}</td></tr>
 
           <tr class="section umsatz"><td>UMSATZ</td><td></td><td class="num strong" id="c-umsatz">${f(d.umsatz)}</td><td></td></tr>
           <tr><td></td><td>Lieferungen</td><td class="num" id="c-umsatzLieferungen">${f(d.umsatzLieferungen)}</td><td></td></tr>
@@ -4522,7 +4532,7 @@ input.cfg-pct:focus{outline:none;border-color:#540025;box-shadow:0 0 0 2px rgba(
   <header>
     <div>
       <h1>Kalkulationsübersicht (I) — Deckungsbeitrag</h1>
-      <div class="sub" id="c-meta-headerline">${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${d.datum || '–'}</div>
+      <div class="sub" id="c-meta-headerline">${d.titel} · Angebot ${d.angebotNr || '–'} · Kunde: ${d.kunde || '–'} · Datum: ${formatDateDE(d.datum)} · Bearbeiter: ${d.bearbeiter || '–'}</div>
     </div>
     <div class="brand">Funkwerk · Erweiterte CEO-Sicht</div>
   </header>
