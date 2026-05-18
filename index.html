@@ -1602,6 +1602,31 @@
     .status-badge.s-verloren     { background: #fee2e2; color: #b91c1c; }
     .status-badge.s-archiviert   { background: #e5e7eb; color: #374151; }
 
+    /* Freigabe-Liste im Modal */
+    .share-list-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.85rem; border-bottom: 1px solid var(--fw-border-s);
+      background: var(--fw-white);
+    }
+    .share-list-row:last-child { border-bottom: none; }
+    .share-list-row .sl-user { font-weight: 600; color: var(--fw-dark); flex: 1; font-size: 0.88rem; }
+    .share-list-row .sl-by   { font-size: 0.78rem; color: var(--fw-muted); }
+    .share-list-row .sl-remove {
+      background: transparent; border: 1px solid var(--fw-border); color: var(--fw-muted);
+      padding: 0.25rem 0.6rem; border-radius: 5px; cursor: pointer; font-size: 0.78rem;
+      font-family: inherit;
+    }
+    .share-list-row .sl-remove:hover { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+
+    /* Freigabe-Indikatoren in der Angebotsliste */
+    .share-indicator {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      font-size: 0.72rem; padding: 0.18rem 0.55rem; border-radius: 10px;
+      font-weight: 600;
+    }
+    .share-indicator.shared-out { background: #e0f2fe; color: #075985; }
+    .share-indicator.shared-in  { background: #ecfdf5; color: #047857; }
+
     /* Versionsliste-Modal */
     .rev-list { padding: 0.5rem 0; }
     .rev-list .rev-row {
@@ -1633,7 +1658,9 @@
     body.quote-readonly #viewCalc .btn-del,
     body.quote-readonly #viewCalc .btn-paste,
     body.quote-readonly #viewCalc .btn-copy,
-    body.quote-readonly #viewCalc .row-actions { display: none !important; }
+    body.quote-readonly #viewCalc .row-actions,
+    body.quote-readonly #viewCalc .actions .edit-only,
+    body.quote-readonly #viewCalc .btn-langtext { display: none !important; }
     .add-user-form {
       display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 0.5rem; align-items: end;
     }
@@ -2180,12 +2207,13 @@
       <button class="btn-primary" onclick="printQuote()">Drucken / als PDF</button>
       <button class="btn-primary" onclick="openCeoView()" style="background:var(--fw-dark);">CEO-Ansicht</button>
       <button class="btn-primary" onclick="openCeoViewExt()" style="background:var(--fw-primary);">Erweiterte CEO-Ansicht</button>
-      <button class="btn-primary" onclick="saveQuoteToServer()" style="background:#047857;">Angebot speichern</button>
-      <button class="btn-primary" onclick="openCommitModal()" style="background:#4338ca;">Version einfrieren</button>
+      <button class="btn-primary edit-only" onclick="saveQuoteToServer()" style="background:#047857;">Angebot speichern</button>
+      <button class="btn-primary edit-only" onclick="openCommitModal()" style="background:#4338ca;">Version einfrieren</button>
       <button class="btn-secondary" onclick="openRevisionsModal()">Versionen</button>
+      <button class="btn-secondary edit-only" onclick="openShareModal()">Freigeben</button>
       <button class="btn-secondary" onclick="exportJSON()">Als JSON exportieren</button>
-      <button class="btn-secondary" onclick="importJSON()">JSON importieren</button>
-      <button class="btn-secondary" onclick="resetTable()">Zurücksetzen</button>
+      <button class="btn-secondary edit-only" onclick="importJSON()">JSON importieren</button>
+      <button class="btn-secondary edit-only" onclick="resetTable()">Zurücksetzen</button>
     </div>
   </div>
 </div>
@@ -2209,6 +2237,30 @@
         <button class="btn-secondary" onclick="leaveCalcWithoutSaving()" style="padding:0.5rem 1rem;">Ohne Speichern verlassen</button>
         <button class="btn-primary" onclick="leaveCalcWithSaving()" style="padding:0.5rem 1rem;background:#047857;">Speichern und verlassen</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Freigaben verwalten -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header">
+      <h3 style="margin:0;font-size:1rem;">Angebot freigeben (Lesen)</h3>
+      <button class="modal-close" onclick="closeShareModal()">&times;</button>
+    </div>
+    <div style="padding:1.1rem 1.5rem 1.3rem;display:flex;flex-direction:column;gap:0.8rem;">
+      <div style="font-size:0.85rem;color:var(--fw-dark);line-height:1.5;">
+        Wähle Benutzer aus, die dieses Angebot <b>nur lesen</b> dürfen. Sie können ansehen, drucken und Versionen einsehen, aber nichts ändern.
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <select id="shareUserSelect" style="flex:1;padding:0.5rem 0.65rem;border:1px solid var(--fw-border);border-radius:6px;font-size:0.88rem;font-family:inherit;background:var(--fw-white);"></select>
+        <button class="btn-primary" onclick="addShare()" style="padding:0.5rem 1rem;">Hinzufügen</button>
+      </div>
+      <div>
+        <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--fw-muted);font-weight:700;margin-bottom:0.35rem;">Aktuell freigegeben für:</div>
+        <div id="shareList" style="max-height:200px;overflow-y:auto;border:1px solid var(--fw-border);border-radius:6px;padding:0.3rem 0;background:var(--fw-bg-soft);"></div>
+      </div>
+      <div id="shareMsg" style="font-size:0.82rem;min-height:1.2em;color:var(--fw-primary);"></div>
     </div>
   </div>
 </div>
@@ -2627,7 +2679,25 @@
   function renderQuoteRow(q) {
     const status = q.status || 'Entwurf';
     const ver = q.current_version ? ' · V' + q.current_version : '';
+    const isMine    = q.ersteller === currentUser?.username;
+    const isAdmin   = currentUser?.role === 'admin';
+    const sharedOut = isMine && Number(q.shared_count) > 0;
+    const sharedIn  = !isMine && !isAdmin && Number(q.shared_to_me) === 1;
     const statusOptions = STATUS_ORDER.map(s => `<option value="${s}" ${s === status ? 'selected' : ''}>${s}</option>`).join('');
+    const indicators = [
+      sharedOut ? `<span class="share-indicator shared-out" title="Du hast freigegeben">👥 ${q.shared_count}</span>` : '',
+      sharedIn  ? `<span class="share-indicator shared-in"  title="Für Dich freigegeben">📥 Freigegeben</span>` : ''
+    ].filter(Boolean).join('');
+    // Empfänger dürfen Status nicht ändern und nicht löschen
+    const canEdit = isMine || isAdmin;
+    const statusCtrl = canEdit
+      ? `<select class="q-status-select" onchange="setQuoteStatusFromList(${q.id}, this.value)" onclick="event.stopPropagation()">${statusOptions}</select>`
+      : `<span class="status-badge ${STATUS_CLASS[status] || ''}">${escapeHtml(status)}</span>`;
+    const delBtn = canEdit
+      ? `<button class="q-btn del" onclick="deleteQuote(${q.id}, '${escapeHtml(q.titel || '')}')">
+           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+         </button>`
+      : '';
     return `
       <div class="q-row">
         <div>
@@ -2636,12 +2706,11 @@
             ${escapeHtml(q.angebot_nr || '')} · ${escapeHtml(q.kunde || '–')} · ${(q.updated_at || '').slice(0, 10)}${ver}
           </div>
         </div>
-        <select class="q-status-select" onchange="setQuoteStatusFromList(${q.id}, this.value)" onclick="event.stopPropagation()">${statusOptions}</select>
-        ${currentUser?.role === 'admin' ? '<span class="q-user">' + escapeHtml(q.ersteller) + '</span>' : ''}
+        ${indicators}
+        ${statusCtrl}
+        ${(isAdmin || sharedIn) ? '<span class="q-user">' + escapeHtml(q.ersteller) + '</span>' : ''}
         <button class="q-btn" onclick="openQuote(${q.id})">Öffnen</button>
-        <button class="q-btn del" onclick="deleteQuote(${q.id}, '${escapeHtml(q.titel || '')}')">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
+        ${delBtn}
       </div>`;
   }
 
@@ -2673,6 +2742,15 @@
       applyStatusToUI();
       renderRevisionBanner();
       if (typeof clearCalcDirty === 'function') clearCalcDirty();
+      // Wenn das Angebot lediglich freigegeben ist (read_only), Read-Only-Banner anzeigen.
+      if (res.quote.read_only) {
+        const si = res.quote.share_info || {};
+        setReadOnlyMode(true, {
+          kind: 'shared',
+          shared_by: si.shared_by || res.quote.ersteller,
+          shared_at: si.shared_at || ''
+        });
+      }
       showView('viewCalc');
       showToast('Angebot geladen: ' + (res.quote.angebot_nr || res.quote.titel));
     } catch (e) {
@@ -2737,14 +2815,24 @@
     const el = document.getElementById('revisionBanner');
     if (readOnlyMode && el && info) {
       el.classList.add('readonly');
-      const dt = (info.committed_at || '').slice(0, 10);
-      el.innerHTML = `
-        <b>Read-Only:</b> Sie sehen Version <b>V${info.version}</b> vom ${escapeHtml(formatDateDE(dt))} · ${escapeHtml(info.committed_by || '')}
-        ${info.comment ? ` — „${escapeHtml(info.comment)}"` : ''}
-        <span style="margin-left:auto;display:flex;gap:0.4rem;">
-          <button class="btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.8rem;" onclick="exitReadOnly()">Schließen</button>
-          <button class="btn-primary" style="padding:0.35rem 0.75rem;font-size:0.8rem;background:#b45309;" onclick="restoreToDraft(${info.id})">Als Entwurf weiterbearbeiten</button>
-        </span>`;
+      if (info.kind === 'shared') {
+        const dt = (info.shared_at || '').slice(0, 10);
+        el.innerHTML = `
+          <b>Read-Only:</b> Freigegeben von <b>${escapeHtml(info.shared_by || '')}</b>
+          ${dt ? ' am ' + escapeHtml(formatDateDE(dt)) : ''}
+          <span style="margin-left:auto;">
+            <button class="btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.8rem;" onclick="showView('viewStart')">Schließen</button>
+          </span>`;
+      } else {
+        const dt = (info.committed_at || '').slice(0, 10);
+        el.innerHTML = `
+          <b>Read-Only:</b> Sie sehen Version <b>V${info.version}</b> vom ${escapeHtml(formatDateDE(dt))} · ${escapeHtml(info.committed_by || '')}
+          ${info.comment ? ` — „${escapeHtml(info.comment)}"` : ''}
+          <span style="margin-left:auto;display:flex;gap:0.4rem;">
+            <button class="btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.8rem;" onclick="exitReadOnly()">Schließen</button>
+            <button class="btn-primary" style="padding:0.35rem 0.75rem;font-size:0.8rem;background:#b45309;" onclick="restoreToDraft(${info.id})">Als Entwurf weiterbearbeiten</button>
+          </span>`;
+      }
       el.style.display = 'flex';
     } else {
       renderRevisionBanner();
@@ -2887,6 +2975,93 @@
       renderRevisionBanner();
       closeRevisionsModal();
       showToast('V' + res.revision.version + ' als Entwurf übernommen');
+    } catch (e) {
+      alert('Fehler: ' + e.message);
+    }
+  }
+
+  // ===== Freigaben (Share) =====
+  let shareCacheUsernames = null;
+
+  async function openShareModal() {
+    if (!currentQuoteId) {
+      alert('Bitte zuerst das Angebot speichern, bevor Du es freigeben kannst.');
+      return;
+    }
+    if (readOnlyMode) {
+      alert('Im Read-Only-Modus kann nicht freigegeben werden.');
+      return;
+    }
+    document.getElementById('shareMsg').textContent = '';
+    document.getElementById('shareModal').classList.add('open');
+    try {
+      if (!shareCacheUsernames) {
+        const res = await api('users.php?action=listUsernames');
+        shareCacheUsernames = res.usernames || [];
+      }
+    } catch (e) {
+      document.getElementById('shareMsg').textContent = 'Benutzerliste konnte nicht geladen werden: ' + e.message;
+      document.getElementById('shareMsg').style.color = '#dc2626';
+    }
+    await refreshShareList();
+  }
+
+  function closeShareModal() {
+    document.getElementById('shareModal').classList.remove('open');
+  }
+
+  async function refreshShareList() {
+    const sel  = document.getElementById('shareUserSelect');
+    const list = document.getElementById('shareList');
+    list.innerHTML = '<div class="modal-empty" style="padding:0.8rem;">Lade …</div>';
+    try {
+      const res = await api('quotes.php?action=listShares&id=' + currentQuoteId);
+      const shares = res.shares || [];
+      const sharedUsernames = new Set(shares.map(s => s.username));
+
+      // Dropdown mit allen Usern außer: Ersteller (=ich/oder Originalbesitzer) und bereits freigegebene
+      const me = currentUser?.username || '';
+      const candidates = (shareCacheUsernames || []).filter(u => u !== me && !sharedUsernames.has(u));
+      sel.innerHTML = candidates.length
+        ? '<option value="">— Benutzer wählen —</option>' + candidates.map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('')
+        : '<option value="">Keine weiteren Benutzer verfügbar</option>';
+
+      if (shares.length === 0) {
+        list.innerHTML = '<div class="modal-empty" style="padding:0.8rem;">Noch keine Freigaben.</div>';
+        return;
+      }
+      list.innerHTML = shares.map(s => {
+        const dt = (s.shared_at || '').slice(0, 10);
+        return `<div class="share-list-row">
+          <span class="sl-user">${escapeHtml(s.username)}</span>
+          <span class="sl-by">durch ${escapeHtml(s.shared_by || '')} · ${escapeHtml(formatDateDE(dt))}</span>
+          <button class="sl-remove" onclick="removeShare('${escapeHtml(s.username)}')">Entfernen</button>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      list.innerHTML = '<div class="modal-empty" style="padding:0.8rem;color:#dc2626;">Fehler: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
+  async function addShare() {
+    const sel = document.getElementById('shareUserSelect');
+    const u = sel.value;
+    const msg = document.getElementById('shareMsg');
+    if (!u) { msg.textContent = 'Bitte einen Benutzer auswählen.'; msg.style.color = '#dc2626'; return; }
+    try {
+      await api('quotes.php?action=share', { method: 'POST', body: { id: currentQuoteId, username: u } });
+      msg.textContent = '„' + u + '" hinzugefügt.'; msg.style.color = '#059669';
+      await refreshShareList();
+    } catch (e) {
+      msg.textContent = e.message || 'Fehler.'; msg.style.color = '#dc2626';
+    }
+  }
+
+  async function removeShare(username) {
+    if (!confirm('Freigabe für „' + username + '" entfernen?')) return;
+    try {
+      await api('quotes.php?action=unshare', { method: 'POST', body: { id: currentQuoteId, username } });
+      await refreshShareList();
     } catch (e) {
       alert('Fehler: ' + e.message);
     }

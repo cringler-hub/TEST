@@ -98,6 +98,19 @@ try {
     echo "<p style='color:green'>✓ Tabelle <code>quote_revisions</code></p>";
 
     $db->exec("
+        CREATE TABLE IF NOT EXISTS quote_shares (
+            id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            quote_id   INT UNSIGNED NOT NULL,
+            username   VARCHAR(100) NOT NULL,
+            shared_by  VARCHAR(100) NOT NULL,
+            shared_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY ux_quote_user (quote_id, username),
+            CONSTRAINT fk_qs_quote FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    echo "<p style='color:green'>✓ Tabelle <code>quote_shares</code></p>";
+
+    $db->exec("
         CREATE TABLE IF NOT EXISTS templates (
             id    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             name  VARCHAR(255) NOT NULL,

@@ -13,6 +13,14 @@ switch ($action) {
         jsonResponse(['users' => $rows]);
         break;
 
+    case 'listUsernames':
+        // Auch für normale User, nur Benutzernamen — wird z.B. fürs Freigabe-Dropdown gebraucht.
+        requireAuth();
+        $db = getDB();
+        $rows = $db->query('SELECT username FROM users ORDER BY username')->fetchAll();
+        jsonResponse(['usernames' => array_column($rows, 'username')]);
+        break;
+
     case 'create':
         requireAdmin();
         $input = json_decode(file_get_contents('php://input'), true);
