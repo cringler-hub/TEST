@@ -3568,7 +3568,7 @@
         <input type="number" step="0.01" min="0" value="${sonder}" data-f="sonder" oninput="recalcRow(${id})" />
       </div></td>
       <td class="col-std">
-        <input type="number" step="0.5" min="0" value="" placeholder="Std." data-f="std" oninput="recalcRow(${id})" />
+        <input type="number" step="0.5" min="0" value="${std > 0 ? std : ''}" placeholder="Std." data-f="std" oninput="recalcRow(${id})" />
       </td>
       <td class="col-stk">
         <input type="number" step="1" min="0" value="${stueck}" data-f="stueck" oninput="recalcRow(${id})" />
