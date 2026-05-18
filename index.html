@@ -1895,9 +1895,9 @@
       </div>
     </div>
     <div class="topbar-actions">
-      <a href="#" onclick="showView('viewStart');return false">Startseite</a>
+      <a href="#" onclick="confirmLeaveCalc('viewStart');return false">Startseite</a>
       <a href="#" onclick="openPasswordModal();return false">Passwort ändern</a>
-      <a href="#" onclick="doLogout();return false">Abmelden</a>
+      <a href="#" onclick="confirmLeaveCalc('logout');return false">Abmelden</a>
     </div>
   </nav>
 <div class="container">
@@ -2170,6 +2170,27 @@
 </div><!-- /viewCalc -->
 
 <!-- Version einfrieren -->
+<!-- Speichern-Erinnerung beim Verlassen des Kalkulators -->
+<div class="modal-overlay" id="leaveCalcModal">
+  <div class="modal-box" style="max-width:460px;">
+    <div class="modal-header">
+      <h3 style="margin:0;font-size:1rem;">Aktuelles Angebot speichern?</h3>
+      <button class="modal-close" onclick="closeLeaveCalcModal()">&times;</button>
+    </div>
+    <div style="padding:1.1rem 1.5rem 1.3rem;display:flex;flex-direction:column;gap:0.7rem;">
+      <div style="font-size:0.88rem;color:var(--fw-dark);line-height:1.5;">
+        Möchtest Du das aktuelle Angebot speichern, bevor Du den Kalkulator verlässt?
+        <br><span style="color:var(--fw-muted);font-size:0.82rem;">Ohne Speichern gehen nicht festgehaltene Änderungen verloren.</span>
+      </div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.4rem;flex-wrap:wrap;">
+        <button class="btn-secondary" onclick="closeLeaveCalcModal()" style="padding:0.5rem 1rem;">Abbrechen</button>
+        <button class="btn-secondary" onclick="leaveCalcWithoutSaving()" style="padding:0.5rem 1rem;">Ohne Speichern verlassen</button>
+        <button class="btn-primary" onclick="leaveCalcWithSaving()" style="padding:0.5rem 1rem;background:#047857;">Speichern und verlassen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="commitModal">
   <div class="modal-box" style="max-width:480px;">
     <div class="modal-header">
@@ -2445,6 +2466,58 @@
       showToast('Angebot gespeichert' + (qd.angebotNr ? ': ' + qd.angebotNr : ''));
     } catch (e) {
       alert('Fehler beim Speichern: ' + e.message);
+    }
+  }
+
+  // --- Speichern-Erinnerung beim Verlassen des Kalkulators ---
+  let pendingLeaveAction = null; // 'viewStart' | 'logout' (oder ein anderer View-Name)
+
+  function hasQuoteContent() {
+    // Read-Only-Modus zählt nicht als Bearbeitung
+    if (readOnlyMode) return false;
+    const titel = (document.getElementById('angebotTitel')?.value || '').trim();
+    const kunde = (document.getElementById('kundeName')?.value || '').trim();
+    // Items > 0 oder Titel/Kunde gefüllt → es ist etwas zu speichern
+    const items = document.querySelectorAll('#quoteBody tr.item-row').length;
+    return items > 0 || titel || kunde;
+  }
+
+  function confirmLeaveCalc(target) {
+    if (!hasQuoteContent()) {
+      executeLeaveAction(target);
+      return;
+    }
+    pendingLeaveAction = target;
+    document.getElementById('leaveCalcModal').classList.add('open');
+  }
+
+  function closeLeaveCalcModal() {
+    document.getElementById('leaveCalcModal').classList.remove('open');
+    pendingLeaveAction = null;
+  }
+
+  function leaveCalcWithoutSaving() {
+    const target = pendingLeaveAction;
+    document.getElementById('leaveCalcModal').classList.remove('open');
+    pendingLeaveAction = null;
+    executeLeaveAction(target);
+  }
+
+  async function leaveCalcWithSaving() {
+    const target = pendingLeaveAction;
+    document.getElementById('leaveCalcModal').classList.remove('open');
+    pendingLeaveAction = null;
+    try {
+      await saveQuoteToServer();
+    } catch (e) { /* saveQuoteToServer zeigt selbst alert */ }
+    executeLeaveAction(target);
+  }
+
+  function executeLeaveAction(target) {
+    if (target === 'logout') {
+      doLogout();
+    } else {
+      showView(target || 'viewStart');
     }
   }
 
