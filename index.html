@@ -484,6 +484,23 @@
 
     .calc-display.vp { color: var(--fw-primary); font-weight: 700; }
 
+    /* VP Einzel editierbar */
+    tbody input.vp-edit {
+      width: 100%; padding: 0.4rem 0.5rem; border: 1px solid var(--fw-border);
+      border-radius: 5px; background: var(--fw-white); font-size: 0.82rem;
+      text-align: right; font-variant-numeric: tabular-nums;
+      color: var(--fw-primary); font-weight: 700;
+      transition: border-color .15s, background .15s;
+      -moz-appearance: textfield;
+    }
+    tbody input.vp-edit::-webkit-outer-spin-button,
+    tbody input.vp-edit::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    tbody input.vp-edit:hover { background: #fafbfc; }
+    tbody input.vp-edit:focus {
+      outline: none; border-color: var(--fw-primary);
+      background: var(--fw-white); box-shadow: 0 0 0 2px rgba(226,0,26,0.1);
+    }
+
     /* Heading-Rows */
     tr.heading-row {
       background: #fdf2f4 !important;
@@ -3577,7 +3594,7 @@
       <td class="col-deckung">
         <input type="number" step="0.5" min="0" max="99" value="${deckungVal}" data-f="deckung" oninput="recalcRow(${id})" />
       </td>
-      <td class="col-calc"><div class="calc-display vp" id="vp-${id}">0,00 €</div></td>
+      <td class="col-calc"><input type="number" step="0.01" min="0" class="vp-edit" id="vp-${id}" data-f="vp" oninput="recalcRowFromVp(${id})" /></td>
       <td class="col-calc"><div class="calc-display"    id="hkg-${id}">0,00 €</div></td>
       <td class="col-calc"><div class="calc-display vp" id="vpg-${id}">0,00 €</div></td>
       <td class="col-del"><div class="row-actions">
@@ -3902,9 +3919,54 @@
     if (!r) return;
     const c = computeRow(r);
     document.getElementById(`hk-${id}`).textContent  = formatEUR(c.hkEinzel);
-    document.getElementById(`vp-${id}`).textContent  = formatEUR(c.vpEinzel);
+    const vpEl = document.getElementById(`vp-${id}`);
+    // VP-Einzel ist editierbar: nur überschreiben, wenn das Feld aktuell NICHT vom Nutzer
+    // fokussiert ist (sonst würde der Cursor mitten beim Tippen springen).
+    if (vpEl && document.activeElement !== vpEl) {
+      vpEl.value = (c.vpEinzel || 0).toFixed(2);
+    }
     document.getElementById(`hkg-${id}`).textContent = formatEUR(c.hkGesamt);
     document.getElementById(`vpg-${id}`).textContent = formatEUR(c.vpGesamt);
+    recalcTotal();
+  }
+
+  // Wird ausgelöst, wenn der Nutzer den VP Einzel manuell anpasst.
+  // Daraus ergibt sich automatisch eine neue Deckung — der Rest der Anzeige folgt.
+  function recalcRowFromVp(id) {
+    const tr = document.getElementById(`row-${id}`);
+    if (!tr) return;
+    const g = f => tr.querySelector(`[data-f="${f}"]`);
+    const newVp = Math.max(0, parseFloat(g('vp').value) || 0);
+    const r = readRow(id);
+    if (!r) return;
+
+    // SW-Lizenzen: VP = Kaufpreis (Feld „Fremdmaterial"), Deckung implizit 100%
+    if (r.kstr === 'swlizenz') {
+      g('kaufteil').value = (newVp || 0).toFixed(2);
+      recalcRow(id);
+      return;
+    }
+
+    // HK aus den aktuellen Werten ermitteln (unabhängig von der Deckung)
+    const c = computeRow(r);
+    const hk = c.hkEinzel;
+
+    // Neue Deckung berechnen
+    let newDeckung = 0;
+    if (newVp > 0) {
+      newDeckung = ((newVp - hk) / newVp) * 100;
+      if (newDeckung < 0) newDeckung = 0;
+      if (newDeckung > 99) newDeckung = 99;
+    }
+    g('deckung').value = newDeckung.toFixed(4);
+
+    // Gesamt-Anzeigen aktualisieren — ohne VP-Einzel zu überschreiben
+    const stueck = r.stueck;
+    const hkGesamt = r.kstr === 'km' ? hk : hk * stueck;
+    const vpGesamt = r.kstr === 'km' ? newVp : newVp * stueck;
+    document.getElementById(`hk-${id}`).textContent  = formatEUR(hk);
+    document.getElementById(`hkg-${id}`).textContent = formatEUR(hkGesamt);
+    document.getElementById(`vpg-${id}`).textContent = formatEUR(vpGesamt);
     recalcTotal();
   }
 
