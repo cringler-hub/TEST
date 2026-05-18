@@ -11,7 +11,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Staging-Ordner mit gefilterten Dateien anlegen
+        run: |
+          mkdir -p _deploy
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='_deploy' \
+            --exclude='install.php' \
+            --exclude='BENUTZERHANDBUCH.md' \
+            --exclude='RELEASE_NOTES.md' \
+            --exclude='DEPLOY_IONOS.md' \
+            --exclude='*.log' \
+            --exclude='.env*' \
+            ./ _deploy/
 
       - name: SFTP-Deploy zu IONOS
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
@@ -20,8 +36,7 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 22
-          local_path: './*'
+          local_path: './_deploy/*'
           remote_path: ${{ secrets.FTP_SERVER_DIR }}
           sftp_only: true
           delete_remote_files: false
-          exclude: '.git*|.github/**|node_modules/**|install.php|BENUTZERHANDBUCH.md|RELEASE_NOTES.md|DEPLOY_IONOS.md|*.log|.env*'
