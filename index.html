@@ -1650,6 +1650,59 @@
     .docs-body .docs-empty, .docs-body .docs-error { padding: 1.5rem; text-align: center; color: var(--fw-muted); font-size: 0.9rem; }
     .docs-body .docs-error { color: #dc2626; }
 
+    /* Admin-Dashboard */
+    .dashboard-section { margin-top: 2rem; }
+    .db-header { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 0.45rem; border-bottom: 1px solid var(--fw-border); margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
+    .db-header h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--fw-muted); font-weight: 700; margin: 0; }
+    .db-meta { font-size: 0.78rem; color: var(--fw-muted); }
+    .db-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem; margin-bottom: 1.2rem; }
+    .db-kpi {
+      background: var(--fw-white); border: 1px solid var(--fw-border); border-radius: 10px;
+      padding: 0.95rem 1.1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      display: flex; flex-direction: column; gap: 0.35rem;
+    }
+    .db-kpi .k-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fw-muted); font-weight: 700; }
+    .db-kpi .k-value { font-size: 1.5rem; font-weight: 700; color: var(--fw-dark); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+    .db-kpi .k-sub   { font-size: 0.75rem; color: var(--fw-muted); }
+    .db-kpi.k-primary .k-value   { color: var(--fw-primary); }
+    .db-kpi.k-success .k-value   { color: #15803d; }
+    .db-kpi.k-warn    .k-value   { color: #b45309; }
+    .db-kpi.k-info    .k-value   { color: #4338ca; }
+    .db-kpi.k-danger  .k-value   { color: #b91c1c; }
+
+    .db-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem; margin-bottom: 1.2rem; }
+    .db-card { background: var(--fw-white); border: 1px solid var(--fw-border); border-radius: 10px; padding: 0.95rem 1.1rem; }
+    .db-card h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-muted); font-weight: 700; margin: 0 0 0.7rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--fw-border-s); }
+
+    /* Status-Verteilung */
+    .db-status-row { display: grid; grid-template-columns: 110px 1fr 60px; gap: 0.5rem; align-items: center; padding: 0.3rem 0; }
+    .db-status-row .sr-label { font-size: 0.82rem; color: var(--fw-dark); display: flex; align-items: center; gap: 0.4rem; }
+    .db-status-row .sr-bar { background: var(--fw-bg-soft); height: 10px; border-radius: 5px; position: relative; overflow: hidden; }
+    .db-status-row .sr-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; transition: width .3s; }
+    .db-status-row .sr-count { font-size: 0.82rem; color: var(--fw-dark); font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* Listen-Karten (Kunden, Bearbeiter, Aktivitäten) */
+    .db-list-row { display: grid; grid-template-columns: 1fr auto; gap: 0.4rem; align-items: baseline; padding: 0.42rem 0; border-bottom: 1px solid var(--fw-border-s); font-size: 0.85rem; }
+    .db-list-row:last-child { border-bottom: none; }
+    .db-list-row .lr-name { color: var(--fw-dark); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .db-list-row .lr-name-sub { font-size: 0.72rem; color: var(--fw-muted); font-weight: 500; margin-top: 1px; }
+    .db-list-row .lr-value { color: var(--fw-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .db-list-empty { padding: 0.6rem 0; text-align: center; color: var(--fw-muted); font-size: 0.85rem; }
+
+    /* Recent-Aktivität */
+    .db-recent-row { display: grid; grid-template-columns: 100px 1fr auto 100px; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid var(--fw-border-s); font-size: 0.85rem; align-items: center; }
+    .db-recent-row:last-child { border-bottom: none; }
+    .db-recent-row .rr-date  { color: var(--fw-muted); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+    .db-recent-row .rr-main  { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .db-recent-row .rr-title { color: var(--fw-dark); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .db-recent-row .rr-meta  { color: var(--fw-muted); font-size: 0.75rem; }
+    .db-recent-row .rr-vp    { color: var(--fw-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    @media (max-width: 720px) {
+      .db-recent-row { grid-template-columns: 1fr auto; }
+      .db-recent-row .rr-date, .db-recent-row .rr-vp { grid-column: 2; }
+    }
+
     /* Versionsliste-Modal */
     .rev-list { padding: 0.5rem 0; }
     .rev-list .rev-row {
@@ -1785,6 +1838,33 @@
           <div class="btn-sub">Benutzer &amp; Rollen verwalten</div>
         </div>
       </button>
+    </div>
+
+    <!-- Admin-Dashboard (Widget) -->
+    <div class="dashboard-section" id="dashboardSection" style="display:none;">
+      <div class="db-header">
+        <h2>Dashboard</h2>
+        <div class="db-meta" id="dbScopeInfo"></div>
+      </div>
+      <div class="db-kpi-grid" id="dbKpiGrid"></div>
+      <div class="db-row">
+        <div class="db-card db-status-card">
+          <h3>Status-Verteilung</h3>
+          <div id="dbStatusBars"></div>
+        </div>
+        <div class="db-card">
+          <h3>Top 5 Kunden (nach VP)</h3>
+          <div id="dbTopCustomers"></div>
+        </div>
+        <div class="db-card db-users-card">
+          <h3>Top 5 Bearbeiter</h3>
+          <div id="dbTopUsers"></div>
+        </div>
+      </div>
+      <div class="db-card">
+        <h3>Letzte 10 Aktivitäten</h3>
+        <div id="dbRecent"></div>
+      </div>
     </div>
 
     <div class="quote-list-section" id="quoteListSection">
@@ -2408,7 +2488,10 @@
   function showView(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    if (id === 'viewStart') loadQuoteList();
+    if (id === 'viewStart') {
+      loadQuoteList();
+      loadDashboard();
+    }
   }
 
   async function doLogin() {
@@ -2764,6 +2847,116 @@
       </div>`;
   }
 
+  // ===== Dashboard =====
+  async function loadDashboard() {
+    const section = document.getElementById('dashboardSection');
+    if (!section) return;
+    // Sichtbarkeit per Rolle (Phase 1: Admin); später per User-Freigabe ergänzbar.
+    if (currentUser?.role !== 'admin') {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = 'block';
+    try {
+      const res = await api('dashboard.php?action=stats&scope=all');
+      renderDashboard(res);
+    } catch (e) {
+      document.getElementById('dbKpiGrid').innerHTML =
+        '<div class="db-list-empty">Dashboard konnte nicht geladen werden: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
+  function renderDashboard(d) {
+    const fEUR = v => (v || 0).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' €';
+    const fPct = v => v == null ? '–' : (v).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %';
+
+    // Scope-Info
+    const meta = document.getElementById('dbScopeInfo');
+    meta.textContent = 'Auswertung: alle Angebote · Stand: ' + new Date().toLocaleDateString('de-DE');
+
+    // KPI-Kacheln
+    const won  = d.count_by_status?.Beauftragt || 0;
+    const lost = d.count_by_status?.Verloren || 0;
+    const kpis = [
+      { cls: 'k-info',    label: 'Angebote gesamt',  value: (d.total_count || 0).toLocaleString('de-DE'),
+        sub: 'Pipeline: ' + ((d.count_by_status?.Entwurf || 0) + (d.count_by_status?.Eingereicht || 0)) + ' aktiv' },
+      { cls: 'k-primary', label: 'Pipeline-Wert',    value: fEUR(d.pipeline),
+        sub: 'Entwurf + Eingereicht' },
+      { cls: 'k-success', label: 'Auftragseingang',  value: fEUR(d.order_intake),
+        sub: won + ' beauftragte Angebote' },
+      { cls: 'k-warn',    label: 'Hit-Rate',         value: fPct(d.hit_rate),
+        sub: won + ' gewonnen · ' + lost + ' verloren' },
+      { cls: 'k-danger',  label: 'Verloren (Wert)',  value: fEUR(d.lost_value),
+        sub: 'Status: Verloren' },
+      { cls: '',          label: 'Gesamt-VP aller Angebote', value: fEUR(d.total_vp),
+        sub: 'inkl. allen Status' }
+    ];
+    document.getElementById('dbKpiGrid').innerHTML = kpis.map(k =>
+      `<div class="db-kpi ${k.cls}">
+        <span class="k-label">${escapeHtml(k.label)}</span>
+        <span class="k-value">${escapeHtml(k.value)}</span>
+        <span class="k-sub">${escapeHtml(k.sub)}</span>
+      </div>`
+    ).join('');
+
+    // Status-Verteilung
+    const statusOrder = ['Entwurf', 'Eingereicht', 'Beauftragt', 'Verloren', 'Archiviert'];
+    const statusColor = {
+      'Entwurf':     '#9ca3af',
+      'Eingereicht': '#0284c7',
+      'Beauftragt':  '#16a34a',
+      'Verloren':    '#dc2626',
+      'Archiviert':  '#6b7280'
+    };
+    const max = Math.max(1, ...statusOrder.map(s => d.count_by_status?.[s] || 0));
+    document.getElementById('dbStatusBars').innerHTML = statusOrder.map(s => {
+      const c = d.count_by_status?.[s] || 0;
+      const vp = d.vp_by_status?.[s] || 0;
+      const pct = (c / max) * 100;
+      return `<div class="db-status-row" title="${escapeHtml(s)}: ${c} Angebote · ${fEUR(vp)}">
+        <span class="sr-label"><span class="status-badge ${STATUS_CLASS[s] || ''}">${escapeHtml(s)}</span></span>
+        <span class="sr-bar"><span class="sr-bar-fill" style="width:${pct}%;background:${statusColor[s]};"></span></span>
+        <span class="sr-count">${c}</span>
+      </div>`;
+    }).join('');
+
+    // Top-Kunden
+    const tc = d.top_customers || [];
+    document.getElementById('dbTopCustomers').innerHTML = tc.length
+      ? tc.map(c => `<div class="db-list-row">
+          <div><div class="lr-name">${escapeHtml(c.kunde)}</div><div class="lr-name-sub">${c.count} Angebot(e)</div></div>
+          <span class="lr-value">${escapeHtml(fEUR(c.vp))}</span>
+        </div>`).join('')
+      : '<div class="db-list-empty">Noch keine Kundendaten.</div>';
+
+    // Top-Bearbeiter
+    const tu = d.top_users || [];
+    document.getElementById('dbTopUsers').innerHTML = tu.length
+      ? tu.map(u => `<div class="db-list-row">
+          <div><div class="lr-name">${escapeHtml(u.ersteller)}</div><div class="lr-name-sub">${u.count} Angebot(e)</div></div>
+          <span class="lr-value">${escapeHtml(fEUR(u.vp))}</span>
+        </div>`).join('')
+      : '<div class="db-list-empty">Noch keine Daten.</div>';
+
+    // Recent
+    const recent = d.recent || [];
+    document.getElementById('dbRecent').innerHTML = recent.length
+      ? recent.map(r => {
+          const dt = (r.updated_at || '').slice(0, 10);
+          const statusClass = STATUS_CLASS[r.status] || '';
+          return `<div class="db-recent-row">
+            <span class="rr-date">${escapeHtml(formatDateDE(dt))}</span>
+            <span class="rr-main">
+              <a class="rr-title" href="#" onclick="openQuote(${r.id});return false;">${escapeHtml(r.titel)}</a>
+              <span class="rr-meta">${escapeHtml(r.angebot_nr || '')} · ${escapeHtml(r.kunde || '–')} · ${escapeHtml(r.ersteller || '')}</span>
+            </span>
+            <span class="status-badge ${statusClass}">${escapeHtml(r.status || 'Entwurf')}</span>
+            <span class="rr-vp">${escapeHtml(fEUR(r.vp))}</span>
+          </div>`;
+        }).join('')
+      : '<div class="db-list-empty">Keine aktuellen Angebote.</div>';
+  }
+
   async function setQuoteStatusFromList(id, status) {
     try {
       await api('quotes.php?action=setStatus', { method: 'POST', body: { id, status } });
@@ -2774,6 +2967,7 @@
         if (typeof renderRevisionBanner === 'function') renderRevisionBanner();
       }
       loadQuoteList();
+      if (typeof loadDashboard === 'function') loadDashboard();
       showToast('Status: ' + status);
     } catch (e) {
       alert('Fehler beim Status-Update: ' + e.message);
