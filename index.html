@@ -1451,6 +1451,66 @@
       background: var(--fw-bg-soft); color: var(--fw-muted); font-weight: 600;
     }
     .modal-empty { padding: 2rem; text-align: center; color: var(--fw-muted); font-size: 0.88rem; }
+
+    /* Revisions-/Status-Banner */
+    .rev-banner {
+      margin: 0.6rem 0 1rem; padding: 0.7rem 1rem;
+      background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px;
+      font-size: 0.85rem; color: #3730a3;
+      display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
+    }
+    .rev-banner.readonly {
+      background: #fff7ed; border-color: #fdba74; color: #9a3412;
+    }
+    .rev-banner.draft-warn {
+      background: #fef9c3; border-color: #fde68a; color: #854d0e;
+    }
+    .rev-banner b { font-weight: 700; }
+
+    /* Status-Badge */
+    .status-badge {
+      display: inline-block; font-size: 0.7rem; padding: 0.18rem 0.55rem;
+      border-radius: 10px; font-weight: 700; letter-spacing: 0.03em;
+      text-transform: uppercase; line-height: 1;
+    }
+    .status-badge.s-entwurf      { background: #f3f4f6; color: #4b5563; }
+    .status-badge.s-eingereicht  { background: #e0f2fe; color: #075985; }
+    .status-badge.s-beauftragt   { background: #dcfce7; color: #15803d; }
+    .status-badge.s-verloren     { background: #fee2e2; color: #b91c1c; }
+    .status-badge.s-archiviert   { background: #e5e7eb; color: #374151; }
+
+    /* Versionsliste-Modal */
+    .rev-list { padding: 0.5rem 0; }
+    .rev-list .rev-row {
+      display: grid; grid-template-columns: 70px 110px 1fr 170px auto;
+      gap: 0.6rem; align-items: center;
+      padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--fw-border-s);
+    }
+    .rev-list .rev-row:hover { background: #fafbfc; }
+    .rev-list .rev-v { font-weight: 700; color: #4338ca; }
+    .rev-list .rev-date { font-size: 0.82rem; color: var(--fw-muted); }
+    .rev-list .rev-comment { color: var(--fw-dark); }
+    .rev-list .rev-by { font-size: 0.82rem; color: var(--fw-muted); }
+    .rev-list .rev-actions { display: flex; gap: 0.4rem; }
+    .rev-list .rev-actions button {
+      padding: 0.35rem 0.7rem; font-size: 0.78rem; border-radius: 5px;
+      border: 1px solid var(--fw-border); background: var(--fw-white);
+      color: var(--fw-dark); cursor: pointer; font-family: inherit;
+    }
+    .rev-list .rev-actions button:hover { border-color: #4338ca; color: #4338ca; }
+
+    /* Read-only-Mode */
+    body.quote-readonly #viewCalc input,
+    body.quote-readonly #viewCalc select,
+    body.quote-readonly #viewCalc textarea {
+      pointer-events: none; background: #f9fafb !important;
+    }
+    body.quote-readonly #viewCalc .btn-add,
+    body.quote-readonly #viewCalc .btn-add-sub,
+    body.quote-readonly #viewCalc .btn-del,
+    body.quote-readonly #viewCalc .btn-paste,
+    body.quote-readonly #viewCalc .btn-copy,
+    body.quote-readonly #viewCalc .row-actions { display: none !important; }
     .add-user-form {
       display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 0.5rem; align-items: end;
     }
@@ -1544,7 +1604,20 @@
     </div>
 
     <div class="quote-list-section" id="quoteListSection">
-      <h2 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fw-muted);font-weight:700;margin-bottom:0.8rem;padding-bottom:0.45rem;border-bottom:1px solid var(--fw-border);">Gespeicherte Angebote</h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;padding-bottom:0.45rem;border-bottom:1px solid var(--fw-border);gap:0.8rem;flex-wrap:wrap;">
+        <h2 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fw-muted);font-weight:700;margin:0;">Gespeicherte Angebote</h2>
+        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;color:var(--fw-muted);">
+          <label for="quoteListFilter">Status:</label>
+          <select id="quoteListFilter" onchange="loadQuoteList()" style="padding:0.3rem 0.6rem;border:1px solid var(--fw-border);border-radius:5px;font-size:0.82rem;font-family:inherit;background:var(--fw-white);color:var(--fw-dark);">
+            <option value="Alle">Alle</option>
+            <option value="Entwurf">Entwurf</option>
+            <option value="Eingereicht">Eingereicht</option>
+            <option value="Beauftragt">Beauftragt</option>
+            <option value="Verloren">Verloren</option>
+            <option value="Archiviert">Archiviert</option>
+          </select>
+        </div>
+      </div>
       <div id="quoteList" style="min-height:2rem;"></div>
     </div>
   </div>
@@ -1758,7 +1831,20 @@
         <label for="gueltigBis">Gültig bis</label>
         <input type="date" id="gueltigBis" />
       </div>
+      <div class="field">
+        <label for="angebotStatus">Status</label>
+        <select id="angebotStatus" onchange="onStatusChange(this.value)">
+          <option value="Entwurf">Entwurf</option>
+          <option value="Eingereicht">Eingereicht</option>
+          <option value="Beauftragt">Beauftragt</option>
+          <option value="Verloren">Verloren</option>
+          <option value="Archiviert">Archiviert</option>
+        </select>
+      </div>
     </div>
+
+    <!-- Revisions-Banner -->
+    <div id="revisionBanner" class="rev-banner" style="display:none;"></div>
 
     <!-- Konfigurations-Panel -->
     <details class="config">
@@ -1972,6 +2058,8 @@
       <button class="btn-primary" onclick="openCeoView()" style="background:var(--fw-dark);">CEO-Ansicht</button>
       <button class="btn-primary" onclick="openCeoViewExt()" style="background:var(--fw-primary);">Erweiterte CEO-Ansicht</button>
       <button class="btn-primary" onclick="saveQuoteToServer()" style="background:#047857;">Angebot speichern</button>
+      <button class="btn-primary" onclick="openCommitModal()" style="background:#4338ca;">Version einfrieren</button>
+      <button class="btn-secondary" onclick="openRevisionsModal()">Versionen</button>
       <button class="btn-secondary" onclick="exportJSON()">Als JSON exportieren</button>
       <button class="btn-secondary" onclick="importJSON()">JSON importieren</button>
       <button class="btn-secondary" onclick="resetTable()">Zurücksetzen</button>
@@ -1979,6 +2067,44 @@
   </div>
 </div>
 </div><!-- /viewCalc -->
+
+<!-- Version einfrieren -->
+<div class="modal-overlay" id="commitModal">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <h3 style="margin:0;font-size:1rem;">Version einfrieren</h3>
+      <button class="modal-close" onclick="closeCommitModal()">&times;</button>
+    </div>
+    <div style="padding:1.1rem 1.5rem 1.3rem;display:flex;flex-direction:column;gap:0.7rem;">
+      <div style="font-size:0.85rem;color:var(--fw-dark);">
+        Es wird ein Snapshot des aktuellen Standes erstellt — als <b id="commitNextVer">V1</b>.
+        Du kannst danach normal weiterarbeiten; weitere Änderungen landen erst beim nächsten Einfrieren in einer neuen Version.
+      </div>
+      <label style="font-size:0.82rem;color:var(--fw-muted);">
+        Kommentar (optional)
+        <textarea id="commitComment" rows="3"
+                  placeholder="z. B. „nach Verhandlung mit Kunde XYZ""
+                  style="margin-top:0.25rem;width:100%;padding:0.55rem 0.75rem;border:1px solid var(--fw-border);border-radius:6px;font-size:0.9rem;font-family:inherit;resize:vertical;"></textarea>
+      </label>
+      <div id="commitMsg" style="font-size:0.82rem;min-height:1.2em;color:var(--fw-primary);"></div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.4rem;">
+        <button class="btn-secondary" onclick="closeCommitModal()" style="padding:0.5rem 1rem;">Abbrechen</button>
+        <button class="btn-primary" onclick="submitCommit()" style="padding:0.5rem 1rem;background:#4338ca;">Einfrieren</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Versionsliste -->
+<div class="modal-overlay" id="revisionsModal">
+  <div class="modal-box" style="max-width:780px;">
+    <div class="modal-header">
+      <h3 style="margin:0;font-size:1rem;">Versionen dieses Angebots</h3>
+      <button class="modal-close" onclick="closeRevisionsModal()">&times;</button>
+    </div>
+    <div id="revisionsBody" class="rev-list" style="max-height:60vh;overflow-y:auto;"></div>
+  </div>
+</div>
 
 <!-- Passwort ändern -->
 <div class="modal-overlay" id="pwdModal">
@@ -2120,6 +2246,10 @@
 
   function startNewQuote() {
     currentQuoteId = null;
+    currentQuoteStatus = 'Entwurf';
+    currentVersion = 0;
+    latestRevisionInfo = null;
+    if (typeof setReadOnlyMode === 'function') setReadOnlyMode(false);
     document.getElementById('quoteBody').innerHTML = '';
     rowCounter = 0;
     groupCounter = 0;
@@ -2132,6 +2262,8 @@
     document.getElementById('angebotNr').value = 'ANG-' + today.replace(/-/g,'') + '-' + Math.floor(100 + Math.random()*900);
     if (currentUser?.username) document.getElementById('cfgBearbeiter').value = currentUser.username;
     addHeading('Position 1');
+    if (typeof applyStatusToUI === 'function') applyStatusToUI();
+    if (typeof renderRevisionBanner === 'function') renderRevisionBanner();
     showView('viewCalc');
   }
 
@@ -2225,19 +2357,34 @@
         host.innerHTML = '<div class="q-empty">Noch keine gespeicherten Angebote.</div>';
         return;
       }
-      host.innerHTML = quotes.map(q => `
+      // Status-Filter
+      const filterEl = document.getElementById('quoteListFilter');
+      const filter = filterEl ? filterEl.value : 'Alle';
+      const visible = filter === 'Alle' ? quotes : quotes.filter(q => (q.status || 'Entwurf') === filter);
+      if (visible.length === 0) {
+        host.innerHTML = '<div class="q-empty">Keine Angebote in dieser Auswahl.</div>';
+        return;
+      }
+      host.innerHTML = visible.map(q => {
+        const status = q.status || 'Entwurf';
+        const cls = STATUS_CLASS[status] || '';
+        const ver = q.current_version ? ' · V' + q.current_version : '';
+        return `
         <div class="q-row">
           <div>
             <div class="q-title">${escapeHtml(q.titel || 'Ohne Titel')}</div>
-            <div class="q-meta">${escapeHtml(q.angebot_nr || '')} · ${escapeHtml(q.kunde || '–')} · ${(q.updated_at || '').slice(0, 10)}</div>
+            <div class="q-meta">
+              ${escapeHtml(q.angebot_nr || '')} · ${escapeHtml(q.kunde || '–')} · ${(q.updated_at || '').slice(0, 10)}${ver}
+            </div>
           </div>
+          <span class="status-badge ${cls}">${escapeHtml(status)}</span>
           ${currentUser?.role === 'admin' ? '<span class="q-user">' + escapeHtml(q.ersteller) + '</span>' : ''}
           <button class="q-btn" onclick="openQuote(${q.id})">Öffnen</button>
           <button class="q-btn del" onclick="deleteQuote(${q.id}, '${escapeHtml(q.titel || '')}')">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     } catch (e) {
       host.innerHTML = '<div class="q-empty">Fehler beim Laden: ' + escapeHtml(e.message) + '</div>';
     }
@@ -2247,7 +2394,13 @@
     try {
       const res = await api('quotes.php?action=load&id=' + id);
       currentQuoteId = res.quote.id;
+      currentQuoteStatus = res.quote.status || 'Entwurf';
+      currentVersion = res.quote.current_version ? parseInt(res.quote.current_version) : 0;
+      latestRevisionInfo = res.quote.latest_revision || null;
+      setReadOnlyMode(false);
       loadFromData(res.quote.json_data);
+      applyStatusToUI();
+      renderRevisionBanner();
       showView('viewCalc');
       showToast('Angebot geladen: ' + (res.quote.angebot_nr || res.quote.titel));
     } catch (e) {
@@ -2260,6 +2413,208 @@
     try {
       await api('quotes.php?action=delete', { method: 'POST', body: { id } });
       loadQuoteList();
+    } catch (e) {
+      alert('Fehler: ' + e.message);
+    }
+  }
+
+  // ===== Versionen / Snapshots =====
+  let currentQuoteStatus  = 'Entwurf';
+  let currentVersion      = 0;       // letzte eingefrorene Version (0 = noch keine)
+  let latestRevisionInfo  = null;    // { version, comment, committed_by, committed_at }
+  let readOnlyMode        = false;
+
+  const STATUS_CLASS = {
+    'Entwurf':     's-entwurf',
+    'Eingereicht': 's-eingereicht',
+    'Beauftragt':  's-beauftragt',
+    'Verloren':    's-verloren',
+    'Archiviert':  's-archiviert'
+  };
+
+  function applyStatusToUI() {
+    const sel = document.getElementById('angebotStatus');
+    if (sel) sel.value = currentQuoteStatus || 'Entwurf';
+  }
+
+  function renderRevisionBanner() {
+    const el = document.getElementById('revisionBanner');
+    if (!el) return;
+    el.classList.remove('readonly', 'draft-warn');
+    if (readOnlyMode) return; // separater Banner wird via setReadOnlyMode gesetzt
+    if (!currentQuoteId) {
+      el.style.display = 'none';
+      return;
+    }
+    const statusBadge = `<span class="status-badge ${STATUS_CLASS[currentQuoteStatus] || ''}">${escapeHtml(currentQuoteStatus)}</span>`;
+    if (currentVersion > 0 && latestRevisionInfo) {
+      const r = latestRevisionInfo;
+      const dt = (r.committed_at || '').slice(0, 10);
+      el.innerHTML = `${statusBadge}
+        <span>Letzte Version: <b>V${r.version}</b> vom ${escapeHtml(formatDateDE(dt))} · ${escapeHtml(r.committed_by || '')}</span>
+        ${r.comment ? `<span style="color:#6b7a87;">„${escapeHtml(r.comment)}"</span>` : ''}`;
+    } else {
+      el.innerHTML = `${statusBadge} <span>Noch keine Version eingefroren. Du arbeitest im Entwurf.</span>`;
+    }
+    el.style.display = 'flex';
+  }
+
+  function setReadOnlyMode(on, info) {
+    readOnlyMode = !!on;
+    document.body.classList.toggle('quote-readonly', readOnlyMode);
+    const el = document.getElementById('revisionBanner');
+    if (readOnlyMode && el && info) {
+      el.classList.add('readonly');
+      const dt = (info.committed_at || '').slice(0, 10);
+      el.innerHTML = `
+        <b>Read-Only:</b> Sie sehen Version <b>V${info.version}</b> vom ${escapeHtml(formatDateDE(dt))} · ${escapeHtml(info.committed_by || '')}
+        ${info.comment ? ` — „${escapeHtml(info.comment)}"` : ''}
+        <span style="margin-left:auto;display:flex;gap:0.4rem;">
+          <button class="btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.8rem;" onclick="exitReadOnly()">Schließen</button>
+          <button class="btn-primary" style="padding:0.35rem 0.75rem;font-size:0.8rem;background:#b45309;" onclick="restoreToDraft(${info.id})">Als Entwurf weiterbearbeiten</button>
+        </span>`;
+      el.style.display = 'flex';
+    } else {
+      renderRevisionBanner();
+    }
+  }
+
+  async function onStatusChange(status) {
+    if (!currentQuoteId) {
+      currentQuoteStatus = status;
+      renderRevisionBanner();
+      return;
+    }
+    try {
+      await api('quotes.php?action=setStatus', { method: 'POST', body: { id: currentQuoteId, status } });
+      currentQuoteStatus = status;
+      renderRevisionBanner();
+      showToast('Status: ' + status);
+    } catch (e) {
+      alert('Fehler beim Status-Update: ' + e.message);
+    }
+  }
+
+  // --- Commit-Modal ---
+  function openCommitModal() {
+    if (!currentQuoteId) {
+      alert('Bitte zuerst „Angebot speichern", danach kann eine Version eingefroren werden.');
+      return;
+    }
+    document.getElementById('commitNextVer').textContent = 'V' + (currentVersion + 1);
+    document.getElementById('commitComment').value = '';
+    document.getElementById('commitMsg').textContent = '';
+    document.getElementById('commitModal').classList.add('open');
+    setTimeout(() => document.getElementById('commitComment').focus(), 50);
+  }
+
+  function closeCommitModal() {
+    document.getElementById('commitModal').classList.remove('open');
+  }
+
+  async function submitCommit() {
+    const comment = document.getElementById('commitComment').value.trim();
+    const msg = document.getElementById('commitMsg');
+    try {
+      // Erst aktuellen Stand speichern, damit der Snapshot dem entspricht, was am Bildschirm steht
+      await saveQuoteToServer();
+      const res = await api('quotes.php?action=commit', { method: 'POST', body: { id: currentQuoteId, comment } });
+      currentVersion = res.version;
+      latestRevisionInfo = {
+        version: res.version,
+        comment,
+        committed_by: currentUser?.username || '',
+        committed_at: new Date().toISOString().replace('T', ' ').slice(0, 19)
+      };
+      renderRevisionBanner();
+      closeCommitModal();
+      showToast('V' + res.version + ' eingefroren');
+    } catch (e) {
+      msg.textContent = e.message || 'Fehler beim Einfrieren.';
+    }
+  }
+
+  // --- Versions-Modal ---
+  async function openRevisionsModal() {
+    if (!currentQuoteId) {
+      alert('Bitte zuerst das Angebot speichern.');
+      return;
+    }
+    document.getElementById('revisionsModal').classList.add('open');
+    const body = document.getElementById('revisionsBody');
+    body.innerHTML = '<div class="modal-empty">Lade Versionen …</div>';
+    try {
+      const res = await api('quotes.php?action=listRevisions&id=' + currentQuoteId);
+      const revs = res.revisions || [];
+      if (revs.length === 0) {
+        body.innerHTML = '<div class="modal-empty">Noch keine Versionen eingefroren.</div>';
+        return;
+      }
+      body.innerHTML = revs.map(r => {
+        const dt = (r.committed_at || '').slice(0, 10);
+        return `<div class="rev-row">
+          <div class="rev-v">V${r.version}</div>
+          <div class="rev-date">${escapeHtml(formatDateDE(dt))}</div>
+          <div class="rev-comment">${escapeHtml(r.comment || '—')}</div>
+          <div class="rev-by">${escapeHtml(r.committed_by || '')}</div>
+          <div class="rev-actions">
+            <button onclick="viewRevision(${r.id})">Anzeigen</button>
+            <button onclick="restoreToDraft(${r.id})">Zurücksetzen</button>
+          </div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      body.innerHTML = '<div class="modal-empty">Fehler: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
+  function closeRevisionsModal() {
+    document.getElementById('revisionsModal').classList.remove('open');
+  }
+
+  async function viewRevision(revId) {
+    try {
+      const res = await api('quotes.php?action=loadRevision&revision_id=' + revId);
+      closeRevisionsModal();
+      loadFromData(res.revision.json_data);
+      setReadOnlyMode(true, {
+        id: res.revision.id,
+        version: res.revision.version,
+        comment: res.revision.comment,
+        committed_by: res.revision.committed_by,
+        committed_at: res.revision.committed_at
+      });
+    } catch (e) {
+      alert('Fehler: ' + e.message);
+    }
+  }
+
+  function exitReadOnly() {
+    if (!currentQuoteId) {
+      showView('viewStart');
+      return;
+    }
+    // Aktuellen Entwurf neu laden, damit Zustand korrekt ist
+    openQuote(currentQuoteId);
+  }
+
+  async function restoreToDraft(revId) {
+    if (!confirm('Diese Version wird als Entwurf übernommen. Dein aktueller Arbeitsstand geht dabei verloren (wird überschrieben, sofern nicht zuvor als Version eingefroren). Wirklich fortfahren?')) {
+      return;
+    }
+    try {
+      const res = await api('quotes.php?action=loadRevision&revision_id=' + revId);
+      setReadOnlyMode(false);
+      loadFromData(res.revision.json_data);
+      currentQuoteStatus = 'Entwurf';
+      applyStatusToUI();
+      // Direkt speichern, damit der Draft auf dem Server dem entspricht, was angezeigt wird
+      await saveQuoteToServer();
+      // Status auf Entwurf setzen
+      await api('quotes.php?action=setStatus', { method: 'POST', body: { id: currentQuoteId, status: 'Entwurf' } });
+      renderRevisionBanner();
+      closeRevisionsModal();
+      showToast('V' + res.revision.version + ' als Entwurf übernommen');
     } catch (e) {
       alert('Fehler: ' + e.message);
     }

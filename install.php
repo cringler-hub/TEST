@@ -66,6 +66,37 @@ try {
     ");
     echo "<p style='color:green'>✓ Tabelle <code>quotes</code></p>";
 
+    // Migration: status & current_version
+    try {
+        $db->exec("ALTER TABLE quotes ADD COLUMN status VARCHAR(40) NOT NULL DEFAULT 'Entwurf' AFTER ersteller");
+        echo "<p style='color:green'>✓ Spalte <code>quotes.status</code> ergänzt</p>";
+    } catch (Exception $e) {
+        if (stripos($e->getMessage(), 'Duplicate') !== false) echo "<p style='color:green'>✓ Spalte <code>quotes.status</code> vorhanden</p>";
+        else echo "<p style='color:orange'>Info: " . htmlspecialchars($e->getMessage()) . "</p>";
+    }
+    try {
+        $db->exec("ALTER TABLE quotes ADD COLUMN current_version INT UNSIGNED NULL");
+        echo "<p style='color:green'>✓ Spalte <code>quotes.current_version</code> ergänzt</p>";
+    } catch (Exception $e) {
+        if (stripos($e->getMessage(), 'Duplicate') !== false) echo "<p style='color:green'>✓ Spalte <code>quotes.current_version</code> vorhanden</p>";
+        else echo "<p style='color:orange'>Info: " . htmlspecialchars($e->getMessage()) . "</p>";
+    }
+
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS quote_revisions (
+            id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            quote_id      INT UNSIGNED NOT NULL,
+            version       INT UNSIGNED NOT NULL,
+            json_data     LONGTEXT NOT NULL,
+            comment       VARCHAR(500) NOT NULL DEFAULT '',
+            committed_by  VARCHAR(100) NOT NULL,
+            committed_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_quote_version (quote_id, version),
+            CONSTRAINT fk_qr_quote FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    echo "<p style='color:green'>✓ Tabelle <code>quote_revisions</code></p>";
+
     $db->exec("
         CREATE TABLE IF NOT EXISTS templates (
             id    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
