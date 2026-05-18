@@ -2130,6 +2130,7 @@
     const gd = new Date(); gd.setDate(gd.getDate() + 30);
     document.getElementById('gueltigBis').value = gd.toISOString().slice(0, 10);
     document.getElementById('angebotNr').value = 'ANG-' + today.replace(/-/g,'') + '-' + Math.floor(100 + Math.random()*900);
+    if (currentUser?.username) document.getElementById('cfgBearbeiter').value = currentUser.username;
     addHeading('Position 1');
     showView('viewCalc');
   }
@@ -3685,7 +3686,13 @@
       if (data.config.gk2Entwicklung != null) document.getElementById('cfgGK2Entwicklung').value = data.config.gk2Entwicklung;
       if (data.config.garantie       != null) document.getElementById('cfgGarantie').value       = data.config.garantie;
       if (data.config.sicherheit     != null) document.getElementById('cfgSicherheit').value     = data.config.sicherheit;
-      if (data.config.bearbeiter     != null) document.getElementById('cfgBearbeiter').value     = data.config.bearbeiter;
+      // Bearbeiter = aktuell angemeldeter Benutzer (überschreibt den gespeicherten Wert);
+      // Fallback auf gespeicherten Wert, falls keine Session-Info vorhanden ist (z.B. JSON-Import ohne Login-Kontext).
+      if (currentUser?.username) {
+        document.getElementById('cfgBearbeiter').value = currentUser.username;
+      } else if (data.config.bearbeiter != null) {
+        document.getElementById('cfgBearbeiter').value = data.config.bearbeiter;
+      }
       if (data.config.freigabe       != null) document.getElementById('cfgFreigabe').value       = data.config.freigabe;
       if (data.config.stundensaetze) {
         Object.entries(data.config.stundensaetze).forEach(([key, val]) => {
