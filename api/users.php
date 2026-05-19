@@ -9,8 +9,19 @@ switch ($action) {
     case 'list':
         requireAdmin();
         $db = getDB();
-        $rows = $db->query('SELECT id, username, role, created_at FROM users ORDER BY id')->fetchAll();
+        $rows = $db->query('SELECT id, username, role, can_calc_products, created_at FROM users ORDER BY id')->fetchAll();
         jsonResponse(['users' => $rows]);
+        break;
+
+    case 'setCalcProducts':
+        requireAdmin();
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id   = (int)($input['id'] ?? 0);
+        $flag = !empty($input['can_calc_products']) ? 1 : 0;
+        if ($id < 1) jsonResponse(['error' => 'Ungültige ID'], 400);
+        $db = getDB();
+        $db->prepare('UPDATE users SET can_calc_products = ? WHERE id = ?')->execute([$flag, $id]);
+        jsonResponse(['ok' => true]);
         break;
 
     case 'listUsernames':

@@ -1264,6 +1264,7 @@
     .start-btn.orange .icon-wrap { background: #fef3e6; color: #b45309; }
     .start-btn.teal   .icon-wrap { background: #e0f7fa; color: #0e7490; }
     .start-btn.pink   .icon-wrap { background: #fdf2f8; color: #be185d; }
+    .start-btn.brown  .icon-wrap { background: #f5f0e8; color: #92400e; }
     .start-btn .btn-title {
       font-size: 1rem;
       font-weight: 700;
@@ -1664,6 +1665,85 @@
     .docs-body .docs-empty, .docs-body .docs-error { padding: 1.5rem; text-align: center; color: var(--fw-muted); font-size: 0.9rem; }
     .docs-body .docs-error { color: #dc2626; }
 
+    /* Produkt-Kalkulationen */
+    .pp-wrap { max-width: 1280px; margin: 2rem auto; padding: 0 2rem; }
+    .pp-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.9rem; border-bottom: 1px solid var(--fw-border); margin-bottom: 1.2rem; gap: 1rem; flex-wrap: wrap; }
+    .pp-header h2 { font-size: 1.3rem; letter-spacing: -0.01em; color: var(--fw-dark); margin: 0; }
+    .pp-editor-head { background: var(--fw-white); border: 1px solid var(--fw-border); border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 1rem; }
+    .pp-editor-head .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.8rem; }
+    .pp-editor-head .field { display: flex; flex-direction: column; gap: 0.25rem; }
+    .pp-editor-head .field label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-muted); font-weight: 700; }
+    .pp-editor-head .field input, .pp-editor-head .field select {
+      padding: 0.5rem 0.7rem; border: 1px solid var(--fw-border); border-radius: 6px; font-size: 0.9rem; font-family: inherit; background: var(--fw-white);
+    }
+    .pp-editor-head .field input:focus, .pp-editor-head .field select:focus {
+      outline: none; border-color: var(--fw-primary); box-shadow: 0 0 0 2px rgba(226,0,26,0.1);
+    }
+
+    /* Produkt-Tabellen */
+    .pm-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .pm-table thead th { background: var(--fw-bg-soft); padding: 0.55rem 0.5rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-muted); font-weight: 700; text-align: left; border-bottom: 1px solid var(--fw-border); white-space: nowrap; }
+    .pm-table thead th.num { text-align: right; }
+    .pm-table thead th.center { text-align: center; }
+    .pm-table tbody td { padding: 0.35rem 0.4rem; border-bottom: 1px solid var(--fw-border-s); vertical-align: middle; }
+    .pm-table tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .pm-table tbody td.center { text-align: center; }
+    .pm-table tbody td.calc { font-weight: 700; color: var(--fw-dark); }
+    .pm-table input, .pm-table select {
+      width: 100%; padding: 0.35rem 0.45rem; border: 1px solid var(--fw-border); border-radius: 5px;
+      font-size: 0.82rem; font-family: inherit; background: var(--fw-white);
+    }
+    .pm-table input[type="number"] { text-align: right; font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
+    .pm-table input[type="number"]::-webkit-outer-spin-button,
+    .pm-table input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .pm-table input:focus, .pm-table select:focus { outline: none; border-color: var(--fw-primary); box-shadow: 0 0 0 2px rgba(226,0,26,0.1); }
+    .pm-table .pm-del {
+      background: none; border: none; color: #b9c2cc; cursor: pointer;
+      padding: 0.25rem; border-radius: 4px;
+    }
+    .pm-table .pm-del:hover { color: #dc2626; background: #fef2f2; }
+
+    /* Zusammenfassung Produkt */
+    .pm-summary {
+      background: linear-gradient(135deg, #92400e, #b45309);
+      color: #fff;
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .pm-summary .ps-item { display: flex; flex-direction: column; gap: 0.25rem; }
+    .pm-summary .ps-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8; }
+    .pm-summary .ps-value { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .pm-summary .ps-item.highlight .ps-value { font-size: 1.4rem; color: #fef3c7; }
+
+    /* Produktliste */
+    .pp-list-row {
+      display: grid; grid-template-columns: 100px 1fr 130px 90px 130px 90px 130px;
+      gap: 0.6rem; align-items: center;
+      padding: 0.6rem 0.8rem; border: 1px solid var(--fw-border-s); border-radius: 8px;
+      background: var(--fw-white); margin-bottom: 0.4rem; font-size: 0.85rem;
+    }
+    .pp-list-row:hover { border-color: #92400e; background: #fdf8f3; }
+    .pp-list-row .pl-name { font-weight: 600; color: var(--fw-dark); }
+    .pp-list-row .pl-meta { font-size: 0.78rem; color: var(--fw-muted); margin-top: 2px; }
+    .pp-list-row .pl-num  { font-variant-numeric: tabular-nums; font-weight: 600; }
+    .pp-list-row .pl-actions { display: flex; gap: 0.3rem; justify-content: flex-end; }
+    .pp-list-row .pl-actions button {
+      background: transparent; border: 1px solid var(--fw-border); border-radius: 5px;
+      padding: 0.3rem 0.6rem; font-size: 0.78rem; cursor: pointer; color: var(--fw-dark); font-family: inherit;
+    }
+    .pp-list-row .pl-actions button:hover { border-color: #92400e; color: #92400e; }
+    .pp-list-row .pl-actions button.del:hover { border-color: #fecaca; color: #dc2626; background: #fef2f2; }
+
+    /* Status-Pill in Produktliste */
+    .pp-status { font-size: 0.7rem; padding: 0.2rem 0.55rem; border-radius: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .pp-status.s-bearbeitung { background: #f3f4f6; color: #4b5563; }
+    .pp-status.s-freigegeben { background: #dcfce7; color: #15803d; }
+    .pp-status.s-archiviert  { background: #e5e7eb; color: #374151; }
+
     /* Admin-Dashboard */
     .dashboard-wrap { max-width: 1200px; margin: 2.5rem auto; padding: 0 2rem; }
     .db-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.9rem; border-bottom: 1px solid var(--fw-border); margin-bottom: 1.3rem; gap: 1rem; flex-wrap: wrap; }
@@ -1856,6 +1936,15 @@
         <div>
           <div class="btn-title">Benutzerhandbuch</div>
           <div class="btn-sub">Anleitung &amp; Tipps zum Tool</div>
+        </div>
+      </button>
+      <button class="start-btn brown" id="btnProducts" onclick="showView('viewProducts')" style="display:none;">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M2 5l6-3 6 3v6l-6 3-6-3V5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 5l6 3 6-3M8 8v7" stroke="currentColor" stroke-width="1.3"/></svg>
+        </div>
+        <div>
+          <div class="btn-title">Produktkalkulationen</div>
+          <div class="btn-sub">Eigene Produkte kalkulieren &amp; freigeben</div>
         </div>
       </button>
       <button class="start-btn pink" id="btnDashboard" onclick="showView('viewDashboard')" style="display:none;">
@@ -2119,6 +2208,184 @@
         </div>
       </div>
       <div id="gaebError" style="margin-top:1rem;color:#dc2626;font-size:0.85rem;min-height:1em;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUKTKALKULATIONEN: Liste -->
+<div class="view view-products" id="viewProducts">
+  <nav class="fw-topbar">
+    <div class="fw-brand">
+      <div class="logo-mark">FW</div>
+      <div>
+        Produktkalkulationen
+        <small>Funkwerk Mobility Solutions GmbH</small>
+        <span class="fw-version">V1.0 &middot; 01.06.2026</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a href="#" onclick="showView('viewStart');return false">Startseite</a>
+      <a href="#" onclick="openPasswordModal();return false">Passwort ändern</a>
+      <a href="#" onclick="doLogout();return false">Abmelden</a>
+    </div>
+  </nav>
+  <div class="pp-wrap">
+    <div class="pp-header">
+      <h2>Produktkalkulationen</h2>
+      <button class="btn-primary" onclick="openProductEditor(null)" style="padding:0.55rem 1.1rem;background:#92400e;">Neues Produkt</button>
+    </div>
+    <div id="productListBody"></div>
+  </div>
+</div>
+
+<!-- PRODUKTKALKULATIONEN: Editor -->
+<div class="view view-product-editor" id="viewProductEditor">
+  <nav class="fw-topbar">
+    <div class="fw-brand">
+      <div class="logo-mark">FW</div>
+      <div>
+        Produktkalkulation
+        <small>Funkwerk Mobility Solutions GmbH</small>
+        <span class="fw-version">V1.0 &middot; 01.06.2026</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a href="#" onclick="confirmLeaveProductEditor('viewProducts');return false">Zurück zur Liste</a>
+      <a href="#" onclick="openPasswordModal();return false">Passwort ändern</a>
+      <a href="#" onclick="confirmLeaveProductEditor('logout');return false">Abmelden</a>
+    </div>
+  </nav>
+  <div class="pp-wrap">
+    <div class="pp-editor-head">
+      <div class="meta">
+        <div class="field"><label>Produkt-Nr.</label><input type="text" id="pmProduktNr"/></div>
+        <div class="field"><label>Bezeichnung</label><input type="text" id="pmBezeichnung" placeholder="z. B. Bahnsteiganzeiger 49&quot; extern"/></div>
+        <div class="field"><label>Kategorie</label>
+          <select id="pmKategorie">
+            <option>Displays</option><option>Beschallung</option><option>SW-Lizenzen</option><option>Sonstiges</option>
+          </select>
+        </div>
+        <div class="field"><label>Materialnr.</label><input type="text" id="pmMaterialnr"/></div>
+        <div class="field"><label>Stückzahl Los</label><input type="number" min="1" id="pmStueckLot" value="1" oninput="recalcProduct()"/></div>
+        <div class="field"><label>Status</label>
+          <select id="pmStatus" disabled>
+            <option>In Bearbeitung</option><option>Freigegeben</option><option>Archiviert</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <details class="config" open>
+      <summary>Komponenten / Stückliste</summary>
+      <div style="padding:0.6rem 1.1rem 1rem;">
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem;">
+          <button class="btn-secondary" onclick="addProductComponent()" style="padding:0.4rem 0.85rem;font-size:0.82rem;">+ Zeile hinzufügen</button>
+          <label class="btn-secondary" style="padding:0.4rem 0.85rem;font-size:0.82rem;cursor:pointer;">
+            Excel/CSV importieren <input type="file" id="pmImportFile" accept=".xlsx,.xls,.csv,.txt" onchange="importProductComponents(this.files[0])" style="display:none;"/>
+          </label>
+          <span style="color:var(--fw-muted);font-size:0.78rem;align-self:center;">Erkannte Spalten: Kategorie · OZ · Artikelnr. · Bauteilname · Lieferant · Menge · Einheit · Einzelpreis</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="pm-table" id="pmCompTable">
+            <thead><tr>
+              <th style="width:11%">Kategorie</th>
+              <th style="width:7%">OZ</th>
+              <th style="width:13%">Artikelnr.</th>
+              <th>Bauteilname</th>
+              <th style="width:10%">Lieferant</th>
+              <th class="num" style="width:6%">Menge</th>
+              <th style="width:5%">Einheit</th>
+              <th class="num" style="width:9%">Einzelpr. €</th>
+              <th class="num" style="width:9%">Gesamt €</th>
+              <th style="width:4%"></th>
+            </tr></thead>
+            <tbody id="pmCompBody"></tbody>
+          </table>
+        </div>
+        <div id="pmCompSummary" style="margin-top:0.5rem;font-size:0.85rem;color:var(--fw-muted);"></div>
+      </div>
+    </details>
+
+    <details class="config" open>
+      <summary>Aufwände (Personalstunden)</summary>
+      <div style="padding:0.6rem 1.1rem 1rem;">
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.6rem;">
+          <button class="btn-secondary" onclick="addProductAufwand()" style="padding:0.4rem 0.85rem;font-size:0.82rem;">+ Zeile hinzufügen</button>
+          <span style="color:var(--fw-muted);font-size:0.78rem;align-self:center;">„einmalig" wird durch Stückzahl Los geteilt — sonst direkt pro Anzeiger</span>
+        </div>
+        <table class="pm-table" id="pmAufwTable">
+          <thead><tr>
+            <th style="width:18%">Aufwandstyp</th>
+            <th>Beschreibung</th>
+            <th class="num" style="width:8%">Stunden</th>
+            <th class="num" style="width:10%">Satz €/h</th>
+            <th style="width:8%" class="center">einmalig</th>
+            <th class="num" style="width:12%">Gesamt €</th>
+            <th style="width:4%"></th>
+          </tr></thead>
+          <tbody id="pmAufwBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="config" open>
+      <summary>Transportkosten</summary>
+      <div style="padding:0.6rem 1.1rem 1rem;">
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.6rem;">
+          <button class="btn-secondary" onclick="addProductTransport()" style="padding:0.4rem 0.85rem;font-size:0.82rem;">+ Zeile hinzufügen</button>
+          <span style="color:var(--fw-muted);font-size:0.78rem;align-self:center;">Kosten werden auf die Stückzahl Los umgelegt</span>
+        </div>
+        <table class="pm-table" id="pmTransTable">
+          <thead><tr>
+            <th style="width:18%">Transportart</th>
+            <th>Bemerkung / Lieferant</th>
+            <th class="num" style="width:9%">Stückzahl</th>
+            <th class="num" style="width:11%">Kosten gesamt €</th>
+            <th class="num" style="width:11%">pro Anzeiger €</th>
+            <th style="width:4%"></th>
+          </tr></thead>
+          <tbody id="pmTransBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="config">
+      <summary>Konfiguration (Aufschläge &amp; Sätze) — Default, lokal überschreibbar</summary>
+      <div class="config-body">
+        <div class="config-group">
+          <div class="config-row"><label>MGK (Material)</label>
+            <span class="input-suffix"><input type="number" step="0.1" id="pmMgk" value="4" oninput="recalcProduct()"/><span>%</span></span></div>
+          <div class="config-row"><label>FGK (Fertigung)</label>
+            <span class="input-suffix"><input type="number" step="0.1" id="pmFgk" value="6" oninput="recalcProduct()"/><span>%</span></span></div>
+          <div class="config-row"><label>Risikopuffer</label>
+            <span class="input-suffix"><input type="number" step="0.1" id="pmRisiko" value="2" oninput="recalcProduct()"/><span>%</span></span></div>
+          <div class="config-row"><label>VK-Faktor (Empfehlung)</label>
+            <span class="input-suffix"><input type="number" step="0.01" id="pmVkFaktor" value="1.30" oninput="recalcProduct()"/><span>×</span></span></div>
+        </div>
+        <div class="config-group">
+          <div class="config-row"><label>Fertigungssatz (Montage)</label>
+            <span class="input-suffix"><input type="number" step="0.5" id="pmRateMontage" value="65" oninput="recalcProduct()"/><span>€/h</span></span></div>
+          <div class="config-row"><label>Entwicklung / Konstruktion</label>
+            <span class="input-suffix"><input type="number" step="0.5" id="pmRateEntwicklung" value="100" oninput="recalcProduct()"/><span>€/h</span></span></div>
+          <div class="config-row"><label>SI / Embedded</label>
+            <span class="input-suffix"><input type="number" step="0.5" id="pmRateSi" value="100" oninput="recalcProduct()"/><span>€/h</span></span></div>
+          <div class="config-row"><label>Programm Management</label>
+            <span class="input-suffix"><input type="number" step="0.5" id="pmRatePm" value="100" oninput="recalcProduct()"/><span>€/h</span></span></div>
+          <div class="config-row"><label>Validierung / Tests</label>
+            <span class="input-suffix"><input type="number" step="0.5" id="pmRateTest" value="100" oninput="recalcProduct()"/><span>€/h</span></span></div>
+          <div class="config-row"><label>Customer Service</label>
+            <span class="input-suffix"><input type="number" step="0.5" id="pmRateCs" value="80" oninput="recalcProduct()"/><span>€/h</span></span></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="pm-summary" id="pmSummary"></div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="saveProduct()" style="background:#047857;">Speichern</button>
+      <button class="btn-primary" onclick="releaseProduct()" style="background:#92400e;">Im Katalog freigeben</button>
+      <button class="btn-secondary" onclick="archiveProduct()">Archivieren</button>
+      <button class="btn-secondary" onclick="confirmLeaveProductEditor('viewProducts')">Zurück</button>
     </div>
   </div>
 </div>
@@ -2562,6 +2829,7 @@
     document.getElementById(id).classList.add('active');
     if (id === 'viewStart')     loadQuoteList();
     if (id === 'viewDashboard') loadDashboard();
+    if (id === 'viewProducts')  loadProductList();
   }
 
   async function doLogin() {
@@ -2569,11 +2837,12 @@
     const p = document.getElementById('loginPass').value;
     try {
       const res = await api('auth.php?action=login', { method: 'POST', body: { username: u, password: p } });
-      currentUser = { username: res.username, role: res.role };
+      currentUser = { username: res.username, role: res.role, can_calc_products: res.can_calc_products || 0 };
       document.getElementById('loginError').textContent = '';
       document.getElementById('startUser').textContent = res.username;
       document.getElementById('btnAdmin').style.display = res.role === 'admin' ? '' : 'none';
       document.getElementById('btnDashboard').style.display = res.role === 'admin' ? '' : 'none';
+      document.getElementById('btnProducts').style.display = (res.role === 'admin' || res.can_calc_products) ? '' : 'none';
       await loadTemplatesFromServer();
       await loadCatalogFromServer();
       showView('viewStart');
@@ -2634,10 +2903,11 @@
     try {
       const res = await api('auth.php?action=me');
       if (res.loggedIn) {
-        currentUser = { username: res.username, role: res.role };
+        currentUser = { username: res.username, role: res.role, can_calc_products: res.can_calc_products || 0 };
         document.getElementById('startUser').textContent = res.username;
         document.getElementById('btnAdmin').style.display = res.role === 'admin' ? '' : 'none';
       document.getElementById('btnDashboard').style.display = res.role === 'admin' ? '' : 'none';
+      document.getElementById('btnProducts').style.display = (res.role === 'admin' || res.can_calc_products) ? '' : 'none';
         await loadTemplatesFromServer();
         await loadCatalogFromServer();
         showView('viewStart');
@@ -6375,6 +6645,522 @@ input.cfg-pct:focus{outline:none;border-color:#540025;box-shadow:0 0 0 2px rgba(
     if (typeof clearCalcDirty === 'function') clearCalcDirty();
     showView('viewCalc');
     showToast('GAEB-LV übernommen: ' + selected.length + ' Positionen');
+  }
+
+  // =====================================================================
+  // Produktkalkulationen (Programm Management)
+  // =====================================================================
+
+  let currentProduct = null;   // { id, ... } oder null bei Neu
+  let pmDirty = false;
+  function pmMarkDirty()  { pmDirty = true; }
+  function pmClearDirty() { pmDirty = false; }
+
+  const PM_AUFW_TYPES = [
+    { key: 'montage',     label: 'Produktionszeit (Montage)', rateField: 'pmRateMontage',     einmaligDefault: false },
+    { key: 'entwicklung', label: 'Entwicklung / Konstruktion', rateField: 'pmRateEntwicklung', einmaligDefault: true },
+    { key: 'hwentw',      label: 'Entwicklung Hardware',       rateField: 'pmRateEntwicklung', einmaligDefault: true },
+    { key: 'si',          label: 'SI / Embedded',              rateField: 'pmRateSi',          einmaligDefault: true },
+    { key: 'pm',          label: 'Programm Management',        rateField: 'pmRatePm',          einmaligDefault: true },
+    { key: 'test',        label: 'Validierung / Tests',        rateField: 'pmRateTest',        einmaligDefault: true },
+    { key: 'cs',          label: 'Customer Service',           rateField: 'pmRateCs',          einmaligDefault: false },
+    { key: 'ie',          label: 'Industrial Engineering',     rateField: 'pmRateCs',          einmaligDefault: true },
+    { key: 'sonstige',    label: 'Sonstige',                   rateField: 'pmRateMontage',     einmaligDefault: false }
+  ];
+  const PM_AUFW_BY_KEY = Object.fromEntries(PM_AUFW_TYPES.map(t => [t.key, t]));
+  const PM_KATEGORIEN = ['Elektronik','Glas','Kleinteile','Kabelbaugruppen','Lüftung Heizung','Metall','Rechner','Sensorik','Signal','Technik','Sonstige'];
+
+  async function loadProductList() {
+    const host = document.getElementById('productListBody');
+    if (!host) return;
+    host.innerHTML = '<div class="q-empty">Lade Produkte …</div>';
+    try {
+      const res = await api('products.php?action=list');
+      const prods = res.products || [];
+      if (!prods.length) {
+        host.innerHTML = '<div class="q-empty">Noch keine Produkte angelegt. Klicke auf „Neues Produkt".</div>';
+        return;
+      }
+      host.innerHTML = '<div style="display:grid;grid-template-columns: 100px 1fr 130px 110px 130px 110px 180px;gap:0.6rem;padding:0.4rem 0.8rem;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--fw-muted);font-weight:700;">'
+        + '<div>Produkt-Nr.</div><div>Bezeichnung</div><div>Materialnr.</div><div>Status</div><div class="num" style="text-align:right;">HK €</div><div class="num" style="text-align:right;">VK €</div><div></div>'
+        + '</div>'
+        + prods.map(p => renderProductListRow(p)).join('');
+    } catch (e) {
+      host.innerHTML = '<div class="q-empty">Fehler beim Laden: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
+  function pmStatusClass(s) {
+    if (s === 'Freigegeben') return 's-freigegeben';
+    if (s === 'Archiviert')  return 's-archiviert';
+    return 's-bearbeitung';
+  }
+  function pmFmtEUR(v) { return (v || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
+
+  function renderProductListRow(p) {
+    return `<div class="pp-list-row" style="grid-template-columns: 100px 1fr 130px 110px 130px 110px 180px;">
+      <div class="pl-num">${escapeHtml(p.produkt_nr || '–')}</div>
+      <div>
+        <div class="pl-name">${escapeHtml(p.bezeichnung || 'Ohne Bezeichnung')}</div>
+        <div class="pl-meta">${escapeHtml(p.kategorie || '')} · ${escapeHtml(p.ersteller || '')} · ${(p.updated_at||'').slice(0,10)}</div>
+      </div>
+      <div>${escapeHtml(p.materialnr || '–')}</div>
+      <div><span class="pp-status ${pmStatusClass(p.status)}">${escapeHtml(p.status || 'In Bearbeitung')}</span></div>
+      <div class="pl-num" style="text-align:right;">${pmFmtEUR(parseFloat(p.hk_preis))}</div>
+      <div class="pl-num" style="text-align:right;">${pmFmtEUR(parseFloat(p.vk_preis_empf))}</div>
+      <div class="pl-actions">
+        <button onclick="openProductEditor(${p.id})">Öffnen</button>
+        <button class="del" onclick="deleteProduct(${p.id}, '${escapeHtml(p.bezeichnung || '')}')">×</button>
+      </div>
+    </div>`;
+  }
+
+  async function deleteProduct(id, title) {
+    if (!confirm('Produkt „' + title + '" wirklich löschen?')) return;
+    try {
+      await api('products.php?action=delete', { method: 'POST', body: { id } });
+      loadProductList();
+    } catch (e) { alert('Fehler: ' + e.message); }
+  }
+
+  function openProductEditor(id) {
+    currentProduct = id ? { id } : null;
+    resetProductEditor();
+    if (id) {
+      api('products.php?action=load&id=' + id).then(res => {
+        loadProductIntoEditor(res.product);
+        pmClearDirty();
+      }).catch(e => alert('Fehler beim Laden: ' + e.message));
+    } else {
+      // Neu — Defaults
+      addProductAufwand({ typ: 'montage', stunden: 0 });
+      pmClearDirty();
+    }
+    showView('viewProductEditor');
+  }
+
+  function resetProductEditor() {
+    document.getElementById('pmProduktNr').value   = '';
+    document.getElementById('pmBezeichnung').value = '';
+    document.getElementById('pmKategorie').value   = 'Displays';
+    document.getElementById('pmMaterialnr').value  = '';
+    document.getElementById('pmStueckLot').value   = '1';
+    document.getElementById('pmStatus').value      = 'In Bearbeitung';
+    document.getElementById('pmCompBody').innerHTML = '';
+    document.getElementById('pmAufwBody').innerHTML = '';
+    document.getElementById('pmTransBody').innerHTML = '';
+    // Defaults wieder setzen
+    document.getElementById('pmMgk').value = '4';
+    document.getElementById('pmFgk').value = '6';
+    document.getElementById('pmRisiko').value = '2';
+    document.getElementById('pmVkFaktor').value = '1.30';
+    document.getElementById('pmRateMontage').value = '65';
+    document.getElementById('pmRateEntwicklung').value = '100';
+    document.getElementById('pmRateSi').value = '100';
+    document.getElementById('pmRatePm').value = '100';
+    document.getElementById('pmRateTest').value = '100';
+    document.getElementById('pmRateCs').value = '80';
+    recalcProduct();
+  }
+
+  function loadProductIntoEditor(p) {
+    document.getElementById('pmProduktNr').value   = p.produkt_nr || '';
+    document.getElementById('pmBezeichnung').value = p.bezeichnung || '';
+    document.getElementById('pmKategorie').value   = p.kategorie || 'Displays';
+    document.getElementById('pmMaterialnr').value  = p.materialnr || '';
+    document.getElementById('pmStatus').value      = p.status || 'In Bearbeitung';
+    const d = p.json_data || {};
+    document.getElementById('pmStueckLot').value = d.stueckLot || 1;
+    // Config
+    if (d.config) {
+      const c = d.config;
+      if (c.mgk        != null) document.getElementById('pmMgk').value          = c.mgk;
+      if (c.fgk        != null) document.getElementById('pmFgk').value          = c.fgk;
+      if (c.risikopuffer != null) document.getElementById('pmRisiko').value     = c.risikopuffer;
+      if (c.vkFaktor   != null) document.getElementById('pmVkFaktor').value     = c.vkFaktor;
+      const r = c.rates || {};
+      if (r.montage     != null) document.getElementById('pmRateMontage').value     = r.montage;
+      if (r.entwicklung != null) document.getElementById('pmRateEntwicklung').value = r.entwicklung;
+      if (r.si          != null) document.getElementById('pmRateSi').value          = r.si;
+      if (r.pm          != null) document.getElementById('pmRatePm').value          = r.pm;
+      if (r.test        != null) document.getElementById('pmRateTest').value        = r.test;
+      if (r.cs          != null) document.getElementById('pmRateCs').value          = r.cs;
+    }
+    (d.components || []).forEach(c => addProductComponent(c));
+    (d.aufwaende  || []).forEach(a => addProductAufwand(a));
+    (d.transport  || []).forEach(t => addProductTransport(t));
+    recalcProduct();
+  }
+
+  // --- Komponenten -------------------------------------------------------
+  function addProductComponent(data = {}) {
+    const tr = document.createElement('tr');
+    const catOptions = PM_KATEGORIEN.map(k => `<option ${k === (data.kategorie || '') ? 'selected' : ''}>${k}</option>`).join('');
+    tr.innerHTML = `
+      <td><select data-f="kategorie" onchange="pmMarkDirty();recalcProduct()"><option value=""></option>${catOptions}</select></td>
+      <td><input type="text" data-f="oz" value="${escapeHtml(data.oz || '')}" oninput="pmMarkDirty()"/></td>
+      <td><input type="text" data-f="artikelnr" value="${escapeHtml(data.artikelnr || '')}" oninput="pmMarkDirty()"/></td>
+      <td><input type="text" data-f="name" value="${escapeHtml(data.name || '')}" oninput="pmMarkDirty()"/></td>
+      <td><input type="text" data-f="lieferant" value="${escapeHtml(data.lieferant || '')}" oninput="pmMarkDirty()"/></td>
+      <td class="num"><input type="number" step="0.001" min="0" data-f="menge" value="${data.menge ?? 1}" oninput="pmMarkDirty();recalcProduct()"/></td>
+      <td><input type="text" data-f="einheit" value="${escapeHtml(data.einheit || 'ST')}" oninput="pmMarkDirty()"/></td>
+      <td class="num"><input type="number" step="0.01" min="0" data-f="einzelpreis" value="${data.einzelpreis ?? 0}" oninput="pmMarkDirty();recalcProduct()"/></td>
+      <td class="num calc" data-role="gesamt">0,00 €</td>
+      <td><button class="pm-del" title="Zeile löschen" onclick="this.closest('tr').remove();pmMarkDirty();recalcProduct();">×</button></td>
+    `;
+    if (data.kategorie) tr.querySelector('[data-f="kategorie"]').value = data.kategorie;
+    document.getElementById('pmCompBody').appendChild(tr);
+    if (data.menge || data.einzelpreis) recalcProduct();
+    return tr;
+  }
+
+  // --- Aufwände ----------------------------------------------------------
+  function addProductAufwand(data = {}) {
+    const tr = document.createElement('tr');
+    const opts = PM_AUFW_TYPES.map(t => `<option value="${t.key}" ${t.key === (data.typ || 'montage') ? 'selected' : ''}>${t.label}</option>`).join('');
+    const einmalig = data.einmalig !== undefined
+      ? !!data.einmalig
+      : (PM_AUFW_BY_KEY[data.typ || 'montage']?.einmaligDefault || false);
+    const satz = data.satz !== undefined ? data.satz : '';
+    tr.innerHTML = `
+      <td><select data-f="typ" onchange="onPmTypChange(this);pmMarkDirty();recalcProduct()">${opts}</select></td>
+      <td><input type="text" data-f="beschreibung" value="${escapeHtml(data.beschreibung || '')}" oninput="pmMarkDirty()"/></td>
+      <td class="num"><input type="number" step="0.5" min="0" data-f="stunden" value="${data.stunden ?? 0}" oninput="pmMarkDirty();recalcProduct()"/></td>
+      <td class="num"><input type="number" step="0.5" min="0" data-f="satz" value="${satz}" placeholder="auto" oninput="pmMarkDirty();recalcProduct()"/></td>
+      <td class="center"><input type="checkbox" data-f="einmalig" ${einmalig ? 'checked' : ''} onchange="pmMarkDirty();recalcProduct()"/></td>
+      <td class="num calc" data-role="gesamt">0,00 €</td>
+      <td><button class="pm-del" title="Zeile löschen" onclick="this.closest('tr').remove();pmMarkDirty();recalcProduct();">×</button></td>
+    `;
+    document.getElementById('pmAufwBody').appendChild(tr);
+    recalcProduct();
+    return tr;
+  }
+  function onPmTypChange(sel) {
+    // Wenn Satz leer ist, vorbelegen aus Default-Stundensatz
+    const tr = sel.closest('tr');
+    const satzInput = tr.querySelector('[data-f="satz"]');
+    if (satzInput && !satzInput.value) satzInput.placeholder = 'auto';
+  }
+  function pmAufwSatz(typ) {
+    const t = PM_AUFW_BY_KEY[typ] || PM_AUFW_BY_KEY.montage;
+    return parseFloat(document.getElementById(t.rateField)?.value) || 0;
+  }
+
+  // --- Transport ---------------------------------------------------------
+  function addProductTransport(data = {}) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" data-f="art" value="${escapeHtml(data.art || '')}" oninput="pmMarkDirty()"/></td>
+      <td><input type="text" data-f="bemerkung" value="${escapeHtml(data.bemerkung || '')}" oninput="pmMarkDirty()"/></td>
+      <td class="num"><input type="number" step="1" min="0" data-f="stueck" value="${data.stueck ?? 0}" oninput="pmMarkDirty();recalcProduct()"/></td>
+      <td class="num"><input type="number" step="0.01" min="0" data-f="kosten" value="${data.kosten ?? 0}" oninput="pmMarkDirty();recalcProduct()"/></td>
+      <td class="num calc" data-role="proAnzeiger">0,00 €</td>
+      <td><button class="pm-del" title="Zeile löschen" onclick="this.closest('tr').remove();pmMarkDirty();recalcProduct();">×</button></td>
+    `;
+    document.getElementById('pmTransBody').appendChild(tr);
+    recalcProduct();
+    return tr;
+  }
+
+  // --- Live-Berechnung ---------------------------------------------------
+  function recalcProduct() {
+    const stueckLot = Math.max(1, parseInt(document.getElementById('pmStueckLot').value) || 1);
+    const mgk    = (parseFloat(document.getElementById('pmMgk').value)    || 0) / 100;
+    const fgk    = (parseFloat(document.getElementById('pmFgk').value)    || 0) / 100;
+    const risiko = (parseFloat(document.getElementById('pmRisiko').value) || 0) / 100;
+    const vkFkt  = parseFloat(document.getElementById('pmVkFaktor').value) || 1;
+
+    // Komponenten
+    let matSum = 0;
+    document.querySelectorAll('#pmCompBody tr').forEach(tr => {
+      const menge = parseFloat(tr.querySelector('[data-f="menge"]').value) || 0;
+      const ep    = parseFloat(tr.querySelector('[data-f="einzelpreis"]').value) || 0;
+      const g = menge * ep;
+      matSum += g;
+      tr.querySelector('[data-role="gesamt"]').textContent = pmFmtEUR(g);
+    });
+    const matTotal = matSum * (1 + mgk);
+
+    // Aufwände
+    let aufwEinmalig = 0;   // werden auf Lot umgelegt
+    let aufwProStk   = 0;   // direkt pro Anzeiger
+    let fertigungProStk = 0; // Aufwandstyp „montage" — gesondert mit FGK
+    document.querySelectorAll('#pmAufwBody tr').forEach(tr => {
+      const typ      = tr.querySelector('[data-f="typ"]').value;
+      const std      = parseFloat(tr.querySelector('[data-f="stunden"]').value) || 0;
+      const satzIn   = parseFloat(tr.querySelector('[data-f="satz"]').value);
+      const satz     = isFinite(satzIn) && satzIn > 0 ? satzIn : pmAufwSatz(typ);
+      const einmalig = tr.querySelector('[data-f="einmalig"]').checked;
+      const gesamt   = std * satz;
+      tr.querySelector('[data-role="gesamt"]').textContent = pmFmtEUR(gesamt);
+      if (typ === 'montage') {
+        // Fertigung pro Stück mit FGK belastet
+        const fert = einmalig ? (gesamt / stueckLot) : gesamt;
+        fertigungProStk += fert * (1 + fgk);
+      } else if (einmalig) {
+        aufwEinmalig += gesamt;
+      } else {
+        aufwProStk += gesamt;
+      }
+    });
+    const aufwUmgelegt = (aufwEinmalig / stueckLot);
+
+    // Transport
+    let transProStk = 0;
+    document.querySelectorAll('#pmTransBody tr').forEach(tr => {
+      const stk = parseFloat(tr.querySelector('[data-f="stueck"]').value) || 0;
+      const k   = parseFloat(tr.querySelector('[data-f="kosten"]').value) || 0;
+      // Annahme: Kosten gelten für gelistete Stückzahl → auf Anzeiger / Lot umlegen
+      // Wenn stk == stueckLot: k/stueckLot; sonst proportional via stk Anzeiger
+      const proAnzeiger = stueckLot > 0 ? k / stueckLot : 0;
+      tr.querySelector('[data-role="proAnzeiger"]').textContent = pmFmtEUR(proAnzeiger);
+      transProStk += proAnzeiger;
+    });
+
+    const zwischen = matTotal + aufwUmgelegt + aufwProStk + fertigungProStk + transProStk;
+    const hkProStk = zwischen * (1 + risiko);
+    const vkEmpf   = hkProStk * vkFkt;
+
+    document.getElementById('pmCompSummary').textContent =
+      'Komponenten: ' + pmFmtEUR(matSum) + ' netto · ' + pmFmtEUR(matTotal) + ' inkl. MGK ' + (mgk*100).toFixed(1) + '%';
+
+    document.getElementById('pmSummary').innerHTML = `
+      <div class="ps-item"><span class="ps-label">Material (× MGK)</span><span class="ps-value">${pmFmtEUR(matTotal)}</span></div>
+      <div class="ps-item"><span class="ps-label">Aufwände einmalig / Stk.</span><span class="ps-value">${pmFmtEUR(aufwUmgelegt)}</span></div>
+      <div class="ps-item"><span class="ps-label">Aufwände pro Stk.</span><span class="ps-value">${pmFmtEUR(aufwProStk)}</span></div>
+      <div class="ps-item"><span class="ps-label">Fertigung (× FGK)</span><span class="ps-value">${pmFmtEUR(fertigungProStk)}</span></div>
+      <div class="ps-item"><span class="ps-label">Transport / Stk.</span><span class="ps-value">${pmFmtEUR(transProStk)}</span></div>
+      <div class="ps-item"><span class="ps-label">Risikopuffer ${(risiko*100).toFixed(1)}%</span><span class="ps-value">${pmFmtEUR(zwischen * risiko)}</span></div>
+      <div class="ps-item highlight"><span class="ps-label">HK pro Anzeiger</span><span class="ps-value">${pmFmtEUR(hkProStk)}</span></div>
+      <div class="ps-item highlight"><span class="ps-label">Empf. VK (× ${vkFkt.toFixed(2)})</span><span class="ps-value">${pmFmtEUR(vkEmpf)}</span></div>
+    `;
+
+    // Save-Werte zwischenspeichern
+    window._pmCalc = { hk: hkProStk, vk: vkEmpf };
+  }
+
+  // --- Daten sammeln + speichern ----------------------------------------
+  function buildProductData() {
+    const stueckLot = Math.max(1, parseInt(document.getElementById('pmStueckLot').value) || 1);
+    const config = {
+      mgk:          parseFloat(document.getElementById('pmMgk').value) || 0,
+      fgk:          parseFloat(document.getElementById('pmFgk').value) || 0,
+      risikopuffer: parseFloat(document.getElementById('pmRisiko').value) || 0,
+      vkFaktor:     parseFloat(document.getElementById('pmVkFaktor').value) || 1,
+      rates: {
+        montage:     parseFloat(document.getElementById('pmRateMontage').value)     || 0,
+        entwicklung: parseFloat(document.getElementById('pmRateEntwicklung').value) || 0,
+        si:          parseFloat(document.getElementById('pmRateSi').value)          || 0,
+        pm:          parseFloat(document.getElementById('pmRatePm').value)          || 0,
+        test:        parseFloat(document.getElementById('pmRateTest').value)        || 0,
+        cs:          parseFloat(document.getElementById('pmRateCs').value)          || 0
+      }
+    };
+    const components = [...document.querySelectorAll('#pmCompBody tr')].map(tr => ({
+      kategorie:   tr.querySelector('[data-f="kategorie"]').value,
+      oz:          tr.querySelector('[data-f="oz"]').value,
+      artikelnr:   tr.querySelector('[data-f="artikelnr"]').value,
+      name:        tr.querySelector('[data-f="name"]').value,
+      lieferant:   tr.querySelector('[data-f="lieferant"]').value,
+      menge:       parseFloat(tr.querySelector('[data-f="menge"]').value) || 0,
+      einheit:     tr.querySelector('[data-f="einheit"]').value,
+      einzelpreis: parseFloat(tr.querySelector('[data-f="einzelpreis"]').value) || 0
+    }));
+    const aufwaende = [...document.querySelectorAll('#pmAufwBody tr')].map(tr => ({
+      typ:          tr.querySelector('[data-f="typ"]').value,
+      beschreibung: tr.querySelector('[data-f="beschreibung"]').value,
+      stunden:      parseFloat(tr.querySelector('[data-f="stunden"]').value) || 0,
+      satz:         parseFloat(tr.querySelector('[data-f="satz"]').value) || 0,
+      einmalig:     tr.querySelector('[data-f="einmalig"]').checked
+    }));
+    const transport = [...document.querySelectorAll('#pmTransBody tr')].map(tr => ({
+      art:       tr.querySelector('[data-f="art"]').value,
+      bemerkung: tr.querySelector('[data-f="bemerkung"]').value,
+      stueck:    parseFloat(tr.querySelector('[data-f="stueck"]').value) || 0,
+      kosten:    parseFloat(tr.querySelector('[data-f="kosten"]').value) || 0
+    }));
+    return { stueckLot, config, components, aufwaende, transport };
+  }
+
+  async function saveProduct() {
+    recalcProduct();
+    const json_data = buildProductData();
+    const calc = window._pmCalc || { hk: 0, vk: 0 };
+    try {
+      const res = await api('products.php?action=save', { method: 'POST', body: {
+        id:            currentProduct?.id || 0,
+        produkt_nr:    document.getElementById('pmProduktNr').value.trim(),
+        bezeichnung:   document.getElementById('pmBezeichnung').value.trim(),
+        kategorie:     document.getElementById('pmKategorie').value,
+        materialnr:    document.getElementById('pmMaterialnr').value.trim(),
+        json_data,
+        hk_preis:      calc.hk,
+        vk_preis_empf: calc.vk
+      }});
+      currentProduct = { id: res.id };
+      pmClearDirty();
+      showToast('Produkt gespeichert');
+    } catch (e) { alert('Fehler beim Speichern: ' + e.message); }
+  }
+
+  async function releaseProduct() {
+    if (!currentProduct?.id) { await saveProduct(); }
+    if (!currentProduct?.id) return;
+    if (!confirm('Produkt im Katalog veröffentlichen?\nDer aktuelle HK-Preis wird für den Vertrieb sichtbar.')) return;
+    try {
+      await saveProduct(); // sicherheitshalber aktuellen Stand speichern
+      await api('products.php?action=release', { method: 'POST', body: { id: currentProduct.id } });
+      document.getElementById('pmStatus').value = 'Freigegeben';
+      showToast('Produkt freigegeben — im Katalog verfügbar');
+    } catch (e) { alert('Fehler beim Freigeben: ' + e.message); }
+  }
+
+  async function archiveProduct() {
+    if (!currentProduct?.id) { alert('Bitte zuerst speichern.'); return; }
+    if (!confirm('Produkt archivieren? Es wird nicht gelöscht, aber als „Archiviert" markiert.')) return;
+    try {
+      await api('products.php?action=setStatus', { method: 'POST', body: { id: currentProduct.id, status: 'Archiviert' } });
+      document.getElementById('pmStatus').value = 'Archiviert';
+      showToast('Produkt archiviert');
+    } catch (e) { alert('Fehler: ' + e.message); }
+  }
+
+  // Dirty-Tracking
+  document.addEventListener('input', function(e) {
+    if (e.target && e.target.closest('#viewProductEditor')) pmMarkDirty();
+  }, true);
+  document.addEventListener('change', function(e) {
+    if (e.target && e.target.closest('#viewProductEditor')) pmMarkDirty();
+  }, true);
+
+  function confirmLeaveProductEditor(target) {
+    if (!pmDirty) {
+      if (target === 'logout') return doLogout();
+      return showView(target || 'viewProducts');
+    }
+    if (confirm('Aktuelle Produktkalkulation hat ungespeicherte Änderungen. Trotzdem verlassen?')) {
+      pmClearDirty();
+      if (target === 'logout') return doLogout();
+      showView(target || 'viewProducts');
+    }
+  }
+
+  // beforeunload auch für Produkt-Editor
+  window.addEventListener('beforeunload', function(e) {
+    const v = document.getElementById('viewProductEditor');
+    if (!v || !v.classList.contains('active')) return;
+    if (!pmDirty) return;
+    e.preventDefault(); e.returnValue = '';
+  });
+
+  // ===== Komponenten-Import (CSV nativ + XLSX via SheetJS-CDN dynamisch) =====
+  async function importProductComponents(file) {
+    if (!file) return;
+    const name = file.name.toLowerCase();
+    try {
+      let rows;
+      if (name.endsWith('.csv') || name.endsWith('.txt')) {
+        const text = await file.text();
+        rows = parseCSV(text);
+      } else if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+        const XLSX = await loadSheetJS();
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: 'array' });
+        // Erstes Sheet ODER ein „Komponenten"-Sheet bevorzugen
+        const sheetName = wb.SheetNames.find(n => /komponent/i.test(n)) || wb.SheetNames[0];
+        const sh = wb.Sheets[sheetName];
+        rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: '', raw: false });
+      } else {
+        alert('Nicht unterstütztes Format. Bitte .xlsx, .xls oder .csv wählen.');
+        return;
+      }
+      const mapped = mapComponentRows(rows);
+      if (mapped.length === 0) { alert('Keine Datenzeilen erkannt. Bitte Spalten prüfen.'); return; }
+      if (!confirm('Import von ' + mapped.length + ' Komponenten — bestehende Zeilen anhängen oder ersetzen?\n\nOK = Anhängen, Abbrechen = Ersetzen')) {
+        document.getElementById('pmCompBody').innerHTML = '';
+      }
+      mapped.forEach(c => addProductComponent(c));
+      recalcProduct();
+      pmMarkDirty();
+      showToast(mapped.length + ' Komponenten importiert');
+    } catch (e) {
+      alert('Fehler beim Import: ' + e.message);
+    } finally {
+      document.getElementById('pmImportFile').value = '';
+    }
+  }
+
+  function loadSheetJS() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+      s.onload  = () => resolve(window.XLSX);
+      s.onerror = () => reject(new Error('SheetJS (xlsx) konnte nicht geladen werden — bitte CSV-Export verwenden.'));
+      document.head.appendChild(s);
+    });
+  }
+
+  function mapComponentRows(rows) {
+    if (!rows || !rows.length) return [];
+    // Header-Zeile erkennen
+    const norm = s => String(s || '').toLowerCase().trim();
+    let headerIdx = -1;
+    for (let i = 0; i < Math.min(rows.length, 5); i++) {
+      const r = rows[i].map(norm);
+      if (r.some(c => c.includes('einzelpr')) || r.some(c => c.includes('bauteil') || c.includes('name'))) {
+        headerIdx = i; break;
+      }
+    }
+    if (headerIdx === -1) return [];
+    const header = rows[headerIdx].map(norm);
+    const colIdx = name => {
+      // suche erste Spalte, deren Header eines der Synonyme enthält
+      for (let i = 0; i < header.length; i++) {
+        for (const syn of name) {
+          if (header[i].includes(syn)) return i;
+        }
+      }
+      return -1;
+    };
+    const idx = {
+      kategorie:   colIdx(['kategorie', 'kategorien']),
+      oz:          colIdx(['position', 'oz', 'pos.']),
+      artikelnr:   colIdx(['artikel']),
+      name:        colIdx(['bauteil', 'name', 'beschreibung', 'bezeichnung']),
+      lieferant:   colIdx(['lieferant']),
+      menge:       colIdx(['menge']),
+      einheit:     colIdx(['einheit']),
+      einzelpreis: colIdx(['einzelpr'])
+    };
+    const out = [];
+    for (let i = headerIdx + 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || r.every(c => c === '' || c == null)) continue;
+      const get = key => idx[key] >= 0 ? r[idx[key]] : '';
+      const parseNum = s => {
+        if (s === '' || s == null) return 0;
+        const str = String(s).replace(/[€\s]/g,'');
+        const n = str.includes(',') ? parseFloat(str.replace(/\./g,'').replace(',', '.')) : parseFloat(str);
+        return isNaN(n) ? 0 : n;
+      };
+      const c = {
+        kategorie:   String(get('kategorie') || ''),
+        oz:          String(get('oz') || ''),
+        artikelnr:   String(get('artikelnr') || ''),
+        name:        String(get('name') || ''),
+        lieferant:   String(get('lieferant') || ''),
+        menge:       parseNum(get('menge')) || 1,
+        einheit:     String(get('einheit') || 'ST'),
+        einzelpreis: parseNum(get('einzelpreis'))
+      };
+      // Leere und Platzhalter-Zeilen filtern (Stücklistenlangtext, 0000-Dummy)
+      if (!c.name && !c.artikelnr && c.einzelpreis === 0) continue;
+      if (/^st(ü|ue)cklistenlangtext$/i.test(c.name.trim())) continue;
+      if (c.artikelnr === '0000-000-00000') continue;
+      out.push(c);
+    }
+    return out;
   }
 
   // Session prüfen (Templates + Katalog werden nach Login geladen)

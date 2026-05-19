@@ -17,7 +17,7 @@ switch ($action) {
         }
 
         $db = getDB();
-        $stmt = $db->prepare('SELECT id, username, password_hash, role FROM users WHERE username = ?');
+        $stmt = $db->prepare('SELECT id, username, password_hash, role, can_calc_products FROM users WHERE username = ?');
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
@@ -30,9 +30,10 @@ switch ($action) {
         $_SESSION['role']     = $user['role'];
 
         jsonResponse([
-            'ok'       => true,
-            'username' => $user['username'],
-            'role'     => $user['role'],
+            'ok'                => true,
+            'username'          => $user['username'],
+            'role'              => $user['role'],
+            'can_calc_products' => (int)($user['can_calc_products'] ?? 0),
         ]);
         break;
 
@@ -47,10 +48,17 @@ switch ($action) {
         if (empty($_SESSION['user_id'])) {
             jsonResponse(['loggedIn' => false]);
         }
+        // can_calc_products live aus der DB lesen (Flag kann zur Laufzeit vom Admin geändert werden)
+        $db = getDB();
+        $stmt = $db->prepare('SELECT can_calc_products FROM users WHERE id = ?');
+        $stmt->execute([$_SESSION['user_id']]);
+        $row = $stmt->fetch();
+        $canCalc = $row ? (int)$row['can_calc_products'] : 0;
         jsonResponse([
-            'loggedIn' => true,
-            'username' => $_SESSION['username'],
-            'role'     => $_SESSION['role'],
+            'loggedIn'          => true,
+            'username'          => $_SESSION['username'],
+            'role'              => $_SESSION['role'],
+            'can_calc_products' => $canCalc,
         ]);
         break;
 

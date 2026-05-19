@@ -110,6 +110,51 @@ try {
     ");
     echo "<p style='color:green'>✓ Tabelle <code>quote_shares</code></p>";
 
+    // Produktkalkulationen (Programm Management)
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS products (
+            id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            produkt_nr      VARCHAR(50)   NOT NULL DEFAULT '',
+            bezeichnung     VARCHAR(255)  NOT NULL,
+            kategorie       VARCHAR(100)  NOT NULL DEFAULT 'Displays',
+            materialnr      VARCHAR(100)  NOT NULL DEFAULT '',
+            status          VARCHAR(40)   NOT NULL DEFAULT 'In Bearbeitung',
+            ersteller       VARCHAR(100)  NOT NULL,
+            json_data       LONGTEXT      NOT NULL,
+            hk_preis        DECIMAL(12,2) NOT NULL DEFAULT 0,
+            vk_preis_empf   DECIMAL(12,2) NOT NULL DEFAULT 0,
+            catalog_id      INT UNSIGNED  NULL,
+            created_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_status (status),
+            INDEX idx_ersteller (ersteller)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    echo "<p style='color:green'>✓ Tabelle <code>products</code></p>";
+
+    // Flag pro Benutzer: Produktkalkulation erlaubt?
+    try {
+        $db->exec("ALTER TABLE users ADD COLUMN can_calc_products TINYINT(1) NOT NULL DEFAULT 0");
+        echo "<p style='color:green'>✓ Spalte <code>users.can_calc_products</code> ergänzt</p>";
+    } catch (Exception $e) {
+        if (stripos($e->getMessage(), 'Duplicate') !== false) {
+            echo "<p style='color:green'>✓ Spalte <code>users.can_calc_products</code> vorhanden</p>";
+        } else {
+            echo "<p style='color:orange'>Info: " . htmlspecialchars($e->getMessage()) . "</p>";
+        }
+    }
+    // Link von catalog auf product (für Re-Veröffentlichung)
+    try {
+        $db->exec("ALTER TABLE catalog ADD COLUMN product_id INT UNSIGNED NULL");
+        echo "<p style='color:green'>✓ Spalte <code>catalog.product_id</code> ergänzt</p>";
+    } catch (Exception $e) {
+        if (stripos($e->getMessage(), 'Duplicate') !== false) {
+            echo "<p style='color:green'>✓ Spalte <code>catalog.product_id</code> vorhanden</p>";
+        } else {
+            echo "<p style='color:orange'>Info: " . htmlspecialchars($e->getMessage()) . "</p>";
+        }
+    }
+
     $db->exec("
         CREATE TABLE IF NOT EXISTS templates (
             id    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
