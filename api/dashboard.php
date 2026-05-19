@@ -186,11 +186,20 @@ function computeQuoteTotals(string $jsonData): array {
             $hausteil = (float)($p['hausteil'] ?? 0);
             $kaufteil = (float)($p['kaufteil'] ?? 0);
             $fremd    = (float)($p['fremd']    ?? 0);
-            $sonder   = (float)($p['sonder']   ?? 0);
             $std      = (float)($p['std']      ?? 0);
             $stueck   = (float)($p['stueck']   ?? 1);
             $deckung  = (float)($p['deckung']  ?? 0);
             $rate     = (float)($rates[$kstr]  ?? 0);
+            // sonder kann Zahl oder Formel-String sein (z.B. "=stk*5,5") — auflösen.
+            $sonderRaw = $p['sonder'] ?? 0;
+            $sonder    = evalSonderFormula($sonderRaw, [
+                'stk' => $stueck, 'stueck' => $stueck, 'menge' => $stueck,
+                'std' => $std, 'stunden' => $std,
+                'em' => $hausteil, 'eigenmaterial' => $hausteil,
+                'fm' => $kaufteil, 'fremdmaterial' => $kaufteil,
+                'fl' => $fremd, 'fremdleistung' => $fremd,
+                'gstk' => max(1, (int)($g['stueck'] ?? 1)), 'gruppenstueck' => max(1, (int)($g['stueck'] ?? 1)),
+            ]);
 
             if ($kstr === 'swlizenz') {
                 $vp = $kaufteil;
@@ -218,6 +227,41 @@ function computeQuoteTotals(string $jsonData): array {
     }
 
     return ['hk' => $totalHK, 'vp' => $totalVP];
+}
+
+/**
+ * Werte ein Sonderkosten-Feld aus. Akzeptiert Zahl oder Formel mit "="-Präfix.
+ * Variablen wie stk/std/em/fm/fl/gstk werden aus $vars eingesetzt. Strenges
+ * Whitelisting verhindert Code-Injection.
+ */
+function evalSonderFormula($raw, array $vars): float {
+    if (is_numeric($raw)) return max(0.0, (float)$raw);
+    $s = trim((string)$raw);
+    if ($s === '') return 0.0;
+    if ($s[0] !== '=') {
+        // DE-Format nur wenn ein Komma vorkommt — sonst Punkt als Dezimaltrenner.
+        if (strpos($s, ',') !== false) {
+            $n = (float)str_replace(',', '.', preg_replace('/\./', '', $s));
+        } else {
+            $n = (float)$s;
+        }
+        return max(0.0, $n);
+    }
+    $expr = substr($s, 1);
+    $expr = preg_replace_callback('/\b([a-zA-Z_][a-zA-Z_0-9]*)\b/', function ($m) use ($vars) {
+        $name = strtolower($m[1]);
+        return isset($vars[$name]) ? '(' . (float)$vars[$name] . ')' : '0';
+    }, $expr);
+    $expr = str_replace(',', '.', $expr);
+    if (preg_match('/[^0-9+\-*\/().\s]/', $expr) || trim($expr) === '') return 0.0;
+    try {
+        $result = null;
+        // Sichere Auswertung über eval — Whitelist oben sichert ab.
+        @eval('$result = ' . $expr . ';');
+        return is_numeric($result) && is_finite((float)$result) ? max(0.0, (float)$result) : 0.0;
+    } catch (Throwable $e) {
+        return 0.0;
+    }
 }
 
 function countQuotesForCustomer(array $quotes, string $kunde): int {

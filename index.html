@@ -518,6 +518,19 @@
       background: var(--fw-white); box-shadow: 0 0 0 2px rgba(226,0,26,0.1);
     }
 
+    /* Formel-Markierung für Sonderkosten */
+    tbody input.has-formula {
+      background-color: #fef3e6 !important;
+      color: #b45309;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    tbody input.has-formula:focus {
+      border-color: #b45309;
+      box-shadow: 0 0 0 2px rgba(180,83,9,0.15);
+    }
+
     /* Heading-Rows */
     tr.heading-row {
       background: #fdf2f4 !important;
@@ -2679,6 +2692,11 @@
         r.posNr = posInput ? posInput.value : '';
         r.posEdited = posInput && posInput.dataset.edited === '1';
         delete r.id; delete r.gid;
+        // sonder als Rohstring/Formel persistieren — damit Formeln über Speichern/Laden erhalten bleiben.
+        if (r.sonderRaw !== undefined) {
+          r.sonder = r.sonderRaw;
+        }
+        delete r.sonderRaw;
         current.positionen.push(r);
       } else if (tr.dataset.type === 'subtotal') {
         const titleInput = tr.querySelector('[data-f="stitle"]');
@@ -4389,6 +4407,9 @@
     const id = ++rowCounter;
     const { desc='', kstr='material', hausteil=0, kaufteil=0, fremd=0, sonder=0, std=0, stueck=1, deckung=null, langtext='' } = data;
     const deckungVal = deckung !== null ? deckung : getDefaultDeckung();
+    // Sonder kann Zahl (Altdaten) oder Formel-String sein. Zahl 0 → leeres Feld zeigen.
+    const sonderDisplay = (typeof sonder === 'number') ? (sonder ? String(sonder) : '') : String(sonder ?? '');
+    const sonderHasFormula = sonderDisplay.trim().startsWith('=');
 
     const tr = document.createElement('tr');
     tr.className = 'item-row';
@@ -4415,7 +4436,9 @@
         <input type="number" step="0.01" min="0" value="${fremd}" data-f="fremd" oninput="recalcRow(${id})" />
       </div></td>
       <td class="col-num"><div class="input-eur">
-        <input type="number" step="0.01" min="0" value="${sonder}" data-f="sonder" oninput="recalcRow(${id})" />
+        <input type="text" inputmode="decimal" class="${sonderHasFormula ? 'has-formula' : ''}"
+               value="${escapeHtml(sonderDisplay)}" data-f="sonder" oninput="onSonderInput(${id})"
+               title="Wert oder Formel — z.B. =stk*5,50 (Variablen: stk, std, em, fm, fl, gstk)" />
       </div></td>
       <td class="col-std">
         <input type="number" step="0.5" min="0" value="${std > 0 ? std : ''}" placeholder="Std." data-f="std" oninput="recalcRow(${id})" />
@@ -4599,7 +4622,7 @@
       hausteil: num('hausteil'),
       kaufteil: num('kaufteil'),
       fremd:    num('fremd'),
-      sonder:   num('sonder'),
+      sonder:   g('sonder') ? g('sonder').value : '',
       std:      num('std'),
       stueck:   num('stueck') || 1,
       deckung:  Math.min(99, num('deckung')),
@@ -4760,20 +4783,96 @@
     const g = f => tr.querySelector(`[data-f="${f}"]`);
     const num = f => Math.max(0, parseFloat(g(f).value) || 0);
     const ltEl = document.getElementById(`langtext-${id}`);
+    const sonderRaw = g('sonder') ? g('sonder').value : '';
     return {
       id,
-      gid:      tr.dataset.gid,
-      desc:     g('desc').value,
-      kstr:     g('kstr').value,
-      hausteil: num('hausteil'),
-      kaufteil: num('kaufteil'),
-      fremd:    num('fremd'),
-      sonder:   num('sonder'),
-      std:      num('std'),
-      stueck:   num('stueck'),
-      deckung:  Math.min(99, num('deckung')),
-      langtext: ltEl ? ltEl.value : ''
+      gid:        tr.dataset.gid,
+      desc:       g('desc').value,
+      kstr:       g('kstr').value,
+      hausteil:   num('hausteil'),
+      kaufteil:   num('kaufteil'),
+      fremd:      num('fremd'),
+      sonder:     parseFormula(sonderRaw, rowVars(tr)),
+      sonderRaw,
+      std:        num('std'),
+      stueck:     num('stueck'),
+      deckung:    Math.min(99, num('deckung')),
+      langtext:   ltEl ? ltEl.value : ''
     };
+  }
+
+  // --- Formel-Auswertung für Sonderkosten ---------------------------------
+  // Akzeptiert: leeren String, Zahl (mit DE-Komma) oder Formel mit "="-Präfix.
+  // Variablen: stk/menge (Stück), std (Stunden), em (Eigenmaterial),
+  // fm (Fremdmaterial), fl (Fremdleistung), gstk (Gruppen-Stück).
+  // Erlaubt nur Whitelist-Zeichen — kein eval-Bypass möglich.
+  function parseFormula(raw, vars) {
+    if (raw == null) return 0;
+    const s = String(raw).trim();
+    if (s === '') return 0;
+    if (!s.startsWith('=')) {
+      // DE-Format nur wenn ein Komma vorkommt: Punkte sind dann Tausendertrenner.
+      // Sonst Punkt als Dezimaltrenner stehen lassen.
+      const n = s.includes(',')
+        ? parseFloat(s.replace(/\./g, '').replace(',', '.'))
+        : parseFloat(s);
+      return isNaN(n) ? 0 : Math.max(0, n);
+    }
+    let expr = s.slice(1).replace(/\b([a-zA-Z_][a-zA-Z_0-9]*)\b/g, (_, name) => {
+      const v = (vars || {})[name.toLowerCase()];
+      return v !== undefined ? '(' + Number(v) + ')' : '0';
+    });
+    expr = expr.replace(/,/g, '.');
+    if (/[^0-9+\-*/().\s]/.test(expr) || expr.trim() === '') return 0;
+    try {
+      const result = Function('"use strict"; return (' + expr + ')')();
+      return typeof result === 'number' && isFinite(result) ? Math.max(0, result) : 0;
+    } catch (_) { return 0; }
+  }
+
+  function rowVars(tr) {
+    const g = f => tr.querySelector(`[data-f="${f}"]`);
+    const num = f => {
+      const el = g(f);
+      if (!el) return 0;
+      const v = String(el.value);
+      const n = v.includes(',') ? parseFloat(v.replace(/\./g,'').replace(',','.')) : parseFloat(v);
+      return isNaN(n) ? 0 : n;
+    };
+    const htr = document.querySelector(`#quoteBody tr.heading-row[data-gid="${tr.dataset.gid}"]`);
+    const grpStk = htr ? Math.max(1, parseInt(htr.querySelector('[data-f="grp-stk"]')?.value) || 1) : 1;
+    return {
+      stk:           num('stueck'),
+      stueck:        num('stueck'),
+      menge:         num('stueck'),
+      std:           num('std'),
+      stunden:       num('std'),
+      em:            num('hausteil'),
+      eigenmaterial: num('hausteil'),
+      fm:            num('kaufteil'),
+      fremdmaterial: num('kaufteil'),
+      fl:            num('fremd'),
+      fremdleistung: num('fremd'),
+      gstk:          grpStk,
+      gruppenstueck: grpStk
+    };
+  }
+
+  function onSonderInput(id) {
+    const tr = document.getElementById(`row-${id}`);
+    if (!tr) return;
+    const input = tr.querySelector('[data-f="sonder"]');
+    if (input) {
+      const isFormula = input.value.trim().startsWith('=');
+      input.classList.toggle('has-formula', isFormula);
+      if (isFormula) {
+        const v = parseFormula(input.value, rowVars(tr));
+        input.title = '= ' + v.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+      } else {
+        input.title = 'Wert oder Formel — z.B. =stk*5,50 (Variablen: stk, std, em, fm, fl, gstk)';
+      }
+    }
+    recalcRow(id);
   }
 
   function computeRow(r) {

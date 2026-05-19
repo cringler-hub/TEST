@@ -94,7 +94,7 @@ Pro Zeile trägst Du ein:
 | **Eigenmaterial €** | Eigenfertigungs-Material |
 | **Fremdmaterial €** | Zugekauftes Material (mit MGK belegt) |
 | **Fremdleistung €** | Externe Dienstleistung (mit MGK belegt) |
-| **Sonderkosten €** | 1:1 übernommen |
+| **Sonderkosten €** | 1:1 übernommen — akzeptiert auch Formeln mit `=`-Präfix (siehe 3.x) |
 | **Std./Menge** | Stunden oder km |
 | **Stück** | Anzahl in der Gruppe |
 | **HK Einzel** | Automatisch berechnet |
@@ -104,13 +104,35 @@ Pro Zeile trägst Du ein:
 
 **Aktionen pro Unterposition**: ↑/↓, Kopieren, Einfügen, **Langtext-Toggle** 📝, Löschen.
 
-### 3.5 VP Einzel manuell anpassen
+### 3.5 Formeln in Sonderkosten
+
+Das Feld **Sonderkosten** akzeptiert nicht nur eine Zahl, sondern auch einfache Rechenformeln. Eine Formel beginnt immer mit `=`. Verfügbare Variablen pro Position:
+
+| Variable | Bedeutung |
+|---|---|
+| `stk` / `menge` | Stück (im Item) |
+| `std` | Stunden / Menge |
+| `em` | Eigenmaterial € |
+| `fm` | Fremdmaterial € |
+| `fl` | Fremdleistung € |
+| `gstk` | Stückzahl der Überschrift |
+
+**Beispiele:**
+
+- `=stk*5,50` → 5,50 € pro Stück
+- `=menge/12` → durch 12 Monate teilen
+- `=std*0,85` → 85 % vom Std.-Wert
+- `=(em+fm)*0,05` → 5 % auf Materialkosten
+
+Formel-Felder werden orange hinterlegt. Wert ohne `=` bleibt eine einfache Zahl wie bisher.
+
+### 3.6 VP Einzel manuell anpassen
 
 - Klick in das Feld **VP Einzel** und Wert ändern → die **Deckung wird automatisch neu berechnet** (Formel: `Deckung = (VP − HK) / VP × 100`).
 - Tippst Du danach in ein Materialfeld, wird VP wieder aus HK und Deckung neu berechnet.
 - Für SW-Lizenzen wirkt eine VP-Eingabe direkt auf den Kaufpreis (Feld „Fremdmaterial").
 
-### 3.6 Langtext pro Position
+### 3.7 Langtext pro Position
 
 Pro Unterposition kannst Du detaillierte Beschreibungen hinterlegen:
 
@@ -120,18 +142,18 @@ Pro Unterposition kannst Du detaillierte Beschreibungen hinterlegen:
 4. Langtext wird **mit Kopieren, Verschieben, Speichern** mitgeführt.
 5. Im **Druck/PDF**, in der **CEO-Ansicht** und beim **GAEB-Import** wird er sichtbar.
 
-### 3.7 Zwischensummen
+### 3.8 Zwischensummen
 
 - Unterhalb der Tabelle: **„Zwischensumme einfügen"** legt eine neue Zwischensummen-Zeile an.
 - Titel eingeben (z. B. „Zwischensumme Mechanik").
 - Mit ↑/↓ verschieben.
 - Summiert alle Überschriften seit der vorherigen Zwischensumme je Kostenart sowie HK Gesamt, VP Gesamt und Deckung %.
 
-### 3.8 Gesamtsummen & Endpreis
+### 3.9 Gesamtsummen & Endpreis
 
 Unten findest Du fett: Gesamt HK, Gesamt VP, Deckung, Endpreis (nach Nachlass), Deckung (nach Nachlass).
 
-### 3.9 Status setzen
+### 3.10 Status setzen
 
 Im Angebotskopf gibt es das Dropdown **Status**:
 
