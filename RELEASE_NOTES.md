@@ -9,6 +9,38 @@ Funkwerk Mobility Solutions GmbH
 
 Diese Release Notes fassen alle Funktionen zusammen, die bis zum offiziellen Launch am 01.06.2026 in den Angebotskalkulator integriert wurden.
 
+### Update vom 19.05.2026 — Programm Management Modul + Sonderkosten-Formeln
+
+#### Produktkalkulationen (neues Modul)
+
+Programm Management kann eigene Produktkalkulationen direkt im Tool durchführen — ohne E-Mail-Pingpong mit dem Vertrieb. Sobald ein Produkt freigegeben ist, landet es automatisch im Vertriebs-Produktkatalog mit aktuellem HK-Preis.
+
+- **Neuer Startseiten-Button „Produktkalkulationen"** (braun, sichtbar für Admin und freigegebene Benutzer).
+- **Liste** mit Produkten je Status (In Bearbeitung / Freigegeben / Archiviert), Materialnummer, HK, VK.
+- **Editor** mit fünf Sektionen analog zur Excel-Vorlage:
+  - **Kopfdaten** — Produkt-Nr., Bezeichnung, Kategorie, Materialnr., Stückzahl Los, Status
+  - **Komponenten / Stückliste** — Tabelle mit Kategorie, OZ, Artikelnr., Bauteilname, Lieferant, Menge, Einheit, Einzelpreis; Live-Summe inkl. MGK
+  - **Aufwände** — Personalstunden je Aufwandstyp (Montage 65 €, Entwicklung/SI/PM/Test 100 €, Customer Service 80 €). „einmalig"-Flag teilt die Entwicklungskosten automatisch durch die Stückzahl Los; Pro-Stück-Aufwände gehen direkt ein. Fertigungsstunden werden mit FGK belastet.
+  - **Transport** — Kosten gesamt mit automatischer Umlage auf die Stückzahl
+  - **Konfiguration** — MGK 4 %, FGK 6 %, Risikopuffer 2 %, VK-Faktor 1,30 sowie alle Stundensätze als Default; jeder Wert lokal pro Produkt überschreibbar
+- **Live-Zusammenfassung** zeigt alle Teilbeträge und das Endergebnis (HK pro Anzeiger + empfohlener VK).
+- **Excel-/CSV-Import** für die Komponentenliste: Spalten werden per Header-Erkennung gemappt (Kategorie, OZ, Artikelnr., Bauteilname, Lieferant, Menge, Einheit, Einzelpreis). Bestehende Zeilen wahlweise anhängen oder ersetzen. Platzhalterzeilen werden automatisch herausgefiltert.
+- **„Im Katalog freigeben"** legt einen Eintrag im Vertriebs-Produktkatalog an oder aktualisiert den bestehenden — über `catalog.product_id` referenziert. Der Vertrieb sieht den neuen HK-Preis sofort beim nächsten „Aus Katalog".
+
+#### Berechtigungs-Flag pro Benutzer
+
+Statt einer neuen Rolle gibt es das Flag **`can_calc_products`** in der Users-Tabelle. Setzt der Admin den Haken, sieht der Benutzer den Button „Produktkalkulationen". Admins haben grundsätzlich Zugriff. Der Status wird beim Login und beim Session-Check übertragen.
+
+#### Sonderkosten-Formeln im Vertriebs-Kalkulator
+
+Das Feld **Sonderkosten** akzeptiert jetzt Formeln im Excel-Stil mit `=`-Präfix. Variablen je Position: `stk`/`menge` (Stück), `std` (Stunden), `em` (Eigenmaterial), `fm` (Fremdmaterial), `fl` (Fremdleistung), `gstk` (Gruppen-Stück).
+
+Beispiele: `=stk*5,50` · `=menge/12` · `=(em+fm)*0,05`. Formel-Zellen werden orange hinterlegt; Tooltip zeigt das aufgelöste Ergebnis in €. Sicherer Parser per Whitelist — kein Code-Injection-Risiko.
+
+#### Dashboard auf eigene Seite
+
+Das Admin-Dashboard wurde aus dem Inline-Widget auf der Startseite in eine eigene View ausgegliedert — zugänglich über einen pinken „Dashboard"-Button auf der Startseite. Neue Visualisierungen: **Donut-Chart** für die Status-Verteilung (Anzahl) und **horizontaler Bar-Chart** für das VP-Volumen je Status. Listen für Top-Kunden, Top-Bearbeiter und letzte Aktivitäten bleiben.
+
 ### Update vom 18.05.2026 — finale Vorbereitung für den Launch
 
 Eine größere Aktualisierungswelle mit über 15 Verbesserungen direkt vor dem Launch:
@@ -89,6 +121,9 @@ Im Rahmen von V1.0 ergänzte Migrationen:
 | `quote_revisions` | Komplette Snapshots aller eingefrorenen Versionen |
 | `quote_shares` | Lese-Freigaben an einzelne Benutzer |
 | `catalog.materialnr` | Materialnummer-Spalte im Produktkatalog |
+| `catalog.product_id` | Verknüpfung zu Programm-Management-Produktkalkulationen |
+| `products` | Produktkalkulationen (Programm Management) |
+| `users.can_calc_products` | Berechtigungs-Flag für Produktkalkulation |
 | Kategorie-Umbenennung | `Hardware` → `Displays` im Produktkatalog |
 
 > **Wichtig:** `install.php` nach erfolgreicher Migration wieder vom Server entfernen.
@@ -114,7 +149,10 @@ Mit V1.0 stehen Vertriebsmitarbeiter:innen folgende Bereiche zur Verfügung:
 - **Erweiterte CEO-Ansicht** als Deckungsbeitrag-PDF auf einer A4-Seite
 - **Datenrettung**: Speichern-Erinnerung, Browser-Warnung bei ungespeicherten Änderungen
 - **Drucken / PDF** des kompletten Angebots inkl. Langtexte
+- **Sonderkosten-Formeln** mit `=`-Präfix (z.B. `=stk*5,50`)
 - **JSON-Export/-Import** für Backups
+- **Produktkalkulationen** (Programm Management) — eigene Modul mit Komponenten-, Aufwände-, Transportkostenerfassung, Excel-/CSV-Import, Freigabe in den Katalog
+- **Admin-Dashboard** auf eigener Seite mit Donut- und Bar-Charts, KPIs, Top-Kunden, Top-Bearbeiter, Aktivitäten
 - **Admin-Portal** mit Benutzerverwaltung, Vorlagenpflege, Produktkatalog-Wartung
 
 ---

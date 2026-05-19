@@ -18,8 +18,9 @@
 9. [Speichern, Laden, Importieren, Exportieren](#9-speichern-laden-importieren-exportieren)
 10. [CEO-Ansichten & Export](#10-ceo-ansichten--export)
 11. [Drucken / PDF](#11-drucken--pdf)
-12. [Admin-Bereich](#12-admin-bereich)
-13. [Tipps & häufige Fragen](#13-tipps--häufige-fragen)
+12. [Produktkalkulationen (Programm Management)](#12-produktkalkulationen-programm-management)
+13. [Admin-Bereich](#13-admin-bereich)
+14. [Tipps & häufige Fragen](#14-tipps--häufige-fragen)
 
 ---
 
@@ -340,34 +341,137 @@ In der Kalkulation: **„Drucken / als PDF"**. Beim Druck werden **alle Langtext
 
 ---
 
-## 12. Admin-Bereich
+## 12. Produktkalkulationen (Programm Management)
+
+> Sichtbar für **Admins** und Benutzer mit Berechtigungs-Haken „Produktkalkulation".
+
+Statt HK-Preise eigenproduzierter Anzeiger per E-Mail an den Vertrieb zu schicken, kann Programm Management die Kalkulation direkt im Tool machen. Sobald sie freigegeben ist, landet das Produkt automatisch im Vertriebs-Katalog mit aktuellem HK-Preis.
+
+### 12.1 Aufruf
+
+Auf der Startseite den Button **„Produktkalkulationen"** klicken → Liste aller Produkte (gruppiert nach Status: In Bearbeitung / Freigegeben / Archiviert). Neues Produkt über **„Neues Produkt"** rechts oben.
+
+### 12.2 Kopfdaten
+
+- **Produkt-Nr.**, **Bezeichnung**, **Kategorie** (Displays / Beschallung / SW-Lizenzen / Sonstiges)
+- **Materialnr.** — wird beim Freigeben in den Katalog übernommen
+- **Stückzahl Los** — z.B. 15 Anzeiger. Wird als Umlage-Basis verwendet.
+- **Status** — wird automatisch gesetzt (In Bearbeitung → Freigegeben → Archiviert).
+
+### 12.3 Komponenten / Stückliste
+
+Tabelle mit Spalten: Kategorie · OZ · Artikelnr. · Bauteilname · Lieferant · Menge · Einheit · Einzelpreis · Gesamt.
+
+- **„+ Zeile hinzufügen"** für manuelle Einträge.
+- **„Excel/CSV importieren"** zieht eine vorhandene Stückliste rein:
+  - Unterstützt `.xlsx`, `.xls`, `.csv`.
+  - Spalten werden per Header-Erkennung gemappt (Synonyme für Kategorie, OZ, Artikelnr., Bauteilname, Lieferant, Menge, Einheit, Einzelpreis).
+  - Platzhalterzeilen wie „Stücklistenlangtext" und Dummy-Nummern werden automatisch herausgefiltert.
+  - Auswahl beim Import: **Anhängen** oder bestehende Zeilen **Ersetzen**.
+
+### 12.4 Aufwände
+
+Personalstunden je Aufwandstyp:
+
+| Typ | Default-Satz | Default „einmalig" |
+|---|---|---|
+| Produktionszeit (Montage) | 65 €/h + FGK | ❌ pro Stück |
+| Entwicklung / Konstruktion | 100 €/h | ✅ wird umgelegt |
+| Entwicklung Hardware | 100 €/h | ✅ wird umgelegt |
+| SI / Embedded | 100 €/h | ✅ wird umgelegt |
+| Programm Management | 100 €/h | ✅ wird umgelegt |
+| Validierung / Tests | 100 €/h | ✅ wird umgelegt |
+| Industrial Engineering | 80 €/h | ✅ wird umgelegt |
+| Customer Service | 80 €/h | ❌ pro Stück |
+| Sonstige | 65 €/h | ❌ pro Stück |
+
+- **„einmalig"-Haken** teilt die Gesamtkosten durch die Stückzahl Los — typisch für Entwicklungs-Aufwände.
+- **Ohne Haken** gilt der Wert direkt pro Anzeiger — typisch für Montagezeit.
+- **Fertigungsstunden** (Aufwandstyp „Montage") werden zusätzlich mit dem FGK-Aufschlag belastet.
+
+### 12.5 Transportkosten
+
+Tabelle mit Transportart · Bemerkung · Stückzahl · Kosten gesamt · pro Anzeiger.
+Die Gesamtkosten werden automatisch auf die Stückzahl Los umgelegt.
+
+### 12.6 Konfiguration (einklappbar)
+
+Default-Werte werden vom System gesetzt und können **pro Produkt** überschrieben werden:
+
+- **MGK** (Material): 4 %
+- **FGK** (Fertigung): 6 %
+- **Risikopuffer**: 2 %
+- **VK-Faktor** (Empfehlung): 1,30
+- **Stundensätze** pro Aufwandstyp
+
+### 12.7 Live-Zusammenfassung
+
+Unterhalb des Editors zeigt die orange Leiste:
+
+- Material gesamt (× MGK)
+- Aufwände einmalig / pro Stk.
+- Fertigung (× FGK)
+- Transport pro Stk.
+- Risikopuffer
+- **HK pro Anzeiger** (hervorgehoben)
+- **Empf. VK** (HK × VK-Faktor)
+
+Die Werte aktualisieren sich live bei jeder Eingabe.
+
+### 12.8 Speichern / Freigeben / Archivieren
+
+- **„Speichern"** — speichert den aktuellen Stand. Status bleibt „In Bearbeitung".
+- **„Im Katalog freigeben"** — speichert + setzt Status auf „Freigegeben" + legt einen Eintrag im Vertriebs-Produktkatalog an (oder aktualisiert den vorhandenen, falls schon einmal freigegeben). Der Vertrieb sieht den HK-Preis ab sofort beim „Aus Katalog".
+- **„Archivieren"** — markiert das Produkt als nicht mehr aktiv. Der Katalog-Eintrag bleibt unverändert; bei erneuter Freigabe wird er aktualisiert.
+
+### 12.9 Beispiel-Rechnung
+
+> Stückzahl Los = 15 Anzeiger
+> Material (Summe Komponenten) = 3.000 € · MGK 4 % → 3.120 €
+> Entwicklung 30 h × 100 €/h = 3.000 € (einmalig) → 200 € / Anzeiger
+> Montage 2 h × 65 €/h × (1 + 6 %) = 137,80 € / Anzeiger
+> Transport gesamt 4.832 € / 15 = 322,13 € / Anzeiger
+> **Zwischensumme: 3.779,93 €**
+> Risikopuffer 2 % = 75,60 €
+> **HK pro Anzeiger: 3.855,53 €**
+> Empf. VK = HK × 1,30 = **5.012,19 €**
+
+---
+
+## 13. Admin-Bereich
 
 Nur sichtbar für Benutzer mit Rolle **Admin**. Auf der Startseite **„Admin Portal"** öffnen.
 
-### 12.1 Benutzerverwaltung
+### 13.1 Benutzerverwaltung
 
 - Liste aller Benutzer mit Rolle.
 - Neue Benutzer anlegen (Benutzername, Passwort, Rolle).
 - Passwort für Andere zurücksetzen.
+- **Berechtigung „Produktkalkulation"** pro Benutzer setzbar (Haken). Nutzer mit Haken sehen den Button „Produktkalkulationen" auf der Startseite (Kapitel 12).
 - Admin-Account kann nicht gelöscht werden.
 
-### 12.2 Vorlagen verwalten
+### 13.2 Vorlagen verwalten
 
 Vordefinierte Positionslisten (z. B. „Anzeiger"), die im Kalkulator unter „Vorlage einfügen" angeboten werden.
 
-### 12.3 Produktkatalog (einklappbar)
+### 13.3 Produktkatalog (einklappbar)
 
 - Spalten: **Materialnr.**, Beschreibung, HK Preis, VK Preis, Kategorie
 - Neue Produkte über Formular hinzufügen
 - **CSV-Import**: Format `Materialnr;Beschreibung;HK;VK;Kategorie`. Bestehende Einträge bleiben erhalten — der Import **ergänzt** nur.
+- Über Produktkalkulationen freigegebene Einträge (siehe Kapitel 12) werden automatisch aktualisiert, wenn das Produkt erneut freigegeben wird.
 
-### 12.4 Release Notes
+### 13.4 Dashboard
 
-Über den Link **„Release Notes"** im Admin Portal lassen sich alle Versionsstände und Änderungen direkt im Tool nachlesen.
+Über den pinken Button **„Dashboard"** auf der Startseite (eigene Seite). KPIs (Angebote gesamt, Pipeline, Auftragseingang, Hit-Rate, Verloren-Wert, Gesamt-VP), Donut-Chart für Status-Verteilung, horizontaler Bar-Chart für VP-Volumen, Top-Kunden, Top-Bearbeiter und letzte 10 Aktivitäten.
+
+### 13.5 Release Notes & Handbuch
+
+Über Buttons im Admin-Portal direkt aufrufbar. Aktuelle Stände, alle Versionsänderungen.
 
 ---
 
-## 13. Tipps & häufige Fragen
+## 14. Tipps & häufige Fragen
 
 **Wie wird der Verkaufspreis berechnet?**
 > VP = HK ÷ (1 − Deckung). Beispiel: HK = 1.000 €, Deckung = 25 % → VP = 1.333,33 €.
