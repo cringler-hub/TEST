@@ -1,6 +1,6 @@
 <?php
 /**
- * Einmal-Setup für den Angebotskalkulator.
+ * Einmal-Setup für den Funkwerk Kalkulationsplattform.
  * Legt Tabellen an und erstellt den Admin-Benutzer.
  *
  * NACH DER INSTALLATION DIESE DATEI LÖSCHEN!
@@ -10,7 +10,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header('Content-Type: text/html; charset=utf-8');
 
-echo "<h2>Angebotskalkulator — Installation</h2>";
+echo "<h2>Funkwerk Kalkulationsplattform — Installation</h2>";
 
 // Schritt 1: Config laden
 echo "<p>1. Lade Konfiguration...</p>";
@@ -247,4 +247,4 @@ try {
 echo "<hr>";
 echo "<h3 style='color:green'>✓ Installation abgeschlossen!</h3>";
 echo "<p><b>WICHTIG:</b> Lösche diese Datei (<code>install.php</code>) jetzt vom Server!</p>";
-echo "<p>→ <a href='index.html'>Zum Angebotskalkulator</a></p>";
+echo "<p>→ <a href='index.html'>Zum Funkwerk Kalkulationsplattform</a></p>";

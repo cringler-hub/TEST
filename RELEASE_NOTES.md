@@ -1,4 +1,4 @@
-# Release Notes — Angebotskalkulator
+# Release Notes — Funkwerk Kalkulationsplattform
 
 **Version 1.0 · Launch 01.06.2026**
 Funkwerk Mobility Solutions GmbH
@@ -7,7 +7,7 @@ Funkwerk Mobility Solutions GmbH
 
 ## Was ist neu in V1.0
 
-Diese Release Notes fassen alle Funktionen zusammen, die bis zum offiziellen Launch am 01.06.2026 in den Angebotskalkulator integriert wurden.
+Diese Release Notes fassen alle Funktionen zusammen, die bis zum offiziellen Launch am 01.06.2026 in den Funkwerk Kalkulationsplattform integriert wurden.
 
 ### Update vom 19.05.2026 — Programm Management Modul + Sonderkosten-Formeln
 

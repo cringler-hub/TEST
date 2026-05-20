@@ -1,4 +1,4 @@
-# Benutzerhandbuch — Angebotskalkulator
+# Benutzerhandbuch — Funkwerk Kalkulationsplattform
 
 > Anleitung für Vertriebsmitarbeiter · Funkwerk Mobility Solutions GmbH
 > Stand: Version 1.0 (Launch 01.06.2026)
@@ -26,7 +26,7 @@
 
 ## 1. Überblick
 
-Der Angebotskalkulator hilft Dir, Angebote nach Funkwerk-Standard zu erstellen. Du trägst Material-, Fremd- und Personalkosten pro Position ein und erhältst automatisch Herstellkosten (HK), Verkaufspreise (VP) und Deckungsbeiträge. Angebote können gespeichert, versioniert, an Kollegen freigegeben, ausgedruckt oder als Excel/Word/JSON exportiert werden. GAEB-LVs (X83) lassen sich direkt als Grundlage einlesen.
+Der Funkwerk Kalkulationsplattform hilft Dir, Angebote nach Funkwerk-Standard zu erstellen. Du trägst Material-, Fremd- und Personalkosten pro Position ein und erhältst automatisch Herstellkosten (HK), Verkaufspreise (VP) und Deckungsbeiträge. Angebote können gespeichert, versioniert, an Kollegen freigegeben, ausgedruckt oder als Excel/Word/JSON exportiert werden. GAEB-LVs (X83) lassen sich direkt als Grundlage einlesen.
 
 ---
 
