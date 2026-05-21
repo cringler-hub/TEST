@@ -1748,6 +1748,13 @@
     .dashboard-wrap { max-width: 1200px; margin: 2.5rem auto; padding: 0 2rem; }
     .db-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.9rem; border-bottom: 1px solid var(--fw-border); margin-bottom: 1.3rem; gap: 1rem; flex-wrap: wrap; }
     .db-meta { font-size: 0.82rem; color: var(--fw-muted); }
+    .db-filter { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .db-filter label { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; color: var(--fw-muted); }
+    .db-filter input[type="date"] {
+      padding: 0.4rem 0.55rem; border: 1px solid var(--fw-border); border-radius: 6px;
+      font-size: 0.85rem; font-family: inherit; background: var(--fw-white); color: var(--fw-dark);
+    }
+    .db-filter input[type="date"]:focus { outline: none; border-color: var(--fw-primary); box-shadow: 0 0 0 2px rgba(226,0,26,0.1); }
     .db-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem; margin-bottom: 1.2rem; }
     .db-kpi {
       background: var(--fw-white); border: 1px solid var(--fw-border); border-radius: 10px;
@@ -2005,7 +2012,12 @@
         <h1 style="margin:0;font-size:1.4rem;letter-spacing:-0.01em;color:var(--fw-dark);">Vertriebs-Dashboard</h1>
         <div class="db-meta" id="dbScopeInfo">Auswertung wird geladen …</div>
       </div>
-      <button class="btn-secondary" onclick="loadDashboard()" style="padding:0.5rem 1rem;font-size:0.85rem;">Aktualisieren</button>
+      <div class="db-filter">
+        <label>Von <input type="date" id="dbFrom" /></label>
+        <label>Bis <input type="date" id="dbTo" /></label>
+        <button class="btn-secondary" onclick="applyDashboardFilter()" style="padding:0.5rem 1rem;font-size:0.85rem;">Anwenden</button>
+        <button class="btn-secondary" onclick="resetDashboardFilter()" style="padding:0.5rem 0.8rem;font-size:0.85rem;" title="Filter zurücksetzen">×</button>
+      </div>
     </div>
 
     <div class="db-kpi-grid" id="dbKpiGrid"></div>
@@ -3204,10 +3216,22 @@
     'Archiviert':  '#6b7280'
   };
 
+  function applyDashboardFilter() { loadDashboard(); }
+  function resetDashboardFilter() {
+    document.getElementById('dbFrom').value = '';
+    document.getElementById('dbTo').value   = '';
+    loadDashboard();
+  }
+
   async function loadDashboard() {
     if (currentUser?.role !== 'admin') return;
+    const from = document.getElementById('dbFrom')?.value || '';
+    const to   = document.getElementById('dbTo')?.value   || '';
+    const qs = 'scope=all'
+      + (from ? '&from=' + encodeURIComponent(from) : '')
+      + (to   ? '&to='   + encodeURIComponent(to)   : '');
     try {
-      const res = await api('dashboard.php?action=stats&scope=all');
+      const res = await api('dashboard.php?action=stats&' + qs);
       renderDashboard(res);
     } catch (e) {
       const kpis = document.getElementById('dbKpiGrid');
@@ -3221,7 +3245,14 @@
 
     // Scope-Info
     const meta = document.getElementById('dbScopeInfo');
-    if (meta) meta.textContent = 'Auswertung: alle Angebote · Stand: ' + new Date().toLocaleDateString('de-DE');
+    if (meta) {
+      let txt = 'Auswertung: alle Angebote';
+      if (d.from || d.to) {
+        txt += ' · Zeitraum: ' + (d.from ? formatDateDE(d.from) : '–') + ' bis ' + (d.to ? formatDateDE(d.to) : '–');
+      }
+      txt += ' · Stand: ' + new Date().toLocaleDateString('de-DE');
+      meta.textContent = txt;
+    }
 
     // KPI-Kacheln
     const won  = d.count_by_status?.Beauftragt || 0;

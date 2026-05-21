@@ -32,16 +32,26 @@ switch ($action) {
         //   'me'   → nur eigene
         //   '<u>'  → eines Benutzers (nur Admin)
         $scope = $_GET['scope'] ?? 'all';
-        $where = '';
+        $from  = trim($_GET['from'] ?? '');  // YYYY-MM-DD
+        $to    = trim($_GET['to']   ?? '');  // YYYY-MM-DD
+        $whereParts = [];
         $params = [];
         if ($scope === 'me') {
-            $where = 'WHERE ersteller = :u';
+            $whereParts[] = 'ersteller = :u';
             $params[':u'] = $user['username'];
         } elseif ($scope !== 'all') {
-            // Bestimmter Benutzer
-            $where = 'WHERE ersteller = :u';
+            $whereParts[] = 'ersteller = :u';
             $params[':u'] = $scope;
         }
+        if ($from && preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) {
+            $whereParts[] = 'DATE(created_at) >= :from';
+            $params[':from'] = $from;
+        }
+        if ($to && preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) {
+            $whereParts[] = 'DATE(created_at) <= :to';
+            $params[':to'] = $to;
+        }
+        $where = $whereParts ? 'WHERE ' . implode(' AND ', $whereParts) : '';
 
         $sql = "SELECT id, titel, kunde, ersteller, status, current_version, angebot_nr,
                        json_data, created_at, updated_at
@@ -141,6 +151,8 @@ switch ($action) {
 
         jsonResponse([
             'scope'           => $scope,
+            'from'            => $from,
+            'to'              => $to,
             'total_count'     => $totalCount,
             'total_vp'        => $totalVP,
             'total_hk'        => $totalHK,
