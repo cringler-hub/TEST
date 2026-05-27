@@ -1265,6 +1265,7 @@
     .start-btn.teal   .icon-wrap { background: #e0f7fa; color: #0e7490; }
     .start-btn.pink   .icon-wrap { background: #fdf2f8; color: #be185d; }
     .start-btn.brown  .icon-wrap { background: #f5f0e8; color: #92400e; }
+    .start-btn.slate  .icon-wrap { background: #eef2f6; color: #334155; }
     .start-btn .btn-title {
       font-size: 1rem;
       font-weight: 700;
@@ -1665,6 +1666,46 @@
     .docs-body .docs-empty, .docs-body .docs-error { padding: 1.5rem; text-align: center; color: var(--fw-muted); font-size: 0.9rem; }
     .docs-body .docs-error { color: #dc2626; }
 
+    /* LED-Konfigurator (Demo) */
+    .led-wrap { max-width: 1280px; margin: 1.8rem auto; padding: 0 2rem; }
+    .led-demo-banner { background: #fff7ed; border: 1px solid #fdba74; color: #9a3412; border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.85rem; margin-bottom: 1.2rem; }
+    .led-grid { display: grid; grid-template-columns: 360px 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+    @media (max-width: 860px) { .led-grid { grid-template-columns: 1fr; } }
+    .led-controls { background: var(--fw-white); border: 1px solid var(--fw-border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+    .led-controls h3, .led-card h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-muted); font-weight: 700; margin: 0 0 0.9rem; }
+    .led-field { margin-bottom: 0.9rem; }
+    .led-field > label { display: block; font-size: 0.8rem; color: var(--fw-dark); font-weight: 600; margin-bottom: 0.35rem; }
+    .led-field > label span { color: #334155; font-weight: 700; }
+    .led-field input[type="range"] { width: 100%; accent-color: #334155; }
+    .led-field select, .led-field input[type="number"] { width: 100%; padding: 0.5rem 0.6rem; border: 1px solid var(--fw-border); border-radius: 6px; font-size: 0.85rem; font-family: inherit; background: var(--fw-white); }
+    .led-field-row { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+    .led-field-row .led-field { flex: 1; min-width: 120px; }
+    .led-check { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.82rem; color: var(--fw-dark); cursor: pointer; }
+    .led-preview-col { display: flex; flex-direction: column; gap: 1rem; }
+    .led-preview-box { background: #0f172a; border-radius: 10px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 220px; }
+    .led-preview { display: grid; gap: 2px; }
+    .led-preview .led-tile { background: linear-gradient(135deg,#f59e0b,#ef4444); border-radius: 1px; }
+    .led-preview-cap { color: #cbd5e1; font-size: 0.78rem; margin-top: 0.9rem; font-variant-numeric: tabular-nums; text-align: center; }
+    .led-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.7rem; }
+    .led-kpi { background: var(--fw-white); border: 1px solid var(--fw-border); border-radius: 8px; padding: 0.7rem 0.85rem; }
+    .led-kpi .lk-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-muted); font-weight: 700; }
+    .led-kpi .lk-value { font-size: 1.1rem; font-weight: 700; color: var(--fw-dark); font-variant-numeric: tabular-nums; margin-top: 0.2rem; }
+    .led-kpi .lk-sub { font-size: 0.72rem; color: var(--fw-muted); }
+    .led-grid2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.2rem; margin-bottom: 1rem; }
+    @media (max-width: 860px) { .led-grid2 { grid-template-columns: 1fr; } }
+    .led-card { background: var(--fw-white); border: 1px solid var(--fw-border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+    .led-demo-tag { font-size: 0.65rem; background: #fff7ed; color: #9a3412; border: 1px solid #fdba74; border-radius: 8px; padding: 0.1rem 0.45rem; margin-left: 0.4rem; text-transform: none; letter-spacing: 0; font-weight: 600; }
+    .led-bom { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    .led-bom th { background: var(--fw-bg-soft); text-align: left; padding: 0.45rem 0.55rem; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fw-muted); font-weight: 700; border-bottom: 1px solid var(--fw-border); }
+    .led-bom th.num, .led-bom td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .led-bom td { padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--fw-border-s); }
+    .led-bom tr.sum td { font-weight: 700; border-top: 2px solid var(--fw-border); background: var(--fw-bg-soft); }
+    .led-power-row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px solid var(--fw-border-s); font-size: 0.88rem; }
+    .led-power-row:last-child { border-bottom: none; }
+    .led-power-row .pw-val { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--fw-dark); }
+    .led-power-row.big { background: #0f172a; color: #fff; border-radius: 8px; padding: 0.7rem 0.85rem; margin-top: 0.6rem; }
+    .led-power-row.big .pw-val { color: #fbbf24; font-size: 1.15rem; }
+
     /* Produkt-Kalkulationen */
     .pp-wrap { max-width: 1280px; margin: 2rem auto; padding: 0 2rem; }
     .pp-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.9rem; border-bottom: 1px solid var(--fw-border); margin-bottom: 1.2rem; gap: 1rem; flex-wrap: wrap; }
@@ -1952,6 +1993,15 @@
         <div>
           <div class="btn-title">Produktkalkulationen</div>
           <div class="btn-sub">Eigene Produkte kalkulieren &amp; freigeben</div>
+        </div>
+      </button>
+      <button class="start-btn slate" onclick="showView('viewLedConfig')">
+        <div class="icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h.01M8 6h.01M11 6h.01M5 9h.01M8 9h.01M11 9h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="btn-title">LED-Konfigurator <span style="font-size:0.7rem;color:#64748b;">DEMO</span></div>
+          <div class="btn-sub">Anzeiger konfigurieren, Stückliste &amp; Strom</div>
         </div>
       </button>
       <button class="start-btn pink" id="btnDashboard" onclick="showView('viewDashboard')" style="display:none;">
@@ -2402,6 +2452,124 @@
   </div>
 </div>
 
+<!-- LED-KONFIGURATOR (DEMO / MOCK-UP) -->
+<div class="view view-led" id="viewLedConfig">
+  <nav class="fw-topbar">
+    <div class="fw-brand">
+      <div class="logo-mark">FW</div>
+      <div>
+        LED-Konfigurator <small>Funkwerk Kalkulationsplattform · DEMO</small>
+        <span class="fw-version">V1.0 &middot; 01.06.2026</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a href="#" onclick="showView('viewStart');return false">Startseite</a>
+      <a href="#" onclick="doLogout();return false">Abmelden</a>
+    </div>
+  </nav>
+  <div class="led-wrap">
+    <div class="led-demo-banner">
+      <strong>Demo / Mock-up:</strong> Logik (Maße, Stückliste, Strom) basiert auf der Muster-Excel — alle Preise und Watt-Werte sind <em>Platzhalter</em> zu Präsentationszwecken.
+    </div>
+
+    <div class="led-grid">
+      <!-- Steuerung -->
+      <div class="led-controls">
+        <h3>Konfiguration</h3>
+
+        <div class="led-field">
+          <label>Breite <span id="ledWLabel">—</span></label>
+          <input type="range" id="ledModW" min="1" max="20" value="5" oninput="recalcLed()">
+        </div>
+        <div class="led-field">
+          <label>Höhe <span id="ledHLabel">—</span></label>
+          <input type="range" id="ledModH" min="1" max="15" value="5" oninput="recalcLed()">
+        </div>
+
+        <div class="led-field">
+          <label>Pixel-Pitch</label>
+          <select id="ledPitch" onchange="recalcLed()">
+            <option value="4" selected>4 mm (Modul 64×16 px)</option>
+            <option value="6">6 mm (Modul 64×16 px)</option>
+            <option value="8">8 mm (Modul 64×16 px)</option>
+          </select>
+        </div>
+
+        <div class="led-field-row">
+          <div class="led-field">
+            <label>Ausführung</label>
+            <select id="ledSeiten" onchange="recalcLed()">
+              <option value="1">Einseitig</option>
+              <option value="2" selected>Doppelseitig</option>
+            </select>
+          </div>
+          <div class="led-field">
+            <label>Gehäuse</label>
+            <select id="ledGehaeuse" onchange="recalcLed()">
+              <option value="G">G — Gerade</option>
+              <option value="GS" selected>GS — Gerade m. Schlagrahmen</option>
+              <option value="S">S — Schräg</option>
+              <option value="SS">SS — Schräg m. Schlagrahmen</option>
+              <option value="L">L — Lumino</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="led-field">
+          <label>Helligkeitsprofil (für Strom)</label>
+          <select id="ledBright" onchange="recalcLed()">
+            <option value="0.0051">Volllast (255 / 100 %)</option>
+            <option value="0.0017" selected>Betrieb hell (255 / Abbildung)</option>
+            <option value="0.0004">Betrieb gedimmt (140)</option>
+            <option value="0.0001">Standby (0)</option>
+          </select>
+        </div>
+
+        <div class="led-field-row">
+          <label class="led-check"><input type="checkbox" id="ledBlitz" checked onchange="recalcLed()"> Blitzschutz</label>
+          <label class="led-check"><input type="checkbox" id="ledEws" onchange="recalcLed()"> EWS</label>
+          <label class="led-check"><input type="checkbox" id="ledUhr" onchange="recalcLed()"> Uhr</label>
+        </div>
+
+        <div class="led-field" style="margin-top:0.8rem;">
+          <label>Strompreis (€/kWh) &amp; Betrieb (h/Tag)</label>
+          <div style="display:flex;gap:0.5rem;">
+            <input type="number" id="ledPreis" value="0.30" step="0.01" style="width:50%;" oninput="recalcLed()">
+            <input type="number" id="ledStunden" value="20" step="1" style="width:50%;" oninput="recalcLed()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Vorschau + Kennzahlen -->
+      <div class="led-preview-col">
+        <div class="led-preview-box">
+          <div id="ledPreview" class="led-preview"></div>
+          <div class="led-preview-cap" id="ledPreviewCap">—</div>
+        </div>
+        <div class="led-kpi-grid" id="ledKpis"></div>
+      </div>
+    </div>
+
+    <!-- Stückliste + Strom -->
+    <div class="led-grid2">
+      <div class="led-card">
+        <h3>Wesentliche Stückliste <span class="led-demo-tag">Pseudo-Preise</span></h3>
+        <div style="overflow-x:auto;">
+          <table class="led-bom" id="ledBom"></table>
+        </div>
+      </div>
+      <div class="led-card">
+        <h3>Stromverbrauch</h3>
+        <div id="ledPower"></div>
+      </div>
+    </div>
+
+    <div class="actions" style="justify-content:flex-end;">
+      <button class="btn-secondary" disabled title="In Phase 1d geplant">In Produktkalkulation übernehmen (geplant)</button>
+    </div>
+  </div>
+</div>
+
 <!-- KALKULATOR -->
 <div class="view view-calc" id="viewCalc">
   <nav class="fw-topbar">
@@ -2842,6 +3010,7 @@
     if (id === 'viewStart')     loadQuoteList();
     if (id === 'viewDashboard') loadDashboard();
     if (id === 'viewProducts')  loadProductList();
+    if (id === 'viewLedConfig') recalcLed();
   }
 
   async function doLogin() {
@@ -7192,6 +7361,156 @@ input.cfg-pct:focus{outline:none;border-color:#540025;box-shadow:0 0 0 2px rgba(
       out.push(c);
     }
     return out;
+  }
+
+  // =====================================================================
+  // LED-Konfigurator (DEMO / Mock-up) — Logik aus Muster-Excel, Pseudo-Preise
+  // =====================================================================
+  const LED_MOD_PX_W = 64;   // Modulauflösung horizontal (px)
+  const LED_MOD_PX_H = 16;   // Modulauflösung vertikal (px)
+
+  // Pseudo-Stammdaten (Platzhalter-Preise; in der echten Version aus DB)
+  const LED_PRICES = {
+    matrix:        99.54,   // Matrix-Modul 64×16
+    kabelHor:       4.00,
+    kabelVer:       4.00,
+    controller:   150.00,
+    netzteil:      96.00,
+    netzteilLogik: 28.50,
+    abdeckhaube:   20.00,
+    thermostat:    30.00,
+    tempfuehler:   10.00,
+    kleinteile:   110.00,
+    stromschiene:   3.36,   // pro lfd. m
+    montageMatrix: 80.00,
+    montageCtrl:   80.00,
+    tragarm:       90.00,
+    gehaeuseBasis:700.00,   // + Flächenanteil
+    gehaeuseProM2:350.00,
+    frontplatte:  120.00,
+    blitzschutz:   85.00,
+    ewsBoard:     250.00,
+    uhrmodul:     104.00
+  };
+  const LED_MATERIAL_AUFSCHLAG = 0.03;  // 3 %
+  const LED_NETZTEIL_AMP = 90;          // 90 A je Netzteil (Demo)
+  const LED_VOLT = 5;                   // LED-Spannung
+
+  function recalcLed() {
+    const modW   = parseInt(document.getElementById('ledModW').value) || 1;
+    const modH   = parseInt(document.getElementById('ledModH').value) || 1;
+    const pitch  = parseFloat(document.getElementById('ledPitch').value) || 4;
+    const seiten = parseInt(document.getElementById('ledSeiten').value) || 1;
+    const gehaeuse = document.getElementById('ledGehaeuse').value;
+    const wattPerPx = parseFloat(document.getElementById('ledBright').value) || 0.0017;
+    const blitz = document.getElementById('ledBlitz').checked;
+    const ews   = document.getElementById('ledEws').checked;
+    const uhr   = document.getElementById('ledUhr').checked;
+    const preis = parseFloat(document.getElementById('ledPreis').value) || 0;
+    const stundenTag = parseFloat(document.getElementById('ledStunden').value) || 0;
+
+    // Pixel + Maße (Formeln aus Excel)
+    const breitePx = modW * LED_MOD_PX_W;
+    const hoehePx  = modH * LED_MOD_PX_H;
+    const pixelGesamt = breitePx * hoehePx * seiten;
+    const displayB = breitePx * pitch + 10;
+    const displayH = hoehePx * pitch + 12;
+    const gehaeuseB = displayB + 120;
+    const gehaeuseH = displayH + 120;
+    const flaecheM2 = (gehaeuseB / 1000) * (gehaeuseH / 1000);
+
+    // Labels an Slidern
+    document.getElementById('ledWLabel').textContent = modW + ' Module · ' + breitePx + ' px · ' + Math.round(displayB) + ' mm';
+    document.getElementById('ledHLabel').textContent = modH + ' Module · ' + hoehePx + ' px · ' + Math.round(displayH) + ' mm';
+
+    // Mengen (Excel-Formeln)
+    const matrixStk  = modW * modH * seiten;
+    const kabelHor   = Math.max(0, (modW - 1) * modH * seiten);
+    const kabelVer   = Math.max(0, (modH - 1) * seiten);
+    const controller = seiten * 1;
+    const stromMeter = Math.ceil(((2 * modW * seiten * displayH) + (2 * seiten * displayB)) / 1000);
+
+    // Strom
+    const wattBetrieb = pixelGesamt * wattPerPx;
+    const wattMitVerlust = wattBetrieb * 1.10;   // 10 % Verlust
+    const wattMitSicher  = wattMitVerlust * 1.10; // + 10 % Sicherheit
+    const ampere = wattMitSicher / LED_VOLT;
+    const netzteilStk = Math.max(1, Math.ceil(ampere / LED_NETZTEIL_AMP));
+
+    // Jahresverbrauch
+    const kwhTag  = (wattBetrieb / 1000) * stundenTag;
+    const kwhJahr = kwhTag * 365;
+    const kostenJahr = kwhJahr * preis;
+
+    // --- Vorschau-Raster ---
+    const prev = document.getElementById('ledPreview');
+    const maxPxBox = 360;
+    const tile = Math.max(6, Math.floor(Math.min(maxPxBox / modW, 140 / modH)));
+    prev.style.gridTemplateColumns = `repeat(${modW}, ${tile}px)`;
+    prev.innerHTML = Array.from({length: modW * modH}, () =>
+      `<div class="led-tile" style="width:${tile}px;height:${tile/4*1}px;min-height:6px;"></div>`).join('');
+    document.getElementById('ledPreviewCap').textContent =
+      `${breitePx} × ${hoehePx} px · ${Math.round(displayB)} × ${Math.round(displayH)} mm · ${seiten === 2 ? 'doppelseitig' : 'einseitig'}`;
+
+    // --- KPIs ---
+    const f0 = v => Math.round(v).toLocaleString('de-DE');
+    document.getElementById('ledKpis').innerHTML = `
+      <div class="led-kpi"><div class="lk-label">Module gesamt</div><div class="lk-value">${matrixStk}</div><div class="lk-sub">${modW} × ${modH}${seiten===2?' × 2 Seiten':''}</div></div>
+      <div class="led-kpi"><div class="lk-label">Pixel gesamt</div><div class="lk-value">${f0(pixelGesamt)}</div></div>
+      <div class="led-kpi"><div class="lk-label">Displaymaß</div><div class="lk-value">${Math.round(displayB)}×${Math.round(displayH)}</div><div class="lk-sub">mm</div></div>
+      <div class="led-kpi"><div class="lk-label">Gehäusemaß</div><div class="lk-value">${Math.round(gehaeuseB)}×${Math.round(gehaeuseH)}</div><div class="lk-sub">mm · ${gehaeuse}</div></div>
+      <div class="led-kpi"><div class="lk-label">Fläche</div><div class="lk-value">${flaecheM2.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="lk-sub">m²</div></div>
+      <div class="led-kpi"><div class="lk-label">Gewicht (Glas)</div><div class="lk-value">${f0(flaecheM2 * 140)}</div><div class="lk-sub">kg (≈)</div></div>
+    `;
+
+    // --- Stückliste ---
+    const eur = v => (v||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+    const P = LED_PRICES;
+    const items = [
+      ['Matrix-Modul 64×16 (Mpx 4mm)', matrixStk, P.matrix],
+      ['Flachbandkabel horizontal', kabelHor, P.kabelHor],
+      ['Flachbandkabel vertikal', kabelVer, P.kabelVer],
+      ['Controller', controller, P.controller],
+      ['Netzteil ' + LED_NETZTEIL_AMP + 'A', netzteilStk, P.netzteil],
+      ['Netzteil Logik', seiten, P.netzteilLogik],
+      ['Abdeckhaube Netzteil', 1, P.abdeckhaube],
+      ['Thermostat', 1, P.thermostat],
+      ['Temperaturfühler', 1, P.tempfuehler],
+      ['Kleinteile / Blitzschutz', blitz ? 1 : 0, P.kleinteile],
+      ['Stromschiene bearbeitet (lfd. m)', stromMeter, P.stromschiene],
+      ['Montageplatte Matrix', seiten, P.montageMatrix],
+      ['Montageplatte Controller', 1, P.montageCtrl],
+      ['Tragarm', 1, P.tragarm],
+      ['Gehäuse ' + gehaeuse + ' (' + flaecheM2.toFixed(2) + ' m²)', 1, P.gehaeuseBasis + flaecheM2 * P.gehaeuseProM2],
+      ['Frontplatte', seiten, P.frontplatte],
+      ['EWS-Board', ews ? 1 : 0, P.ewsBoard],
+      ['Uhrmodul', uhr ? 1 : 0, P.uhrmodul]
+    ].filter(r => r[1] > 0);
+
+    let matSum = 0;
+    let rows = '<thead><tr><th>Material</th><th class="num">Menge</th><th class="num">Einzel</th><th class="num">Summe</th></tr></thead><tbody>';
+    items.forEach(([name, menge, einzel]) => {
+      const summe = menge * einzel;
+      matSum += summe;
+      rows += `<tr><td>${escapeHtml(name)}</td><td class="num">${menge.toLocaleString('de-DE',{maximumFractionDigits:1})}</td><td class="num">${eur(einzel)}</td><td class="num">${eur(summe)}</td></tr>`;
+    });
+    const matInkl = matSum * (1 + LED_MATERIAL_AUFSCHLAG);
+    rows += `<tr class="sum"><td>Summe Material</td><td></td><td></td><td class="num">${eur(matSum)}</td></tr>`;
+    rows += `<tr class="sum"><td>inkl. ${(LED_MATERIAL_AUFSCHLAG*100).toFixed(0)} % Kalk.-Aufschlag</td><td></td><td></td><td class="num">${eur(matInkl)}</td></tr>`;
+    rows += '</tbody>';
+    document.getElementById('ledBom').innerHTML = rows;
+
+    // --- Strom-Panel ---
+    document.getElementById('ledPower').innerHTML = `
+      <div class="led-power-row"><span>Leistung (Betrieb)</span><span class="pw-val">${wattBetrieb.toFixed(1)} W</span></div>
+      <div class="led-power-row"><span>+ 10 % Verlustleistung</span><span class="pw-val">${wattMitVerlust.toFixed(1)} W</span></div>
+      <div class="led-power-row"><span>+ 10 % Sicherheit (Netzteildim.)</span><span class="pw-val">${wattMitSicher.toFixed(1)} W</span></div>
+      <div class="led-power-row"><span>Strombedarf</span><span class="pw-val">${ampere.toFixed(1)} A</span></div>
+      <div class="led-power-row"><span>Netzteile (${LED_NETZTEIL_AMP} A)</span><span class="pw-val">${netzteilStk} Stück</span></div>
+      <div class="led-power-row"><span>Verbrauch / Tag (${stundenTag} h)</span><span class="pw-val">${kwhTag.toFixed(2)} kWh</span></div>
+      <div class="led-power-row big"><span>Stromkosten / Jahr</span><span class="pw-val">${eur(kostenJahr)}</span></div>
+      <div style="font-size:0.74rem;color:var(--fw-muted);margin-top:0.5rem;">≈ ${kwhJahr.toFixed(0)} kWh/Jahr bei ${preis.toLocaleString('de-DE',{minimumFractionDigits:2})} €/kWh · Watt-Werte sind Demo-Annäherungen.</div>
+    `;
   }
 
   // Session prüfen (Templates + Katalog werden nach Login geladen)
